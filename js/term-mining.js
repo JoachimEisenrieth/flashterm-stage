@@ -1,4 +1,11 @@
-// term-mining.js
+// ====================================================================================================
+// © 2025 Eisenrieth Digital Solutions. Alle Rechte vorbehalten.
+// * Dateiname: term-mining.js
+// * Version: 1.3.0
+// * Datum: 2025-07-19
+// * Autor: Joachim Eisenrieth
+// * Beschreibung: Steuerung des Term-Mining
+// ====================================================================================================
 
 import { showWiki } from './flashterm.js';
 

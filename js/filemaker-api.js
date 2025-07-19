@@ -1,5 +1,10 @@
 // ====================================================================================================
 // © 2025 Eisenrieth Digital Solutions. Alle Rechte vorbehalten.
+// * Dateiname: filemaker-api.js
+// * Version: 1.3.0
+// * Datum: 2025-07-19
+// * Autor: Joachim Eisenrieth
+// * Beschreibung: Zentrale Steuerung der Kommunikation mit FileMaker
 // ====================================================================================================
 
 import { config } from './config.js'; 

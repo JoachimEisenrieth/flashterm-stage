@@ -1,4 +1,11 @@
-// © 2025-04-18 Eisenrieth Digital Solutions. Alle Rechte vorbehalten.
+// ====================================================================================================
+// © 2025 Eisenrieth Digital Solutions. Alle Rechte vorbehalten.
+// * Dateiname: flashterm.js
+// * Version: 1.3.0
+// * Datum: 2025-07-19
+// * Autor: Joachim Eisenrieth
+// * Beschreibung: Zentrales Script zu Steuerung der flashterm-stage
+// ====================================================================================================
 
 import { loginToFileMaker, getFileMakerTerms, fetchAvailableLanguages, getFileMakerConceptDetails } from './filemaker-api.js';
 import { config } from './config.js';  // Konfiguration importieren
