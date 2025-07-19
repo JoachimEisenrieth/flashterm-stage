@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <title>Gebrauchsanleitung für flashterm STAGE</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link href="flashterm-121-003.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+    <style>
+      body {
+        font-family: "Inter", "Segoe UI", sans-serif;
+        font-size: 1.05rem;
+        line-height: 1.7;
+      }
+
+      .container {
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        padding: 2.5em;
+        background: var(--bg-color);
+      }
+
+      code {
+        font-family: monospace;
+        font-size: 0.95em;
+        padding: 0.3em 0.6em;
+        border-radius: 6px;
+      }
+
+      h1,
+      h2,
+      h3 {
+        letter-spacing: -0.02em;
+      }
+
+      h1 {
+        font-size: 2.2em;
+        position: static !important;
+        top: auto !important;
+        z-index: auto !important;
+      }
+
+      h2 {
+        font-size: 1.6em;
+      }
+
+      h3 {
+        font-size: 1.3em;
+      }
+
+      .dark-mode {
+        background-color: #222;
+        color: #e0e0e0;
+      }
+
+      .dark-mode .container {
+        background-color: #333;
+      }
+
+      .dark-mode code {
+        background-color: #555;
+      }
+
+      .dark-mode a {
+        color: #90c5ff;
+      }
+
+      .icon {
+        display: inline-block;
+        margin-right: 0.6em;
+        font-style: normal;
+        font-size: 1.1em;
+        vertical-align: middle;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="container">
+      <h1>📘 Gebrauchsanleitung für flashterm STAGE</h1>
+      <p><em>Terminologie- und Wissensmanagement leicht gemacht</em></p>
+
+      <h2>Einführung</h2>
+      <p>
+        <strong>flashterm STAGE</strong> richtet sich an alle Mitarbeitenden, die beim Erstellen oder Prüfen von Texten
+        definierte Begriffe verwenden möchten, eine Vokabelliste zur Übersetzung bereitstellen wollen oder einfach einen
+        Begriff besser verstehen möchten – unabhängig von Rolle, Fachbereich oder Sprachniveau.
+      </p>
+
+      <h2>Funktionsübersicht</h2>
+      <ul>
+        <li><strong>Suchfeld:</strong> Eingabe eines Begriffs mit sofortiger Vorschlagsliste</li>
+        <li><strong>Tastatursteuerung:</strong> Navigation durch Vorschläge per Pfeiltasten und Auswahl per Enter</li>
+        <li><strong>Modusauswahl:</strong> Drei Modi: Wiki, Inspector, Translator</li>
+        <li><strong>Sprachumschaltung:</strong> Zielsprachen dynamisch auswählbar</li>
+        <li><strong>Term-Mining:</strong> Analyse von Texten zur Begriffsidentifikation</li>
+        <li><strong>Export:</strong> Gefundene Begriffe als Excel oder JSON exportieren</li>
+        <li>
+          <strong>Zwischenablage:</strong> Texte aus der Zwischenablage einfügen und automatisch prüfen oder übersetzen
+          lassen
+        </li>
+        <li><strong>URL-Parameter:</strong> Sprachkombination direkt über die URL anwählbar</li>
+      </ul>
+
+      <h2>Bedienung Schritt für Schritt</h2>
+
+      <h3>1. Start und Suche</h3>
+      <p>
+        Öffnen Sie die Anwendung im Browser und geben Sie im Suchfeld einen Begriff ein. Die Vorschlagsliste öffnet sich
+        automatisch.
+      </p>
+
+      <h3>2. Vorschläge nutzen</h3>
+      <p>
+        – Navigieren Sie mit ↓ / ↑ durch die Vorschläge.<br />
+        – Drücken Sie <strong>Enter</strong>, um den markierten Vorschlag auszuwählen.<br />
+        – Alternativ: Klicken Sie mit der Maus auf einen Vorschlag.<br />
+        <strong>Tipp:</strong> Wenn Sie die Vorschlagsliste mit der Maus verschieben (z. B. zur Seite), bleibt sie
+        dauerhaft geöffnet. Das erleichtert das systematische Abarbeiten mehrerer Begriffe, ohne die Liste bei jedem
+        neuen Suchwort erneut öffnen zu müssen.
+      </p>
+
+      <h3>3. Wissensanzeige (Wiki)</h3>
+      <p>
+        Sie sehen: Vorzugsbenennungen, Definitionen, Kontexte, Synonyme, Infobox. Schalten Sie die Sprache um: Klick auf
+        [de] / [en] usw.
+      </p>
+
+      <h3>4. Modus wechseln</h3>
+      <ul>
+        <li><strong>Wiki:</strong> Begriffseinzelanzeige</li>
+        <li><strong>Inspector:</strong> Textanalyse (mit Begriffserkennung)</li>
+        <li><strong>Translator:</strong> Begriffe mit Zielsprachübersetzung</li>
+      </ul>
+
+      <h3>5. Textanalyse (Term-Mining)</h3>
+      <p>
+        – Kopieren Sie einen Text (Strg+C) und fügen Sie ihn in das Suchfeld ein (Strg+V).<br />
+        – Analyse in der Ausgangssprache startet automatisch<br />
+        – Gefundene Begriffe werden markiert: ⭐⭐ = Vorzugsbenennung, ⭐ = alternativ, 🚫 = abgelehnt.<br />
+        – Wechseln Sie in den Modus <em>Translator</em>.<br />
+        – Gefundene Begriffe werden mit der Vorzugsbenennung der Zielsprache übersetzt.
+      </p>
+
+      <h3>6. Sprachkombination per URL steuern</h3>
+      <p>
+        Rufen Sie die Seite beispielsweise so auf:<br />
+        <code>https://ihre-domain.de/index.html?source=de-DE&amp;target=en-US</code>
+      </p>
+      <p>
+        Die gültigen Sprachcodes finden Sie in der Sprachauswahl von flashterm STAGE.
+        <strong>Tipp:</strong> Nach dem Wechseln einer Zielsprache sehen Sie die für Ihre Domain gültige URL.
+      </p>
+      <p>Ungültige Sprachcodes werden ignoriert – in diesem Fall verwendet das System die Voreinstellung.</p>
+
+      <h3>7. Exportieren</h3>
+      <p>Klicken Sie auf das Export-Icon 📤 unter der Tabelle, um die Daten zu speichern.</p>
+
+      <h2>Tastenkombinationen</h2>
+      <ul>
+        <li>↓ = nächsten Vorschlag markieren</li>
+        <li>↑ = vorherigen Vorschlag markieren</li>
+        <li><strong>Enter</strong> = Auswahl öffnen</li>
+      </ul>
+
+      <h2>Tipps &amp; Hinweise</h2>
+      <ul>
+        <li>Der Dunkelmodus wird automatisch erkannt</li>
+        <li>Suchfeld-Reset per Klick auf das „x“-Icon</li>
+        <li>Profil-Icon öffnet Spracheinstellungen</li>
+        <li>Markdown erlaubt Formatierungen in der Infobox</li>
+      </ul>
+
+      <h2>Technik</h2>
+      <ul>
+        <li>Empfohlene Browser: Chrome, Firefox, Safari, Edge</li>
+        <li>JavaScript muss aktiviert sein</li>
+        <li>Internetverbindung erforderlich für Datenabruf</li>
+      </ul>
+
+      <footer>
+        <p>
+          &copy; 2025 flashterm – Terminologie- und Wissensmanagement | &nbsp;<span id="legal-links">
+            <a href="https://www.edok.de/impressum.html">Impressum</a> | &nbsp;<a
+              href="https://www.edok.de/kontakt.html"
+              >Kontakt</a
+            >
+            |
+          </span>
+          &nbsp;<a href="./manual-de.html">Manual</a>
+        </p>
+      </footer>
+    </section>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // 🌓 Dark Mode Toggle Button einfügen
+        const toggle = document.createElement("button");
+        toggle.textContent = "🌓 Modus wechseln";
+        toggle.style.cssText =
+          "position:fixed;bottom:20px;right:20px;padding:10px 14px;border:none;border-radius:8px;background:#666;color:white;cursor:pointer;z-index:9999;";
+        document.body.appendChild(toggle);
+
+        toggle.addEventListener("click", () => {
+          document.documentElement.classList.toggle("dark-mode");
+        });
+
+        // 🔒 Impressum/Kontakt nur anzeigen, wenn NICHT lokal
+        const hostname = location.hostname;
+        const isLocal =
+          hostname === "localhost" ||
+          hostname === "127.0.0.1" ||
+          location.protocol === "file:" ||
+          /^192\.168\./.test(hostname) ||
+          /^10\./.test(hostname) ||
+          /\.lokal$/.test(hostname); // z. B. srvfilemaker.mbraun.lokal
+
+        if (isLocal) {
+          const legal = document.getElementById("legal-links");
+          if (legal) {
+            legal.style.display = "none";
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

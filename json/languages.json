@@ -1,0 +1,814 @@
+﻿{
+    "A1": {
+        "de" : "",
+        "en" : ""
+    },
+    "aa": {
+        "de" : "Afar",
+        "en" : "Afar"
+    },
+    "ab": {
+        "de" : "Abchasisch",
+        "en" : "Abkhazian"
+    },
+    "af": {
+        "de" : "Afrikaans",
+        "en" : "Afrikaans"
+    },
+    "am": {
+        "de" : "Amharisch",
+        "en" : "Amharic"
+    },
+    "ar-AE": {
+        "de" : "Arabisch",
+        "en" : "Arabic"
+    },
+    "ar-BH": {
+        "de" : "Arabisch",
+        "en" : "Arabic"
+    },
+    "ar-DZ": {
+        "de" : "Arabisch",
+        "en" : "Arabic"
+    },
+    "ar-EG": {
+        "de" : "Arabisch",
+        "en" : "Arabic"
+    },
+    "ar-IQ": {
+        "de" : "Arabisch",
+        "en" : "Arabic"
+    },
+    "ar-JO": {
+        "de" : "Arabisch",
+        "en" : "Arabic"
+    },
+    "ar-KW": {
+        "de" : "Arabisch",
+        "en" : "Arabic"
+    },
+    "ar-LB": {
+        "de" : "Arabisch",
+        "en" : "Arabic"
+    },
+    "ar-LY": {
+        "de" : "Arabisch",
+        "en" : "Arabic"
+    },
+    "ar-MA": {
+        "de" : "Arabisch",
+        "en" : "Arabic"
+    },
+    "ar-OM": {
+        "de" : "Arabisch",
+        "en" : "Arabic"
+    },
+    "ar-QA": {
+        "de" : "Arabisch",
+        "en" : "Arabic"
+    },
+    "ar-SA": {
+        "de" : "Arabisch",
+        "en" : "Arabic"
+    },
+    "ar-SY": {
+        "de" : "Arabisch",
+        "en" : "Arabic"
+    },
+    "ar-TN": {
+        "de" : "Arabisch",
+        "en" : "Arabic"
+    },
+    "ar-YE": {
+        "de" : "Arabisch",
+        "en" : "Arabic"
+    },
+    "as": {
+        "de" : "Assamesisch",
+        "en" : "Assamese"
+    },
+    "ay": {
+        "de" : "Aymara",
+        "en" : "Aymara"
+    },
+    "az": {
+        "de" : "Aserbaidschanisch",
+        "en" : "Azerbaijani"
+    },
+    "ba": {
+        "de" : "Baschkirisch",
+        "en" : "Bashkir"
+    },
+    "be": {
+        "de" : "Belorussisch",
+        "en" : "Byelorussian"
+    },
+    "bg-BG": {
+        "de" : "Bulgarisch",
+        "en" : "Bulgarian"
+    },
+    "bh": {
+        "de" : "Biharisch",
+        "en" : "Bihari"
+    },
+    "bi": {
+        "de" : "Bislamisch",
+        "en" : "Bislama"
+    },
+    "bn": {
+        "de" : "Bengalisch",
+        "en" : "Bengali"
+    },
+    "bo": {
+        "de" : "Tibetanisch",
+        "en" : "Tibetan"
+    },
+    "br": {
+        "de" : "Bretonisch",
+        "en" : "Breton"
+    },
+    "ca": {
+        "de" : "Katalanisch",
+        "en" : "Catalan"
+    },
+    "co": {
+        "de" : "Korsisch",
+        "en" : "Corsican"
+    },
+    "cs-CZ": {
+        "de" : "Tschechisch",
+        "en" : "Czech"
+    },
+    "cy": {
+        "de" : "Walisisch",
+        "en" : "Welsh"
+    },
+    "da-DK": {
+        "de" : "Dänisch",
+        "en" : "Danish"
+    },
+    "de-AT": {
+        "de" : "Deutsch",
+        "en" : "German"
+    },
+    "de-CH": {
+        "de" : "Deutsch",
+        "en" : "German"
+    },
+    "de-DE": {
+        "de" : "Deutsch",
+        "en" : "German"
+    },
+    "dz": {
+        "de" : "Dzongkha",
+        "en" : "Bhutani"
+    },
+    "el-GR": {
+        "de" : "Griechisch",
+        "en" : "Greek"
+    },
+    "en-AU": {
+        "de" : "Englisch",
+        "en" : "English"
+    },
+    "en-BZ": {
+        "de" : "Englisch",
+        "en" : "English"
+    },
+    "en-CA": {
+        "de" : "Englisch",
+        "en" : "English"
+    },
+    "en-CR": {
+        "de" : "Englisch",
+        "en" : "English"
+    },
+    "en-GB": {
+        "de" : "Englisch",
+        "en" : "English"
+    },
+    "en-IE": {
+        "de" : "Englisch",
+        "en" : "English"
+    },
+    "en-JM": {
+        "de" : "Englisch",
+        "en" : "English"
+    },
+    "en-NZ": {
+        "de" : "Englisch",
+        "en" : "English"
+    },
+    "en-TT": {
+        "de" : "Englisch",
+        "en" : "English"
+    },
+    "en-US": {
+        "de" : "Englisch",
+        "en" : "English"
+    },
+    "en-ZA": {
+        "de" : "Englisch",
+        "en" : "English"
+    },
+    "eo": {
+        "de" : "Esperanto",
+        "en" : "Esperanto"
+    },
+    "es-AR": {
+        "de" : "Spanisch",
+        "en" : "Spanish"
+    },
+    "es-BO": {
+        "de" : "Spanisch",
+        "en" : "Spanish"
+    },
+    "es-CL": {
+        "de" : "Spanisch",
+        "en" : "Spanish"
+    },
+    "es-CO": {
+        "de" : "Spanisch",
+        "en" : "Spanish"
+    },
+    "es-CR": {
+        "de" : "Spanisch",
+        "en" : "Spanish"
+    },
+    "es-DO": {
+        "de" : "Spanisch",
+        "en" : "Spanish"
+    },
+    "es-EC": {
+        "de" : "Spanisch",
+        "en" : "Spanish"
+    },
+    "es-ES": {
+        "de" : "Spanisch",
+        "en" : "Spanish"
+    },
+    "es-GT": {
+        "de" : "Spanisch",
+        "en" : "Spanish"
+    },
+    "es-HN": {
+        "de" : "Spanisch",
+        "en" : "Spanish"
+    },
+    "es-MX": {
+        "de" : "Spanisch",
+        "en" : "Spanish"
+    },
+    "es-NI": {
+        "de" : "Spanisch",
+        "en" : "Spanish"
+    },
+    "es-PA": {
+        "de" : "Spanisch",
+        "en" : "Spanish"
+    },
+    "es-PE": {
+        "de" : "Spanisch",
+        "en" : "Spanish"
+    },
+    "es-PR": {
+        "de" : "Spanisch",
+        "en" : "Spanisch"
+    },
+    "es-PR": {
+        "de" : "Spanish",
+        "en" : "Spanish"
+    },
+    "es-PY": {
+        "de" : "Spanisch",
+        "en" : "Spanish"
+    },
+    "es-SV": {
+        "de" : "Spanisch",
+        "en" : "Spanish"
+    },
+    "es-UY": {
+        "de" : "Spanisch",
+        "en" : "Spanish"
+    },
+    "es-VE": {
+        "de" : "Spanisch",
+        "en" : "Spanish"
+    },
+    "et-EE": {
+        "de" : "Estnisch",
+        "en" : "Estonian"
+    },
+    "eu": {
+        "de" : "Baskisch",
+        "en" : "Basque"
+    },
+    "fa": {
+        "de" : "Persisch",
+        "en" : "Persian"
+    },
+    "fi-FI": {
+        "de" : "Finnisch",
+        "en" : "Finnish"
+    },
+    "fj": {
+        "de" : "Fiji",
+        "en" : "Fiji"
+    },
+    "fo": {
+        "de" : "Färöisch",
+        "en" : "Faeroese"
+    },
+    "fr-CA": {
+        "de" : "Französisch",
+        "en" : "French"
+    },
+    "fr-CH": {
+        "de" : "Französisch",
+        "en" : "French"
+    },
+    "fr-DZ": {
+        "de" : "Französisch",
+        "en" : "French"
+    },
+    "fr-FR": {
+        "de" : "Französisch",
+        "en" : "French"
+    },
+    "fr-MA": {
+        "de" : "Französisch",
+        "en" : "French"
+    },
+    "fr-TN": {
+        "de" : "Französisch",
+        "en" : "French"
+    },
+    "fy": {
+        "de" : "Friesisch",
+        "en" : "Frisian"
+    },
+    "ga": {
+        "de" : "Irisch",
+        "en" : "Irish"
+    },
+    "gd": {
+        "de" : "Schottisches",
+        "en" : "Scots"
+    },
+    "gl": {
+        "de" : "Galizisch",
+        "en" : "Galician"
+    },
+    "gn": {
+        "de" : "Guarani",
+        "en" : "Guarani"
+    },
+    "gu": {
+        "de" : "Gujaratisch",
+        "en" : "Gujarati"
+    },
+    "ha": {
+        "de" : "Haussa",
+        "en" : "Hausa"
+    },
+    "he": {
+        "de" : "Hebräisch",
+        "en" : "Hebrew"
+    },
+    "hi-IN": {
+        "de" : "Hindi",
+        "en" : "Hindi"
+    },
+    "hr": {
+        "de" : "",
+        "en" : ""
+    },
+    "hr-HR": {
+        "de" : "Kroatisch",
+        "en" : "Croatian"
+    },
+    "hu-HU": {
+        "de" : "Ungarisch",
+        "en" : "Hungarian"
+    },
+    "hy": {
+        "de" : "Armenisch",
+        "en" : "Armenian"
+    },
+    "ia": {
+        "de" : "Interlingua",
+        "en" : "Interlingua"
+    },
+    "id": {
+        "de" : "Indonesisch",
+        "en" : "Indonesian"
+    },
+    "ie": {
+        "de" : "Interlingue",
+        "en" : "Interlingue"
+    },
+    "ik": {
+        "de" : "Inupiak",
+        "en" : "Inupiak"
+    },
+    "is-IS": {
+        "de" : "Isländisch",
+        "en" : "Icelandic"
+    },
+    "it-CH": {
+        "de" : "Italienisch",
+        "en" : "Italian"
+    },
+    "it-IT": {
+        "de" : "Italienisch",
+        "en" : "Italian"
+    },
+    "iu": {
+        "de" : "Inuktitut",
+        "en" : "Inuktitut"
+    },
+    "iw": {
+        "de" : "Hebräisch",
+        "en" : "former"
+    },
+    "ja-JP": {
+        "de" : "Japanisch",
+        "en" : "Japanese"
+    },
+    "ji": {
+        "de" : "Jiddish",
+        "en" : "former"
+    },
+    "jw": {
+        "de" : "Javanisch",
+        "en" : "Javanese"
+    },
+    "ka": {
+        "de" : "Georgisch",
+        "en" : "Georgian"
+    },
+    "kk": {
+        "de" : "Kasachisch",
+        "en" : "Kazakh"
+    },
+    "kl": {
+        "de" : "Kalaallisut",
+        "en" : "Greenlandic"
+    },
+    "km": {
+        "de" : "Kambodschanisch",
+        "en" : "Cambodian"
+    },
+    "kn": {
+        "de" : "Kannada",
+        "en" : "Kannada"
+    },
+    "ko-KP": {
+        "de" : "Koreanisch",
+        "en" : "Korean"
+    },
+    "ko-KR": {
+        "de" : "Koreanisch",
+        "en" : "Korean"
+    },
+    "ks": {
+        "de" : "Kaschmirisch",
+        "en" : "Kashmiri"
+    },
+    "ku": {
+        "de" : "Kurdisch",
+        "en" : "Kurdish"
+    },
+    "ky": {
+        "de" : "Kirgisisch",
+        "en" : "Kirghiz"
+    },
+    "la": {
+        "de" : "Lateinisch",
+        "en" : "Latin"
+    },
+    "ln": {
+        "de" : "Lingala",
+        "en" : "Lingala"
+    },
+    "lo": {
+        "de" : "Laotisch",
+        "en" : "Laothian"
+    },
+    "LS-DE": {
+        "de" : "Leichte Sprache",
+        "en" : "Leichte Sprache"
+    },
+    "lt-LT": {
+        "de" : "Litauisch",
+        "en" : "Lithuanian"
+    },
+    "lv-LV": {
+        "de" : "Lettisch",
+        "en" : "Latvian"
+    },
+    "mg": {
+        "de" : "Malagasisch",
+        "en" : "Malagasy"
+    },
+    "mi": {
+        "de" : "Maorisch",
+        "en" : "Maori"
+    },
+    "mk": {
+        "de" : "Mazedonisch",
+        "en" : "Macedonian"
+    },
+    "ml": {
+        "de" : "Malajalam",
+        "en" : "Malayalam"
+    },
+    "mn-MN": {
+        "de" : "Mongolisch",
+        "en" : "Mongolian"
+    },
+    "mo": {
+        "de" : "Moldavisch",
+        "en" : "Moldavian"
+    },
+    "mr": {
+        "de" : "Marathi",
+        "en" : "Marathi"
+    },
+    "ms-MY": {
+        "de" : "Malaysisch",
+        "en" : "Malay"
+    },
+    "mt": {
+        "de" : "Maltesisch",
+        "en" : "Maltese"
+    },
+    "my": {
+        "de" : "Burmesisch",
+        "en" : "Burmese"
+    },
+    "N1": {
+        "de" : "",
+        "en" : ""
+    },
+    "N2": {
+        "de" : "",
+        "en" : ""
+    },
+    "na": {
+        "de" : "Nauruisch",
+        "en" : "Nauru"
+    },
+    "ne": {
+        "de" : "Nepalesisch",
+        "en" : "Nepali"
+    },
+    "nl-NL": {
+        "de" : "Niederländisch",
+        "en" : "Dutch"
+    },
+    "no-NO": {
+        "de" : "Norwegisch",
+        "en" : "Norwegian"
+    },
+    "oc": {
+        "de" : "Okzitanisch",
+        "en" : "Occitan"
+    },
+    "om": {
+        "de" : "Oromo",
+        "en" : "Afan"
+    },
+    "or": {
+        "de" : "Oriya",
+        "en" : "Oriya"
+    },
+    "pa": {
+        "de" : "Pundjabisch",
+        "en" : "Punjabi"
+    },
+    "PL-GB": {
+        "de" : "Plain Language",
+        "en" : "Plain Language"
+    },
+    "pl-PL": {
+        "de" : "Polnisch",
+        "en" : "Polish"
+    },
+    "ps": {
+        "de" : "Paschtu",
+        "en" : "Pashto"
+    },
+    "pt-BR": {
+        "de" : "Portugiesisch",
+        "en" : "Portuguese"
+    },
+    "pt-PT": {
+        "de" : "Portugiesisch",
+        "en" : "Portuguese"
+    },
+    "qu": {
+        "de" : "Quechua",
+        "en" : "Quechua"
+    },
+    "rm": {
+        "de" : "Rätoromanisch",
+        "en" : "Rhaeto"
+    },
+    "rn": {
+        "de" : "Kirundisch",
+        "en" : "Kirundi"
+    },
+    "ro-RO": {
+        "de" : "Rumänisch",
+        "en" : "Romanian"
+    },
+    "ru-RU": {
+        "de" : "Russisch",
+        "en" : "Russian"
+    },
+    "rw": {
+        "de" : "Kijarwanda",
+        "en" : "Kinyarwanda"
+    },
+    "sa": {
+        "de" : "Sanskrit",
+        "en" : "Sanskrit"
+    },
+    "sd": {
+        "de" : "Zinti",
+        "en" : "Sindhi"
+    },
+    "sg": {
+        "de" : "Sango",
+        "en" : "Sangro"
+    },
+    "sh": {
+        "de" : "",
+        "en" : ""
+    },
+    "sh-HR": {
+        "de" : "",
+        "en" : ""
+    },
+    "sh-SR": {
+        "de" : "",
+        "en" : ""
+    },
+    "si": {
+        "de" : "Singhalesisch",
+        "en" : "Singhalese"
+    },
+    "sk-SK": {
+        "de" : "Slowakisch",
+        "en" : "Slovak"
+    },
+    "sl-SI": {
+        "de" : "Slowenisch",
+        "en" : "Slovenian"
+    },
+    "sm": {
+        "de" : "Samoanisch",
+        "en" : "Samoan"
+    },
+    "sn": {
+        "de" : "Schonisch",
+        "en" : "Shona"
+    },
+    "so": {
+        "de" : "Somalisch",
+        "en" : "Somali"
+    },
+    "sq": {
+        "de" : "Albanisch",
+        "en" : "Albanian"
+    },
+    "sr": {
+        "de" : "Serbisch",
+        "en" : "Serbian"
+    },
+    "ss": {
+        "de" : "Swasiländisch",
+        "en" : "Siswati"
+    },
+    "st": {
+        "de" : "Sesothisch",
+        "en" : "Sesotho"
+    },
+    "su": {
+        "de" : "Sudanesisch",
+        "en" : "Sudanese"
+    },
+    "sv-SE": {
+        "de" : "Schwedisch",
+        "en" : "Swedish"
+    },
+    "sw": {
+        "de" : "Suaheli",
+        "en" : "Swahili"
+    },
+    "ta": {
+        "de" : "Tamilisch",
+        "en" : "Tamil"
+    },
+    "te": {
+        "de" : "Tegulu",
+        "en" : "Tegulu"
+    },
+    "tg": {
+        "de" : "Tadschikisch",
+        "en" : "Tajik"
+    },
+    "th": {
+        "de" : "Thai",
+        "en" : "Thai"
+    },
+    "ti": {
+        "de" : "Tigrinja",
+        "en" : "Tigrinya"
+    },
+    "tk": {
+        "de" : "Turkmenisch",
+        "en" : "Turkmen"
+    },
+    "tl": {
+        "de" : "Tagalog",
+        "en" : "Tagalog"
+    },
+    "tn": {
+        "de" : "Sezuan",
+        "en" : "Setswana"
+    },
+    "to": {
+        "de" : "Tongaisch",
+        "en" : "Tonga"
+    },
+    "tr-TR": {
+        "de" : "Türkisch",
+        "en" : "Turkish"
+    },
+    "ts": {
+        "de" : "Tsongaisch",
+        "en" : "Tsonga"
+    },
+    "tt": {
+        "de" : "Tatarisch",
+        "en" : "Tatar"
+    },
+    "tw": {
+        "de" : "Twi",
+        "en" : "Twi"
+    },
+    "ug": {
+        "de" : "Uigur",
+        "en" : "Uigur"
+    },
+    "uk-UA": {
+        "de" : "Ukrainisch",
+        "en" : "Ukrainian"
+    },
+    "ur": {
+        "de" : "Urdu",
+        "en" : "Urdu"
+    },
+    "uz": {
+        "de" : "Usbekisch",
+        "en" : "Uzbek"
+    },
+    "vi": {
+        "de" : "Vietnamesisch",
+        "en" : "Vietnamese"
+    },
+    "vo": {
+        "de" : "Volapük",
+        "en" : "Volapuk"
+    },
+    "wo": {
+        "de" : "Wolof",
+        "en" : "Wolof"
+    },
+    "xh": {
+        "de" : "Xhosa",
+        "en" : "Xhosa"
+    },
+    "yi": {
+        "de" : "Jiddish",
+        "en" : "Yiddish"
+    },
+    "yo": {
+        "de" : "Joruba",
+        "en" : "Yoruba"
+    },
+    "za": {
+        "de" : "Zhuang",
+        "en" : "Zhuang"
+    },
+    "zh-CN": {
+        "de" : "Chinesisch",
+        "en" : "Chinese"
+    },
+    "zu": {
+        "de" : "Zulu",
+        "en" : "Zulu"
+    }
+}

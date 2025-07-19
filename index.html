@@ -1,0 +1,21 @@
+<html>
+<!-- © 2025-04-17 Eisenrieth Digital Solutions. Alle Rechte vorbehalten. -->
+<head>
+    <meta charset="UTF-8">
+    <script>
+        // Leitet automatisch mit allen URL-Parametern weiter
+        const params = window.location.search;
+        window.location.href = "./flashterm.html" + params;
+    </script>
+</head>
+<body>
+    <p>Wenn Sie nicht automatisch weitergeleitet werden, klicken Sie 
+        <a id="manual-link" href="#">hier</a>.
+    </p>
+
+    <script>
+        // Setzt auch den Link im Fallback korrekt mit Parametern
+        document.getElementById('manual-link').href = "./flashterm.html" + params;
+    </script>
+</body>
+</html>
