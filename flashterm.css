@@ -1,0 +1,899 @@
+/* © 2025-04-17 Eisenrieth Digital Solutions. Alle Rechte vorbehalten. */
+
+:root {
+    /* Farben */
+    --active-color: #aaa;
+    --highlight-color: #C43434;
+    --text-color: #4A4A4A;
+    --text-color-invers: #E0E0E0;
+    --link-color: hsl(211, 100%, 50%);
+    --link-hover-color: #0056b3;
+
+    /* Hintergrundfarben */
+    --bg-color: #fff;
+    --bg-color-header: #fff;
+    --bg-color-infobox: #eee;
+    --bg-color-page-wrapper: #818282;
+    --bg-color-header-footer: #fff;
+    --bg-color-search-field: #fff;
+    --bg-color-suggestions: #F0F0F0;
+    --bg-color-rejected-suggestion: #E8DCDC;
+    --bg-color-highlighted-term: yellow;
+    --suggestions-hl-color: #E0E0E0;
+
+
+    /* Ränder und Rahmen */
+    --border-color: #aaa;
+    --border-color-infoBox: #aaa;
+    --brand-line-color: #ccc;
+
+    /* Buttons */
+    --button-bg-color: #007bff;
+    --button-text-color: #ffffff;
+
+    /* Icons */
+    --icon-color: #aaa;
+    --icon-size: 16px;
+    --icon-lage: 32px;
+
+    /* Container und Schatten */
+    --container-bg-color: #fff;
+    --container-shadow-color: rgba(0, 0, 0, 0.1);
+
+    /* Maximalbreite */
+    --max-width: 900px;
+
+    /* Modale Fenster */
+    --modal-bg-color: #fff;
+    --modal-text-color: #4A4A4A;
+    --modal-border-color: #ddd;
+    
+    /* Suchfeld */
+    --search-field-border-color: #ccc;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        /* Farben für den Dunkelmodus */
+        --active-color: #888;
+        --highlight-color: #F28D8D;
+        --text-color: #E0E0E0;
+        --text-color-invers: #E0E0E0;
+        --link-color: #339dff;
+        --link-hover-color: #3385d1;
+
+        /* Hintergrundfarben für den Dunkelmodus */
+        --bg-color: #444;
+        --bg-color-header: #444;
+        --bg-color-infobox: #333;
+        --bg-color-page-wrapper: #333;
+        --bg-color-header-footer: #444;
+        --bg-color-search-field: #444;
+        --bg-color-suggestions: #444;
+        --bg-color-rejected-suggestion: #573a3a;
+        --bg-color-highlighted-term: #6C6C6C;
+        --suggestions-hl-color: #373737;
+
+        /* Ränder und Rahmen für den Dunkelmodus */
+        --border-color: #ccc;
+        --border-color-infoBox: #888;
+        --brand-line-color: rgb(119, 119, 119);
+
+        /* Buttons für den Dunkelmodus */
+        --button-bg-color: #166AD6;
+        --button-text-color: #E0E0E0;
+
+        /* Icons für den Dunkelmodus */
+        --icon-color: #ddd;
+
+        /* Container und Schatten für den Dunkelmodus */
+        --container-bg-color: #444;
+        --container-shadow-color: rgba(0, 0, 0, 0.2);
+
+        /* Modale Fenster für den Dunkelmodus */
+        --modal-bg-color: #2c2c2c;
+        --modal-text-color: #ffffff;
+        --modal-border-color: #444;
+
+        /* Suchfeld */
+        --search-field-border-color: #ccc;
+    }
+}
+
+/* ================================================== */
+/* Page Wrapper
+/* ================================================== */
+
+.page-wrapper {
+    background-color: var(--bg-color-page-wrapper);
+    padding: 0 20px;
+    z-index: 850;
+}
+
+/* ================================================== */
+/* Header
+/* ================================================== */
+
+header {
+    background-color: var(--bg-color-header);
+    padding: 20px 0 20px 0; /* Abstand oben und unten im Kopfbereich */
+    display: flex;
+    justify-content: center; /* Zentriert den Inhalt horizontal */
+    position: fixed; /* Fixiert den Header am Bildschirm */
+    top: 0; /* Positioniert den Header am oberen Rand */
+    width: 100%; /* Der Header soll die gesamte Breite des Bildschirms einnehmen */
+    z-index: 1000; /* Stellt sicher, dass der Header über anderen Elementen liegt */
+}
+
+body {
+    font-family: 'Roboto', 'Noto Sans', sans-serif;
+    margin: 0;
+    padding: 0;
+    color: var(--text-color);
+    background-color: var(--bg-color-page-wrapper);
+}
+
+footer {
+    color: var(--text-color-invers);
+    text-align: center;
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 10px 10px 10px 10px;
+}
+
+.logo {
+    width: 100px;
+    height: auto;
+    margin-right: 20px; /* Abstand zwischen Logo und Suchfeld */
+}
+
+.search-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: var(--max-width);
+}
+
+.container {
+    margin: 70px auto 0 auto; /* Fügt oben 60px Abstand hinzu, um den Platz des Headers zu berücksichtigen */
+    max-width: var(--max-width);
+    padding: 10px 40px 40px 40px; /* oben, rechts, unten, links */
+    background-color: var(--bg-color);
+    z-index: 800;
+}
+
+/* ================================================== */
+/* Überschriften */
+/* ================================================== */
+
+h1, h2, h3 {
+    margin: 0;
+    padding-bottom: 0.25em;
+}
+
+h1 {
+    font-size: 2em;
+    margin-bottom: 0.75em;
+    padding-top: 0.25em;
+    position: sticky;
+    top: 66px;
+    z-index: 999;
+    background-color: var(--bg-color);
+}
+
+h2 {
+    font-size: 1.5em;
+    margin: 1.5em 0 0.5em 0;
+}
+
+h3 {
+    font-size: 1.2em;
+    margin: 1em 0 0.5em 0;
+    color: var(--text-color);
+}
+
+.line-primary {
+    border-bottom: 7px solid var(--brand-line-color);
+}
+
+.line-secondary {
+    border-bottom: 5px solid var(--brand-line-color);
+}
+
+.line-tertiary {
+    border-bottom: 3px solid var(--brand-line-color);
+}
+
+/* ================================================== */
+/* Loading-Indikator (sichtbar beim Laden) */
+/* ================================================== */
+
+.loading {
+    display: block;
+    text-align: center;
+    font-weight: bold;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Zentriert den Inhalt horizontal innerhalb des Headers */
+    width: 100%;
+    max-width: var(--max-width);
+}
+
+/* ================================================== */
+/* Suchfeld
+/* ================================================== */
+
+.search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    max-width: 840px; /* Beschränkt die Breite des Containers */
+    width: 100%; /* Passt sich an die verfügbare Breite an */
+}
+
+.search-field {
+    width: 100%;
+    padding: 10px 90px 10px 30px; /* Platz für die Icons */
+    background-color: var(--search-field-bg-color);
+    border: 1px solid var(--search-field-border-color);
+    border-radius: 16px;
+    font-size: 16px;
+    font-weight: bold;
+    box-sizing: border-box;
+    color: var(--text-color)
+}
+
+/* ================================================== */
+/* Suchfeld
+/* ================================================== */
+.icon {
+    height: 24px;
+    cursor: pointer;
+}
+
+.icon:hover {
+    filter: brightness(0.8);
+    transform: scale(1.1);
+}
+
+/* Spezifische Stile für das clear-icon */
+.clear-icon {
+    position: absolute;
+    right: 56px;
+}
+
+/* Spezifische Stile für das profile-icon */
+.profile-icon {
+    position: absolute;
+    right: 20px;
+}
+
+/* ================================================== */
+/* Vorschlagsliste
+/* ================================================== */
+.window-header {
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Zentriert den Text */
+    background-color: var(--bg-color);
+    margin: 0;
+    padding: 15px;
+    font-size: 1.0em;
+    font-weight: bold;
+    color: #333;
+    border-bottom: 2px solid #ddd;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    cursor: move;
+    position: relative; /* Ermöglicht die Positionierung der Icons */
+    height: 20px;
+    color: var(--text-color);
+}
+
+.window-header .left-icons {
+    position: absolute;
+    left: 15px; /* Hält die Icons links ausgerichtet */
+    display: flex;
+    gap: 10px; /* Optional: Abstand zwischen den Icons */
+    align-items: center; /* Zentriert die Icons vertikal innerhalb der festgelegten Höhe */
+}
+
+.window-header .title {
+    flex: 1; /* Nimmt den verbleibenden Platz ein */
+    text-align: center; /* Zentriert den Titel */
+    justify-content: space-between; /* Zentriert den Text zwischen den Icons */
+    padding: 10px;
+}
+.suggestions-wrapper {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    background-color: var(--bg-color-suggestions);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 0;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+    width: 300px; /* Hier eine feste Breite setzen */
+    min-width: 200px;
+    max-width: 90%;
+    box-sizing: border-box;
+    display: none;
+    overflow: hidden;
+}
+
+.suggestions {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 10px 0 10px 10px;
+    box-sizing: content-box;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+    cursor: pointer;
+}
+
+.suggestion {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-left: 4px;
+    max-width: calc(100% - 20px);
+}
+
+.suggestion:last-child {
+    border-bottom: none;
+}
+
+.suggestion:hover {
+    background-color: var(--suggestions-hl-color);
+    color: var(--text-color);
+}
+
+.rejected-suggestion {
+    background-color: var(--bg-color-rejected-suggestion);
+}
+
+.highlight {
+    color: var(--highlight-color);
+    font-weight: bold;
+}
+
+.suggestion.highlighted {
+    background-color: var(--suggestions-hl-color);
+    font-weight: bold;
+}
+
+.close-icon {
+    display: none;
+    width: 24px;
+    height: 24px;
+    color: var(--text-color);
+}
+
+.movable-icon {
+    width: 24px;
+    height: 24px;
+    color: var(--text-color); /* Verwendet die Textfarbe, die im SVG durch `currentColor` definiert werden kann */
+}
+
+/* ================================================== */
+
+/* ================================================== */
+.highlighted-term {
+    background-color: var(--bg-color-highlighted-term);
+    padding: 2px 8px 2px 0px;
+    border-radius: 2px;
+}
+
+/* ================================================== */
+
+/* ================================================== */
+
+/* ================================================== */
+
+/* ================================================== */
+
+.mode-switch { 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    margin: 10 0 30px 0;
+    position: relative;
+    margin-bottom: 60px;
+}
+
+.mode-option {
+    font-size: 16px;
+    cursor: pointer;
+    background-color: transparent;
+    color: #999999;
+    border: none;
+    transition: color 0.3s ease;
+    text-align: center;
+    padding: 5px 10px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.mode-option.active {
+    position: relative;
+}
+
+.mode-option.active::after {
+    content: "";
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30%;
+    height: 3px;
+    background-color: var(--active-color);
+}
+
+.label-input-pair {
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    margin-bottom: 10px;
+    color: var(--text-color);
+}
+
+.label-small {
+    font-size: 12px;
+    color: var(--text-color);
+    margin-bottom: 2px;
+    text-align: center;
+    display: block;
+    width: 100%;
+    line-height: 1.2;
+    /* z-index: 1; */
+    position: static;
+}
+
+/* ================================================== */
+/* Modales Fenster
+/* ================================================== */
+
+/* Hintergrund */
+.modal {
+    display: none; /* Versteckt das Modal initial */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* Halbtransparenter Hintergrund */
+    overflow: auto;
+    padding-top: 60px;
+  }
+  
+  /* Inhalt */
+  .modal-content {
+    background-color: var(--modal-bg-color);
+    margin: 5% auto;
+    padding: 20px;
+    border-radius: 12px; /* Abgerundete Ecken */
+    width: 400px;
+    max-width: 90%;
+    box-shadow: 0 4px 8px var(--container-shadow-color), 0 6px 20px rgba(0, 0, 0, 0.19); /* Schatteneffekte */
+    position: relative;
+    animation: fadeIn 0.5s ease; /* Sanfte Einblendung */
+  }
+  
+  /* Schließen-Icon */
+  .close {
+    color: var(--icon-color);
+    float: right;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  
+  .close:hover,
+  .close:focus {
+    color:  var(--modal-text-color);
+    text-decoration: none;
+    cursor: pointer;
+  }
+  
+  /* Überschrift */
+  .modal-content h2 {
+    font-family: 'Arial', sans-serif;
+    font-size: 24px;
+    margin-bottom: 20px;
+    text-align: center;
+    color: var(--modal-text-color);
+  }
+  
+  /* Select Box */
+  #language-selector {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: 1px solid var(--modal-border-color);
+    background-color: var(--bg-color);
+    color: var(--text-color);
+  }
+  
+  /* Speichern-Button */
+  #saveLanguageBtn {
+    background-color: var(--button-bg-color);
+    color: var(--button-text-color);
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 16px;
+  }
+  
+  #saveLanguageBtn:hover {
+    background-color: var(--button-bg-color);
+  }
+  
+  /* Einblendeanimation */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+/* ================================================== */
+/* Bild */
+/* ================================================== */
+
+#image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%; /* Stellt sicher, dass der Container die volle Breite hat */
+    margin-bottom: 36px;
+}
+
+#image-container img {
+    max-width: 288px; /* Maximale Breite des Bildes */
+    max-height: 216px; /* Maximale Höhe des Bildes */
+    width: auto; /* Verhindert Verzerrungen */
+    height: auto; /* Verhindert Verzerrungen */
+    border: 2px solid #ddd; /* Dünner grauer Rand */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sanfter Schatten */
+    border-radius: 4px; /* Runde Ecken am Bild */
+    object-fit: contain; /* Beibehaltung des Seitenverhältnisses */
+}
+
+/* ================================================== */
+/* Tabelle | allgemein */
+/* ================================================== */
+
+.table, table {
+    width: 100%;
+    border-collapse: collapse; 
+    font-size: 1em;
+}
+
+.table th, .table td, table th, table td {
+    border: 1px solid var(--brand-line-color);
+    padding: 8px;
+    text-align: left;
+}
+
+/* ================================================== */
+/* Tabelle | Synonyme */
+/* ================================================== */
+
+.synonyms-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+/* Erste Spalte auf feste Breite einstellen */
+.synonyms-table td:first-child {
+    width: 30px; /* Feste Breite der ersten Spalte */
+    text-align: center; /* Zentriere die Symbole in der ersten Spalte */
+}
+
+/* Rechte Spalte standardmäßig linksbündig lassen */
+.synonyms-table td:last-child {
+    text-align: left;
+}
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - -*/
+
+
+.alternative-icon {
+    color: var(--flashterm-green);
+}
+
+.rejected-icon {
+    color: var(--brand-primary-color);
+}
+
+/* ================================================== */
+/*  Sprach-Optionen */
+/* ================================================== */
+
+
+.language-option {
+    font-size: 12pt;
+    padding: 4px 8px;
+    margin: 5px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    width: 50px; /* Feste Breite der Tasten */
+    text-align: center; /* Text zentrieren */
+}
+
+.language-option.selected {
+    background-color: var(--active-color);
+    color: #fff;
+}
+
+.language-option.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ================================================== */
+/*  Termtabelle */
+/* ================================================== */
+
+.term-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.term-table th, .term-table td {
+    border: 1px solid var(--brand-line-color);
+    padding: 8px;
+}
+
+.term-table th {
+    background-color: var(--bg-color-infobox);
+    text-align: left;
+}
+
+.term-table .category-header {
+    font-weight: bold;
+    text-align: left;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.term-table td:first-child {
+    width: 1%;
+    white-space: nowrap;
+}
+
+.category-header {
+    font-weight: bold;
+    background-color: #f0f0f0;
+    text-align: left;
+}
+
+/* ================================================== */
+/* Infobox */
+/* ================================================== */
+
+/* Infobox Container */
+.info-box {
+    background-color: var(--bg-color-infobox);
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Leichter Schatten für mehr Tiefe */
+    border-color: 2px var(--brand-line-color);
+}
+
+/* Überschriften in der Infobox */
+.info-box h1 {
+    font-size: 1.75em;
+    margin: 0 0 0.25em 0;
+    padding-top: 0.25em;
+    border-bottom: 2px solid var(--border-color-infoBox);
+    padding-bottom: 0.25em;
+    position: sticky;
+    top: 125px; /* Setzt das Sticky-Verhalten mit Abstand zum oberen Rand */
+    background-color: var(--bg-color-infobox); /* Gibt der h1 einen Hintergrund */
+    z-index: 999; /* Stellt sicher, dass die h1 über anderen Elementen liegt */
+}
+
+.info-box h2 {
+    font-size: 1.5em;
+    color: var(--text-color);
+    border-bottom: 2px solid var(--border-color-infoBox);
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+}
+
+.info-box h3 {
+    font-size: 1.25em;
+    color: var(--text-color);
+    border-bottom: 1px solid var(--brand-line-color);
+    padding-bottom: 6px;
+    margin-bottom: 10px;
+}
+
+/* Gemeinsame Stile für alle Überschriften (falls benötigt) */
+.info-box h1, .info-box h2, .info-box h3, .info-box h4 {
+    margin-top: 20px;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+/* Tabellen in der Infobox */
+.info-box table {
+    width: 100%; /* Passt die Tabelle an die Breite der Infobox an */
+    border-collapse: collapse;
+    font-size: 1em;
+    margin-bottom: 20px; /* Abstand nach unten für visuelle Abgrenzung */
+}
+
+/* Tabellenzellen */
+.info-box table th, .info-box table td {
+    padding: 6px 12px; /* Etwas mehr Padding für bessere Lesbarkeit */
+    border: 2px solid var(--border-color-infoBox);
+    word-wrap: break-word; /* Erlaubt den Zeilenumbruch innerhalb der Tabellenzellen */
+    text-align: left; /* Standard Textausrichtung */
+}
+
+/* Infobox Bilder */
+.info-box img {
+    max-width: 100%; /* Skaliert Bilder auf die verfügbare Breite */
+    height: auto; /* Beibehaltung des Seitenverhältnisses */
+    border-radius: 4px; /* Leichte Abrundung der Bildkanten */
+    margin-bottom: 15px; /* Abstand nach unten, um sich vom Text abzuheben */
+}
+
+/* Links in der Infobox */
+.info-box a {
+    color: var(--link-color); /* Standard-Linkfarbe, anpassbar */
+    text-decoration: underline; /* Unterstreicht den Link */
+    transition: color 0.3s ease; /* Sanfter Übergangseffekt bei Farbänderungen */
+}
+
+.info-box a:hover {
+    color: var(--link-hover-color); /* Farbe beim Hover-Zustand, anpassbar */
+    text-decoration: none; /* Entfernt die Unterstreichung beim Hover */
+}
+
+/* ================================================== */
+/* Links */
+/* ================================================== */
+/* Standard-Link */
+a {
+    color: var(--text-color); /* Farbe des Links */
+    text-decoration: none; /* Entfernt die Unterstreichung */
+}
+
+/* Link, wenn er mit der Maus berührt wird (Hover-Effekt) */
+a:hover {
+    color: var(--link-hover-color); /* Andere Farbe bei Hover */
+    text-decoration: underline; /* Unterstreichung bei Hover */
+}
+
+/* Besuchter Link */
+a:visited {
+    color: var(--text-color); /* Farbe für bereits besuchte Links */
+}
+
+/* Aktiver Link (während eines Klicks) */
+a:active {
+    color: var(--highlight-color) /* Farbe während des Klickens */
+}
+
+/* ================================================== */
+/* Fußnoten */
+/* ================================================== */
+
+.footnote {
+    font-size: 0.9em;       /* Etwas kleinere Schriftgröße */
+    color: var(--text-color);
+    margin-top: 10px;       /* Abstand zum Text */
+    padding-top: 5px;       /* Platz für den Strich */
+    position: relative;     /* Position für das Pseudo-Element */
+}
+
+.footnote::before {
+    content: "";            /* Keine zusätzlichen Inhalte außer dem Strich */
+    width: 10%;             /* Strich auf 10% der Breite */
+    height: 1.5px;            /* Höhe des Strichs */
+    background-color: var(--brand-line-color); /* Farbe des Strichs */
+    position: absolute;     /* Absolute Position, um es vom Text zu trennen */
+    top: 0;                 /* Strich oberhalb des Texts positionieren */
+}
+
+/* ================================================== */
+/* Ausblenden */
+/* ================================================== */
+
+.hidden {
+    display: none;
+}
+
+/* ================================================== */
+/* Schaltflächen  [de] [en] Sprachwechseler           */
+/* ================================================== */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.toggle-language {
+    margin-left: auto; /* Button wird nach rechts verschoben */
+    background-color: var(--button-color);
+    color: white;
+    border: none;
+    padding: 4px 40px 4px 4px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 5px;
+    text-transform: lowercase;
+}
+
+.toggle-language:hover {
+    background-color: var(--active-color);
+}
+
+.toggle-language[data-lang="source"] {
+    float: left;
+}
+
+.toggle-language[data-lang="target"] {
+    float: right;
+}
+
+/* ================================================== */
+/* Icon [Export]                                      */
+/* ================================================== */
+.export-icon {
+    width: var(--icon-lage);
+    height: var(--icon-lage);
+    cursor: pointer;
+    display: block; /* Das Icon wird als Block-Element behandelt */
+    margin: 20px auto 0 auto; /* Zentriert das Icon unter der Tabelle */
+}
+
+.export-icon:hover {
+    filter: brightness(1.1); /* Heller bei Hover */
+}
+
+/* ================================================== */
+/* Responsive Design */
+/* ================================================== */
+@media (max-width: 768px) {
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .search-field {
+        max-width: 90%;
+        margin-top: 10px;
+    }
+
+    .mode-switch {
+        flex-direction: column;
+    }
+
+    .container {
+        padding: 10px 20px 10px 20px; /* oben, rechts, unten, links */
+    }
+    
+}
