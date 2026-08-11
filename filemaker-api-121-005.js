@@ -18,9 +18,6 @@ export async function loginToFileMaker() {
         const loginUrl = `${server}/fmi/data/vLatest/databases/${database}/sessions`;
         const loginData = JSON.stringify({ fmDataSource: [{ database, username, password }] });
 
-        console.log(`Login-URL: ${loginUrl}`);
-        console.log(`Login-Daten: ${loginData}`);
-
         const response = await fetch(loginUrl, {
             method: 'POST',
             headers: {
@@ -32,9 +29,7 @@ export async function loginToFileMaker() {
         });
 
         if (!response.ok) {
-            const errorText = await response.text();
             console.error(`HTTP-Fehler beim Login: ${response.status} - ${response.statusText}`);
-            console.error(`Server-Antwort: ${errorText}`);
             throw new Error(`HTTP error: ${response.status} - ${response.statusText}`);
         }
 
@@ -51,13 +46,12 @@ export async function loginToFileMaker() {
         sessionStorage.setItem('fmToken', token);
         sessionStorage.setItem('fmTokenExpiration', expirationTime.toString());
 
-        // console.log('Token erfolgreich abgerufen und gespeichert:', token);
         // console.log('Ablaufzeit des Tokens gesetzt auf:', new Date(expirationTime).toLocaleString());
 
         return token;
 
     } catch (error) {
-        console.error('Login-Fehler:', error.message || error);
+        console.error('Login-Fehler.');
         throw new Error('Login fehlgeschlagen. Bitte überprüfe die Zugangsdaten.');
     }
 }
@@ -75,7 +69,6 @@ export async function renewFileMakerToken() {
         expirationTime = new Date().getTime() + 15 * 60 * 1000; // Ablaufzeit auf 15 Minuten setzen
         sessionStorage.setItem('fmToken', token);
         sessionStorage.setItem('fmTokenExpiration', expirationTime.toString());
-        // console.log('Neues Token erhalten:', token);
         // console.log('Neues Ablaufdatum gesetzt:', new Date(expirationTime).toLocaleString());
     } else {
         // Ablaufzeit nach jeder Nutzung verlängern
@@ -113,9 +106,6 @@ export async function fetchAvailableLanguages(guiLanguageCode) {
     const query = JSON.stringify({ query: [{ guiLanguageCode }] });
 
     // console.log('Lade Sprachen für GUI-Sprache:', guiLanguageCode);
-    // console.log('Anfrage-URL:', dataUrl);
-    // console.log('Verwendetes Token:', token);  // Token wird verwendet
-
     try {
         const response = await fetch(dataUrl, {
             method: 'POST',
@@ -129,16 +119,14 @@ export async function fetchAvailableLanguages(guiLanguageCode) {
         if (response.ok) {
             const data = await response.json();
             const availableLanguages = data.response.data;
-            console.log('Sprachdaten erfolgreich abgerufen:', availableLanguages);
+            console.log('Sprachdaten erfolgreich abgerufen.');
 
             // Sprachen im SessionStorage speichern
             sessionStorage.setItem('availableLanguages', JSON.stringify(availableLanguages));
 
             return availableLanguages;
         } else {
-            const errorText = await response.text();
             console.error(`HTTP Fehler: ${response.status}`);
-            console.error(`Fehlernachricht: ${errorText}`);
             throw new Error(`HTTP Fehler: ${response.status}`);
         }
     } catch (error) {
@@ -153,9 +141,6 @@ export async function getFileMakerTerms(languageCode) {
     const { server, database } = config;
     const dataUrl = `${server}/fmi/data/vLatest/databases/${database}/layouts/termAPI/_find`;
     const query = JSON.stringify({ query: [{ languageCode }] });
-
-    // console.log(`[TermAPI] Anfrage-URL: ${dataUrl}`);
-    // console.log(`[TermAPI] Query: ${query}`);
 
     try {
         // Token überprüfen und ggf. erneuern
@@ -173,16 +158,14 @@ export async function getFileMakerTerms(languageCode) {
 
         if (response.ok) {
             const data = await response.json();
-            console.log('[TermAPI] Daten erfolgreich von FileMaker abgerufen:', data);
+            console.log('[TermAPI] Daten erfolgreich von FileMaker abgerufen.');
             return data.response.data;
         } else {
-            const errorText = await response.text();
             console.error(`[TermAPI] HTTP-Fehler: ${response.status} - ${response.statusText}`);
-            console.error(`[TermAPI] Fehlernachricht: ${errorText}`);
             throw new Error(`HTTP error: ${response.status} - ${response.statusText}`);
         }
     } catch (error) {
-        console.error('Fetch-Datenfehler:', error);
+        console.error('Fehler beim Abrufen der Termini.');
         throw new Error(`Fetch data error: ${error.message}`);
     }
 }
@@ -202,10 +185,6 @@ export async function getFileMakerConceptDetails(config, conceptID) {
         ]
     };
 
-    console.log('[definitionAPI] Sende Anfrage mit conceptID:', conceptID);
-    console.log('[definitionAPI] POST-URL:', url);
-    console.log('[definitionAPI] Abfrageinhalt:', query);
-
     try {
         // Token überprüfen und ggf. erneuern
         const token = await renewFileMakerToken();
@@ -220,11 +199,8 @@ export async function getFileMakerConceptDetails(config, conceptID) {
         });
 
         const data = await response.json();
-        // console.log('[definitionAPI] Antwortdaten:', data);  // strukturiert
-        console.log('[definitionAPI] Antwortdaten (formatiert):\n' + JSON.stringify(data, null, 2)); // optional formatiert
-
         if (data.response && data.response.data && data.response.data.length > 0) {
-            console.log(`[definitionAPI] ${data.response.data.length} Begriffe erfolgreich geladen für conceptID: ${conceptID}`);
+            console.log('[definitionAPI] Begriffsdetails erfolgreich geladen.');
 
             return data.response.data.map(item => {
                 const termDetails = item.fieldData;
@@ -232,17 +208,17 @@ export async function getFileMakerConceptDetails(config, conceptID) {
                     try {
                         termDetails.terms = JSON.parse(termDetails.termlist);
                     } catch (e) {
-                        console.log('[definitionAPI] Fehler beim Parsen von "termlist":', e);
+                        console.error('[definitionAPI] Fehler beim Parsen der Terminliste.');
                     }
                 }
                 return termDetails;
             });
         } else {
-            console.warn(`[definitionAPI] Keine Begriffe gefunden für conceptID: ${conceptID}`);
+            console.warn('[definitionAPI] Keine Begriffsdetails gefunden.');
             return null;
         }
     } catch (error) {
-        console.error('[definitionAPI] Fehler beim Abrufen der Begriffe:', error);
+        console.error('[definitionAPI] Fehler beim Abrufen der Begriffsdetails.');
         return null;
     }
 }
@@ -273,6 +249,6 @@ export async function logoutFromFileMaker() {
             console.error(`Fehler bei der Token-Invalidierung: ${response.status}`);
         }
     } catch (error) {
-        console.error('Fehler beim Abmelden:', error);
+        console.error('Fehler beim Abmelden.');
     }
 }
