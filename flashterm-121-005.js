@@ -1,8 +1,7 @@
 // © 2025-04-18 Eisenrieth Digital Solutions. Alle Rechte vorbehalten.
 
-import { loginToFileMaker, getFileMakerTerms, fetchAvailableLanguages, getFileMakerConceptDetails } from './filemaker-api-121-005.js';
+import { loginToFileMaker, fetchAvailableLanguages, getFileMakerConceptDetails } from './filemaker-api-121-005.js';
 import { config } from './config.js';  // Konfiguration importieren
-import { parseTermList as parseTermListPure } from './src/domain/terminology.js';
 import { terminologyRepository } from './src/app/terminology-repository.js';
 
 const langParams = getLanguageParamsFromURL();
@@ -609,20 +608,6 @@ async function fetchAndCacheLanguageOptions(guiLanguage) {
         }
     } catch (error) {
         handleError('Fehler beim Abrufen der Sprachdaten', error);
-    }
-}
-
-//====================================================================================================
-// Parst eine Liste von Objekten und extrahiert Begriffe aus dem 'termlist'-Feld.
-//====================================================================================================
-function parseTermList(data) {
-    try {
-        return parseTermListPure(data);
-    } catch (error) {
-        if (error instanceof SyntaxError) {
-            handleError('Error parsing termlistField', error);
-        }
-        throw error;
     }
 }
 
