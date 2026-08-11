@@ -1,0 +1,32 @@
+{
+  "response": {
+    "data": [
+      {
+        "fieldData": {
+          "conceptID": "TEST-001",
+          "languageCode": "xx-XX",
+          "termlist": "[{\"term\":\"alpha term\",\"weighting\":2},{\"term\":\"beta term\",\"weighting\":1}]",
+          "definition": "[{\"definition\":\"Synthetic definition for alpha term.\",\"footnote\":\"Synthetic footnote.\"}]",
+          "context": "[{\"term\":\"alpha term\",\"context\":\"Synthetic context for testing.\",\"footnote\":\"\"}]",
+          "info": "[{\"term\":\"alpha term\",\"info\":\"Synthetic information for testing.\",\"footnote\":\"\"}]",
+          "hyperLink": "[{\"label\":\"synthetic link\",\"link\":\"https://example.invalid/TEST-001\"}]",
+          "infobox": "# Synthetic infobox\n\nTest-only content.",
+          "fileName": "TEST-001.png"
+        }
+      },
+      {
+        "fieldData": {
+          "conceptID": "TEST-001",
+          "languageCode": "yy-YY",
+          "termlist": "[{\"term\":\"delta term\",\"weighting\":2}]",
+          "definition": "[{\"definition\":\"Synthetic target definition.\",\"footnote\":\"\"}]",
+          "context": "[]",
+          "info": "[]",
+          "hyperLink": "[]",
+          "infobox": "",
+          "fileName": ""
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "response": {
+    "data": [
+      {
+        "fieldData": {
+          "termlist": "[[\"TEST-001\",\"alpha term\",2],[\"TEST-001\",\"beta term\",1],[\"TEST-002\",\"gamma term\",0]]"
+        }
+      }
+    ]
+  }
+}
