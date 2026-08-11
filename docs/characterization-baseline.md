@@ -58,7 +58,7 @@ Beim Laden von `flashterm-121-005.js` geschieht in dieser Reihenfolge:
 7. Aktualisieren des Dokumenttitels und der Modusbeschriftungen.
 8. Registrieren der Haupt-Event-Handler.
 
-Die Schritte laufen überwiegend seriell. Ein Fehler beim Login beendet den gesamten Initialisierungsblock; die nachfolgenden Haupt-Event-Handler werden dann nicht registriert. Fehler beim Laden einer einzelnen Terminliste werden dagegen innerhalb der jeweiligen Ladefunktion abgefangen, sodass die Initialisierung mit einer leeren Liste fortfahren kann.
+Die Schritte laufen überwiegend seriell. Ein Fehler beim Login beendet den gesamten Initialisierungsblock; die nachfolgenden Haupt-Event-Handler werden dann nicht registriert. Fehler beim Laden oder Parsen einer einzelnen Terminliste werden dagegen innerhalb der jeweiligen Ladefunktion abgefangen. Die zuvor vorhandene Terminliste bleibt dabei unverändert; während der ersten Initialisierung ist sie noch leer.
 
 ### FileMaker-Login
 
@@ -363,7 +363,8 @@ Header und Hauptüberschrift verwenden feste beziehungsweise sticky Positionieru
 
 - Loginfehler beenden die Hauptinitialisierung und werden in der Konsole protokolliert.
 - Fehler beim Laden von Sprachdaten können über `handleError()` als Text im Mining-Container landen.
-- Terminlistenfehler werden protokolliert und ergeben eine leere Terminliste.
+- Netzwerk-/API-Fehler beim Laden einer Terminliste werden protokolliert; die zuvor vorhandene Terminliste bleibt unverändert.
+- Enthält ein `termlist`-Feld ungültiges JSON, wird `handleError('Error parsing termlistField', error)` aufgerufen und die gesamte Terminlistenantwort verworfen. Die zuvor vorhandene Source- beziehungsweise Target-Terminliste bleibt unverändert. Dies ist ein bewusster Bugfix gegenüber dem früheren partiellen Ergebnis mit `undefined`-Einträgen.
 - Der Concept-Request prüft `response.ok` nicht ausdrücklich vor dem JSON-Parsing und gibt bei Fehlern häufig `null` zurück.
 - Vollständige Server-Fehlertexte beziehungsweise Responses können aktuell in der Konsole erscheinen.
 
@@ -423,6 +424,7 @@ Header und Hauptüberschrift verwenden feste beziehungsweise sticky Positionieru
 | FT-ERROR-001 | Lokal abgelaufene Tokenzeit | API-Aktion auslösen | Neuer FileMaker-Login erfolgt vor dem Request |
 | FT-ERROR-002 | Server lehnt lokal als gültig betrachteten Token ab | API-Aktion auslösen | Kein zentraler Retry; konkretes UI-/Konsolenverhalten dokumentieren |
 | FT-ERROR-003 | Concept enthält fehlerhaftes JSON in einem Teilfeld | Concept öffnen | Feldfehler wird protokolliert; übrige Bereiche werden soweit möglich gerendert |
+| FT-ERROR-004 | Terminlistenantwort enthält zwischen gültigen Records ein ungültiges `termlist`-JSON | Source- oder Target-Terminliste laden | `handleError()` zeigt den Parsingfehler; die gesamte neue Antwort wird verworfen, die vorherige Terminliste bleibt unverändert und der Ladeindikator wird verborgen |
 
 ## Noch manuell zu verifizieren
 

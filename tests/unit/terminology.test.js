@@ -56,6 +56,21 @@ test('throws the existing JSON.parse error for invalid JSON', () => {
   );
 });
 
+test('aborts a multi-record response completely when one termlist contains invalid JSON', () => {
+  const unchangedResult = Symbol('unchanged result');
+  let result = unchangedResult;
+  const records = [
+    { fieldData: { termlist: '[["TEST-VALID-001","alpha term",2]]' } },
+    { fieldData: { termlist: 'invalid JSON' } },
+    { fieldData: { termlist: '[["TEST-VALID-002","beta term",1]]' } }
+  ];
+
+  assert.throws(() => {
+    result = parseTermList(records);
+  }, SyntaxError);
+  assert.equal(result, unchangedResult);
+});
+
 test('throws a TypeError when fieldData is missing', () => {
   assert.throws(() => parseTermList([{}]), TypeError);
 });

@@ -611,17 +611,14 @@ async function fetchAndCacheLanguageOptions(guiLanguage) {
 // Parst eine Liste von Objekten und extrahiert Begriffe aus dem 'termlist'-Feld.
 //====================================================================================================
 function parseTermList(data) {
-    return data.flatMap(item => {
-        const termlistField = item.fieldData.termlist;
-        if (termlistField) {
-            try {
-                return parseTermListPure([item]);
-            } catch (e) {
-                handleError('Error parsing termlistField', e);
-            }
+    try {
+        return parseTermListPure(data);
+    } catch (error) {
+        if (error instanceof SyntaxError) {
+            handleError('Error parsing termlistField', error);
         }
-        return [];
-    });
+        throw error;
+    }
 }
 
 function showSuggestions(sourceTermList, query) {
