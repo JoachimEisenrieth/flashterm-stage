@@ -1,0 +1,24 @@
+{
+  "response": {
+    "data": [
+      {
+        "fieldData": {
+          "languageCode": "xx-XX",
+          "language": "Alpha language"
+        }
+      },
+      {
+        "fieldData": {
+          "languageCode": "yy-YY",
+          "language": "Beta language"
+        }
+      },
+      {
+        "fieldData": {
+          "languageCode": "zz-ZZ",
+          "language": "Gamma language"
+        }
+      }
+    ]
+  }
+}
