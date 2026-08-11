@@ -2,6 +2,7 @@
 
 import { loginToFileMaker, getFileMakerTerms, fetchAvailableLanguages, getFileMakerConceptDetails } from './filemaker-api-121-005.js';
 import { config } from './config.js';  // Konfiguration importieren
+import { parseTermList as parseTermListPure } from './src/domain/terminology.js';
 
 const langParams = getLanguageParamsFromURL();
 let sourceLanguage = langParams.source;
@@ -614,12 +615,7 @@ function parseTermList(data) {
         const termlistField = item.fieldData.termlist;
         if (termlistField) {
             try {
-                const terms = JSON.parse(termlistField);
-                return terms.map(term => ({
-                    conceptID: term[0],
-                    term: term[1],
-                    weighting: term[2]
-                }));
+                return parseTermListPure([item]);
             } catch (e) {
                 handleError('Error parsing termlistField', e);
             }
