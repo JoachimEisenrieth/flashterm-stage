@@ -52,7 +52,7 @@ Beim Laden von `flashterm-121-005.js` geschieht in dieser Reihenfolge:
    - Browser beginnt mit `de` → `de-DE`
    - alle anderen Browser-Sprachen → `en-GB`
 3. Laden von `json/translations.json` und Aktualisieren der vorhandenen übersetzbaren UI-Elemente.
-4. Laden beziehungsweise Wiederverwenden der FileMaker-Sprachoptionen.
+4. Laden beziehungsweise Wiederverwenden der normalisierten Sprachoptionen aus einem versionierten, an die GUI-Sprache gebundenen Cache.
 5. Laden und Parsen der Terminliste der Ausgangssprache.
 6. Laden und Parsen der Terminliste der Zielsprache.
 7. Aktualisieren des Dokumenttitels und der Modusbeschriftungen.
@@ -225,11 +225,11 @@ Relevante Storage-Einträge:
 | `fmToken` | FileMaker-API | FileMaker-API |
 | `fmTokenExpiration` | FileMaker-API | FileMaker-API |
 | `availableLanguages` | FileMaker-API | nicht vom Hauptmodul verwendet |
-| `languageData` | Hauptmodul | Hauptmodul |
+| `languageData` | Hauptmodul | Hauptmodul; V2-Envelope mit `guiLanguage` und normalisiertem `languages`-Array |
 | `sourceLanguage` | ungenutzter Quellsprachwechsel | nein |
 | `targetLanguage` | Zielsprachwechsel | nein |
 
-Der Sprachcache ist nicht nach GUI-Sprache versioniert. Bereits gecachte Sprachoptionen können deshalb bei einer geänderten Browsersprache wiederverwendet werden. **Zu verifizieren.**
+Der Sprachcache wird als `{ version: 2, guiLanguage, languages: [{ code, name }] }` gespeichert. Nur ein V2-Envelope für die aktuelle GUI-Sprache mit einem Array unter `languages` wird wiederverwendet. Alte FileMaker-Roharrays, andere GUI-Sprachen, unerwartete JSON-Typen und beschädigtes JSON gelten als Cachemiss und führen zu einem neuen Repository-Abruf. Beschädigtes Cache-JSON bricht die Initialisierung damit nicht mehr ab; dies ist eine bewusste Robustheitsänderung. Ein formal gültiges V2-Envelope mit leerem `languages`-Array wird weiterhin als gültiger leerer Cache akzeptiert.
 
 ## 6. Wiki-/Concept-Ansicht
 
@@ -413,6 +413,11 @@ Header und Hauptüberschrift verwenden feste beziehungsweise sticky Positionieru
 | FT-LANG-003 | Wiki mit ausgewähltem Concept | Zielsprache wechseln | Concept wird für das neue Sprachpaar erneut geladen |
 | FT-LANG-004 | `targetLanguage` nur in Session Storage gesetzt, URL ohne Target | Seite neu laden | Session-Wert wird ignoriert; Konfigurationswert wird verwendet |
 | FT-LANG-005 | Ungültiger URL-Sprachcode | Anwendung öffnen | Wert wird nicht vorab validiert; tatsächliche FileMaker-/UI-Reaktion dokumentieren |
+| FT-LANG-CACHE-001 | Altes FileMaker-Roharray in `sessionStorage.languageData` | Anwendung neu laden | Alter Cache wird ignoriert, Sprachen werden über das Repository geladen und als V2-Envelope gespeichert |
+| FT-LANG-CACHE-002 | Gültiges V2-Envelope mit anderer `guiLanguage` | Anwendung neu laden | Cache wird ignoriert und für die aktuelle GUI-Sprache neu geladen |
+| FT-LANG-CACHE-003 | Gültiges V2-Envelope mit `languages: []` für die aktuelle GUI-Sprache | Anwendung neu laden | Leerer Cache wird akzeptiert und löst keinen neuen Sprachabruf aus |
+| FT-LANG-CACHE-004 | Syntaktisch beschädigtes JSON in `sessionStorage.languageData` | Anwendung neu laden | Cache gilt als Cachemiss; Sprachabruf und Initialisierung laufen weiter |
+| FT-LANG-CACHE-005 | Gültiges V2-Envelope für die aktuelle GUI-Sprache | Anwendung neu laden | Sprachen werden aus dem Cache übernommen; kein erneuter Sprachabruf |
 | FT-THEME-001 | Systemmodus Light | Anwendung öffnen | Light-Variablen, Light-Favicon und Light-Logo werden verwendet |
 | FT-THEME-002 | Systemmodus Dark | Anwendung öffnen | Dark-Variablen, Dark-Favicon und Dark-Logo werden verwendet |
 | FT-THEME-003 | Export-Icon bereits sichtbar | Systemmodus wechseln | Logo/Favicon ändern sich; bestehendes Export-Icon-Verhalten verifizieren |

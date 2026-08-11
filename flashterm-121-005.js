@@ -1,7 +1,8 @@
 // © 2025-04-18 Eisenrieth Digital Solutions. Alle Rechte vorbehalten.
 
-import { loginToFileMaker, fetchAvailableLanguages, getFileMakerConceptDetails } from './filemaker-api-121-005.js';
+import { loginToFileMaker, getFileMakerConceptDetails } from './filemaker-api-121-005.js';
 import { config } from './config.js';  // Konfiguration importieren
+import { parseLanguageCache, serializeLanguageCache } from './src/app/language-cache.js';
 import { terminologyRepository } from './src/app/terminology-repository.js';
 
 const langParams = getLanguageParamsFromURL();
@@ -592,17 +593,18 @@ let cachedLanguageOptions = null;
 async function fetchAndCacheLanguageOptions(guiLanguage) {
     // Überprüfe, ob die Sprachdaten bereits im SessionStorage vorhanden sind
     const cachedData = sessionStorage.getItem('languageData');
-    if (cachedData) {
-        cachedLanguageOptions = JSON.parse(cachedData);
+    const cachedLanguages = parseLanguageCache(cachedData, guiLanguage);
+    if (cachedLanguages !== null) {
+        cachedLanguageOptions = cachedLanguages;
         return; // Keine API-Abfrage nötig
     }
 
     try {
         // Wenn keine zwischengespeicherten Daten im SessionStorage vorhanden sind, hole sie vom Server
-        cachedLanguageOptions = await fetchAvailableLanguages(guiLanguage);
+        cachedLanguageOptions = await terminologyRepository.getLanguages(guiLanguage);
         if (cachedLanguageOptions && cachedLanguageOptions.length > 0) {
             // Speichere die Daten im SessionStorage für zukünftige Sitzungen
-            sessionStorage.setItem('languageData', JSON.stringify(cachedLanguageOptions));
+            sessionStorage.setItem('languageData', serializeLanguageCache(guiLanguage, cachedLanguageOptions));
         } else {
             logWarning('Keine Sprachdaten gefunden.');
         }
@@ -749,14 +751,14 @@ function updateModeText() {
             return;
         }
 
-        const sourceLanguageData = cachedLanguageOptions.find(lang => lang.fieldData.languageCode === sourceLanguage);
-        const targetLanguageData = cachedLanguageOptions.find(lang => lang.fieldData.languageCode === targetLanguage);
+        const sourceLanguageData = cachedLanguageOptions.find(lang => lang.code === sourceLanguage);
+        const targetLanguageData = cachedLanguageOptions.find(lang => lang.code === targetLanguage);
 
         const sourceLanguageName = sourceLanguageData
-            ? sourceLanguageData.fieldData.language
+            ? sourceLanguageData.name
             : sourceLanguage.toUpperCase();
         const targetLanguageName = targetLanguageData
-            ? targetLanguageData.fieldData.language
+            ? targetLanguageData.name
             : targetLanguage.toUpperCase();
 
         // Hier werden zwei schmale Leerzeichen (&thinsp;) verwendet
