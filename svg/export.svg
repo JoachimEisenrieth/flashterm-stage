@@ -1,0 +1,11 @@
+<ns0:svg xmlns:ns0="http://www.w3.org/2000/svg" width="200px" height="200px" viewBox="0 0 200 200" version="1.1" xml:space="preserve" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <ns0:g id="primary" transform="matrix(0.241526,0,0,0.241526,3.28823,3.40564)">
+        <ns0:path d="M500,100L700,100L700,300" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:57.96px;" />
+    </ns0:g>
+    <ns0:g id="primary-2" transform="matrix(0.241526,0,0,0.241526,3.28823,3.40564)">
+        <ns0:path d="M700,433.333L700,666.667C700,684.953 684.953,700 666.667,700L133.333,700C115.047,700 100,684.953 100,666.667L100,133.333C100,115.047 115.047,100 133.333,100L366.667,100" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:57.96px;" />
+    </ns0:g>
+    <ns0:g id="primary-3" transform="matrix(0.241526,0,0,0.241526,3.28823,3.40564)">
+        <ns0:path d="M366.667,433.333L700,100" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:57.96px;" />
+    </ns0:g>
+</ns0:svg>

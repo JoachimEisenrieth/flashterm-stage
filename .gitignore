@@ -1,0 +1,14 @@
+# macOS metadata
+.DS_Store
+
+# Local configuration and credentials
+/config.js
+/config.local.js
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Log files
+*.log
