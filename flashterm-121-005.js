@@ -3,6 +3,7 @@
 import { loginToFileMaker, getFileMakerTerms, fetchAvailableLanguages, getFileMakerConceptDetails } from './filemaker-api-121-005.js';
 import { config } from './config.js';  // Konfiguration importieren
 import { parseTermList as parseTermListPure } from './src/domain/terminology.js';
+import { terminologyRepository } from './src/app/terminology-repository.js';
 
 const langParams = getLanguageParamsFromURL();
 let sourceLanguage = langParams.source;
@@ -555,10 +556,12 @@ function toggleClearButton() {
 async function fetchSourceTermList(language) {
     showLoadingIndicator();
     try {
-        const data = await getFileMakerTerms(language);
-        sourceTermList = parseTermList(data);
+        sourceTermList = await terminologyRepository.getTerms(language);
         console.log(`Termliste geladen: ${language}`);
     } catch (error) {
+        if (error instanceof SyntaxError) {
+            handleError('Error parsing termlistField', error);
+        }
         console.error('Fehler beim Laden der Termliste:', error);
     } finally {
         hideLoadingIndicator();
@@ -571,10 +574,12 @@ async function fetchSourceTermList(language) {
 async function fetchTargetTermList(language) {
     showLoadingIndicator();
     try {
-        const data = await getFileMakerTerms(language);
-        targetTermList = parseTermList(data);
+        targetTermList = await terminologyRepository.getTerms(language);
         console.log(`Termliste geladen: ${language}`);
     } catch (error) {
+        if (error instanceof SyntaxError) {
+            handleError('Error parsing termlistField', error);
+        }
         console.error('Fehler beim Laden der Termliste:', error);
     } finally {
         hideLoadingIndicator();
