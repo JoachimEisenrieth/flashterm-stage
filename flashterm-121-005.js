@@ -216,7 +216,7 @@ async function initializeEventListeners() {
 
         try {
             // Sprachoptionen laden
-            const languageData = await fetchAvailableLanguages(guiLanguage);
+            const languageData = await terminologyRepository.getLanguages(guiLanguage);
             populateLanguageOptions(languageData);  // Optionen in das Dropdown einfügen
         } catch (error) {
             console.error('Fehler beim Laden der Sprachoptionen:', error);
@@ -401,17 +401,17 @@ function populateLanguageOptions(languageData) {
     let currentTargetLanguage = targetLanguage || '';
 
     // Sortiere die Sprachdaten alphabetisch nach dem Sprachnamen
-    languageData.sort((a, b) => a.fieldData.language.localeCompare(b.fieldData.language));
+    languageData.sort((a, b) => a.name.localeCompare(b.name));
 
     // Durch die sortierten Sprachdaten iterieren und Optionen hinzufügen
     languageData.forEach(language => {
-        if (language.fieldData && language.fieldData.languageCode !== sourceLanguage) {
+        if (language.code !== sourceLanguage) {
             const option = document.createElement('option');
-            option.value = language.fieldData.languageCode;
-            option.text = `${language.fieldData.language} (${language.fieldData.languageCode})`;
+            option.value = language.code;
+            option.text = `${language.name} (${language.code})`;
 
             // Überprüfen, ob die aktuelle Option der Zielsprache entspricht
-            if (language.fieldData.languageCode === currentTargetLanguage) {
+            if (language.code === currentTargetLanguage) {
                 option.selected = true; // Zielsprache als ausgewählt markieren
             }
 
