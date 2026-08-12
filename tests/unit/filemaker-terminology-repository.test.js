@@ -155,6 +155,35 @@ test('getConcept preserves the existing null result without mapping it', async (
   });
 });
 
+test('getConcept rejects the entire concept when an unused language record has no terms', async () => {
+  const { calls, dependencies } = createFakes({
+    concept: [
+      {
+        languageCode: 'de-DE',
+        terms: [{ term: 'source term', weighting: 2 }]
+      },
+      {
+        languageCode: 'en-GB',
+        terms: [{ term: 'target term', weighting: 2 }]
+      },
+      {
+        languageCode: 'fr-FR'
+      }
+    ]
+  });
+  const repository = createFileMakerTerminologyRepository(dependencies);
+
+  await assert.rejects(
+    repository.getConcept('TEST-UNUSED-MISSING-TERMS'),
+    TypeError
+  );
+  assert.deepEqual(calls, {
+    languages: [],
+    terms: [],
+    concept: [['TEST-UNUSED-MISSING-TERMS']]
+  });
+});
+
 for (const { method, argument, dependency } of [
   { method: 'getLanguages', argument: 'ui-XX', dependency: 'fetchLanguages' },
   { method: 'getTerms', argument: 'xx-XX', dependency: 'fetchTerms' },

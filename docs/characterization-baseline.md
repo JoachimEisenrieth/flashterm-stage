@@ -239,6 +239,17 @@ Der Sprachcache wird als `{ version: 2, guiLanguage, languages: [{ code, name }]
 - Das FileMaker-Feld `termlist` wird als JSON geparst und als `terms` an die UI weitergereicht.
 - Die UI filtert die Antwort nach Ausgangs- und Zielsprache und baut daraus ein internes `conceptData`-Objekt.
 
+### Concept-`termlist`-Semantik
+
+- `getFileMakerConceptDetails()` ergänzt `terms` nur, wenn `termlist` truthy ist und erfolgreich geparst wurde.
+- Ein fehlendes `termlist` oder der leere String `""` erzeugt kein `terms`-Property.
+- Der JSON-String `"[]"` ist truthy und erzeugt dagegen `terms: []`.
+- Bei syntaktisch ungültigem `termlist`-JSON protokolliert die API einen generischen Parsingfehler, schluckt den Fehler und gibt den Sprachrecord ohne `terms` weiter.
+- Fehlt `terms` im ausgewählten Source- oder Target-Record, greift das Wiki-Sprachmenü beziehungsweise die nachfolgende Concept-Verarbeitung darauf zu. Der resultierende `TypeError` wird erst durch `showWiki()` abgefangen; das reguläre Wiki-Rendering wird nicht abgeschlossen.
+- Ein nicht als Source oder Target ausgewählter Sprachrecord ohne `terms` wird im bisherigen Browserpfad durch die vollständigen Sprachcodevergleiche übersprungen. Gültige Source- und Target-Records können weiter gerendert werden.
+- `mapConcept()` verarbeitet dagegen jeden gelieferten Sprachrecord über `detail.terms.map()`. Dadurch verwirft auch ein nicht ausgewählter Record ohne `terms` das gesamte normalisierte Concept mit einem `TypeError`.
+- Diese Asymmetrie ist der derzeit dokumentierte Blocker für die produktive Verwendung von `terminologyRepository.getConcept()` in `showWiki()`. Sie beschreibt den Ist-Zustand und legt noch keine zukünftige Fehlersemantik fest.
+
 ### Benennungen
 
 - Die bevorzugte Ausgangsbenennung und, sofern vorhanden, die bevorzugte Zielbenennung erscheinen gemeinsam als Haupttitel.
@@ -356,7 +367,9 @@ Header und Hauptüberschrift verwenden feste beziehungsweise sticky Positionieru
 
 - Fehlende Terminlisten führen zu leeren internen Listen; Initialisierung kann fortgesetzt werden.
 - Fehlende Concept-Details werden in der Konsole gemeldet; die vorhandene UI wird nicht ausdrücklich durch eine Fehleransicht ersetzt.
-- Fehlerhaftes JSON in einzelnen Concept-Feldern wird feldweise protokolliert; andere Concept-Bereiche können weiter gerendert werden.
+- Fehlerhaftes JSON in `definition`, `context`, `info` oder `hyperLink` führt fachlich zum jeweiligen leeren Fallback; andere Concept-Bereiche können weiter gerendert werden.
+- Der heutige Browserpfad protokolliert diese Parsingfehler feldbezogen. `mapConcept()` erzeugt dieselben fachlichen Fallbackdaten ohne entsprechende feldbezogene Logs. Dieser Unterschied betrifft die Diagnostik, nicht das Domain-Modell oder die gerenderte UI.
+- Eine spätere Entfernung der feldbezogenen Parsinglogs muss bewusst dokumentiert werden und darf nicht unbeabsichtigt Teil der Repository-Integration sein.
 - Fehlende Inhalte werden nach dem Rendering ausgeblendet.
 
 ### API-Fehler
@@ -400,6 +413,10 @@ Header und Hauptüberschrift verwenden feste beziehungsweise sticky Positionieru
 | FT-WIKI-004 | Bild fehlt oder Request schlägt fehl | Concept öffnen | Bildcontainer bleibt beziehungsweise wird verborgen |
 | FT-WIKI-005 | Quell- und Zielinhalt vorhanden | Abschnittssprachbutton anklicken | Quell- und Zielcontainer wechseln; ausgewählter Button wird markiert |
 | FT-WIKI-006 | Source und Target teilen denselben zweistelligen Basiscode | Sprachbutton anklicken | Aktuelle Mehrdeutigkeit der Umschaltung dokumentieren; zu verifizieren |
+| FT-WIKI-TERMS-001 | Source `de-DE` besitzt kein `terms`; Target `en-GB` ist gültig | Concept öffnen | Ein `TypeError` verhindert den Abschluss des regulären Wiki-Renderings; genauer sichtbarer Restzustand ist zu verifizieren |
+| FT-WIKI-TERMS-002 | Target `en-GB` besitzt kein `terms`; Source `de-DE` ist gültig | Concept öffnen | Ein `TypeError` verhindert den Abschluss des regulären Wiki-Renderings; mögliche bereits erfolgte Menüänderungen sind zu verifizieren |
+| FT-WIKI-TERMS-003 | Source und Target sind gültig; nicht ausgewähltes `fr-FR` besitzt kein `terms` | Concept über den bisherigen Browserpfad öffnen | Der `fr-FR`-Record wird übersprungen; Source und Target können regulär gerendert werden. Derselbe Record lässt `mapConcept()` derzeit vollständig scheitern |
+| FT-WIKI-TERMS-004 | Ausgewählter Sprachrecord stammt aus FileMaker mit `termlist: "[]"` | Concept öffnen | Die API erzeugt `terms: []`; kein `TypeError` entsteht aus der Terminliste und der vorhandene Sprachrecord verwendet `Keine Übersetzung` als Preferred-Term-Fallback |
 | FT-MINING-001 | Quellterminliste geladen | Mehrzeiligen Text in das Suchfeld einfügen | Suchfeld wird geleert, Inspector aktiviert und Text analysiert |
 | FT-MINING-002 | Text enthält Gewichtungen 0, 1 und 2 | Text einfügen | Treffer erscheinen mit 🚫, ⭐ und ⭐⭐ und korrekten Zählwerten |
 | FT-MINING-003 | Text enthält kurzen Terminus innerhalb eines längeren | Text einfügen | Der eingeschlossene kürzere Treffer wird unterdrückt |
@@ -428,7 +445,7 @@ Header und Hauptüberschrift verwenden feste beziehungsweise sticky Positionieru
 | FT-EXPORT-003 | Potenziell erreichbarer JSON-Pfad mit nicht leerem Suchfeld | Export auslösen | Erreichbarkeit und möglicher Fehler wegen fehlender Terminlistenübergabe dokumentieren |
 | FT-ERROR-001 | Lokal abgelaufene Tokenzeit | API-Aktion auslösen | Neuer FileMaker-Login erfolgt vor dem Request |
 | FT-ERROR-002 | Server lehnt lokal als gültig betrachteten Token ab | API-Aktion auslösen | Kein zentraler Retry; konkretes UI-/Konsolenverhalten dokumentieren |
-| FT-ERROR-003 | Concept enthält fehlerhaftes JSON in einem Teilfeld | Concept öffnen | Feldfehler wird protokolliert; übrige Bereiche werden soweit möglich gerendert |
+| FT-ERROR-003 | Concept enthält fehlerhaftes JSON in `definition`, `context`, `info` oder `hyperLink` | Concept öffnen | Das betroffene Feld verwendet seinen leeren Fallback und übrige Bereiche werden soweit möglich gerendert; der heutige Browserpfad protokolliert den Feldfehler, während `mapConcept()` dieselben Fallbackdaten ohne feldbezogenes Log erzeugt |
 | FT-ERROR-004 | Terminlistenantwort enthält zwischen gültigen Records ein ungültiges `termlist`-JSON | Source- oder Target-Terminliste laden | `handleError()` zeigt den Parsingfehler; die gesamte neue Antwort wird verworfen, die vorherige Terminliste bleibt unverändert und der Ladeindikator wird verborgen |
 
 ## Noch manuell zu verifizieren

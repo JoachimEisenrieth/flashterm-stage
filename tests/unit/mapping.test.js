@@ -151,9 +151,39 @@ test('preserves empty fallbacks for malformed optional JSON fields', () => {
   });
 });
 
-test('keeps the existing failure when concept terms are missing', () => {
+test('throws when a single concept record has no terms', () => {
   assert.throws(
     () => mapConcept('TEST-MISSING-TERMS', [{ languageCode: 'xx-XX' }]),
     TypeError
   );
+});
+
+test('throws when an otherwise unused language record has no terms', () => {
+  assert.throws(
+    () => mapConcept('TEST-UNUSED-MISSING-TERMS', [
+      {
+        languageCode: 'de-DE',
+        terms: [{ term: 'source term', weighting: 2 }]
+      },
+      {
+        languageCode: 'en-GB',
+        terms: [{ term: 'target term', weighting: 2 }]
+      },
+      {
+        languageCode: 'fr-FR'
+      }
+    ]),
+    TypeError
+  );
+});
+
+test('maps an explicitly empty concept terms array', () => {
+  const result = mapConcept('TEST-EMPTY-TERMS', [
+    {
+      languageCode: 'de-DE',
+      terms: []
+    }
+  ]);
+
+  assert.deepEqual(result.languages[0].terms, []);
 });
