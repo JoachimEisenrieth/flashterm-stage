@@ -1,7 +1,9 @@
 // © 2025-04-18 Eisenrieth Digital Solutions. Alle Rechte vorbehalten.
 
-import { loginToFileMaker, getFileMakerConceptDetails } from './filemaker-api-121-005.js';
+import { loginToFileMaker } from './filemaker-api-121-005.js';
 import { config } from './config.js';  // Konfiguration importieren
+import { getConceptSectionAvailability } from './src/app/concept-section-availability.js';
+import { createConceptViewModel } from './src/app/concept-view-model.js';
 import { parseLanguageCache, serializeLanguageCache } from './src/app/language-cache.js';
 import { terminologyRepository } from './src/app/terminology-repository.js';
 
@@ -840,21 +842,21 @@ async function showWiki(term, conceptID, sourceLanguage, targetLanguage) {
 
     try {
         // Begriffsdetails abrufen
-        const conceptDetails = await getFileMakerConceptDetails(config, conceptID);
+        const concept = await terminologyRepository.getConcept(conceptID);
 
-        if (!conceptDetails || conceptDetails === 'null') {
+        if (!concept) {
             console.error('Keine Begriffsdetails verfügbar.');
             return;
         }
 
-        const parsedConceptDetails = typeof conceptDetails === 'string' ? JSON.parse(conceptDetails) : conceptDetails;
-        if (!parsedConceptDetails || parsedConceptDetails.length === 0) {
+        if (concept.languages.length === 0) {
             console.error('Keine Begriffsdetails verfügbar');
             return;
         }
 
-        createWikiLanguageMenus(parsedConceptDetails);
-        prepareConceptDetails(parsedConceptDetails, sourceLanguage, targetLanguage, config.imagePath);
+        createWikiLanguageMenus(concept);
+        const conceptData = createConceptViewModel(concept, sourceLanguage, targetLanguage);
+        updateDOMElements(conceptData, targetLanguage, config.imagePath);
 
         document.getElementById('mining-container').style.display = 'none';
         document.getElementById('wiki-container').style.display = 'block';
@@ -879,16 +881,17 @@ async function showWiki(term, conceptID, sourceLanguage, targetLanguage) {
 // -------------------------------------------------------------------------------------------------
 // Sprach-Menü für jeden Bereich erstellen
 // -------------------------------------------------------------------------------------------------    
-function createWikiLanguageMenus(parsedConceptDetails) {
+function createWikiLanguageMenus(concept) {
     const sections = ['synonyms', 'definition', 'context', 'info', 'infobox', 'links']; // Wiki-Abschnitte
+    const sectionAvailability = getConceptSectionAvailability(concept, sourceLanguage, targetLanguage);
 
     sections.forEach(section => {
-        createLanguageMenuForSection(section, parsedConceptDetails); // Verwende die bereits erstellte Funktion
+        createLanguageMenuForSection(section, sectionAvailability[section]); // Verwende die bereits erstellte Funktion
     });
 }
 
 // Funktion zur Erstellung eines Sprachmenüs 
-function createLanguageMenuForSection(section, parsedConceptDetails) {
+function createLanguageMenuForSection(section, availability) {
     const languageToggleElement = document.getElementById(`language-toggle-${section}`);
 
     if (!languageToggleElement) {
@@ -904,25 +907,13 @@ function createLanguageMenuForSection(section, parsedConceptDetails) {
     const allLanguages = [sourceLanguage, targetLanguage]; // Alle möglichen Sprachen
 
     // Prüfe, ob für die Ausgangssprache Inhalte vorhanden sind
-    const sourceContentExists = parsedConceptDetails.some(detail =>
-        detail.languageCode === sourceLanguage && (
-            section === 'synonyms'
-                ? detail.terms.length > 1 // Synonyme sind nur vorhanden, wenn mehr als ein Terminus existiert
-                : detail[section]?.trim() !== '' // Für andere Abschnitte prüfen wir, ob Inhalte vorhanden sind
-        )
-    );
+    const sourceContentExists = availability.source;
     if (sourceContentExists) {
         availableLanguages.push(sourceLanguage);
     }
 
     // Prüfe, ob für die Zielsprache Inhalte vorhanden sind
-    const targetContentExists = parsedConceptDetails.some(detail =>
-        detail.languageCode === targetLanguage && (
-            section === 'synonyms'
-                ? detail.terms.length > 1 // Synonyme sind nur vorhanden, wenn mehr als ein Terminus existiert
-                : detail[section]?.trim() !== '' // Für andere Abschnitte prüfen wir, ob Inhalte vorhanden sind
-        )
-    );
+    const targetContentExists = availability.target;
     if (targetContentExists) {
         availableLanguages.push(targetLanguage);
     }
