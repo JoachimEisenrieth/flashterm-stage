@@ -241,14 +241,16 @@ Der Sprachcache wird als `{ version: 2, guiLanguage, languages: [{ code, name }]
 
 ### Concept-`termlist`-Semantik
 
-- `getFileMakerConceptDetails()` ergänzt `terms` nur, wenn `termlist` truthy ist und erfolgreich geparst wurde.
-- Ein fehlendes `termlist` oder der leere String `""` erzeugt kein `terms`-Property.
-- Der JSON-String `"[]"` ist truthy und erzeugt dagegen `terms: []`.
-- Bei syntaktisch ungültigem `termlist`-JSON protokolliert die API einen generischen Parsingfehler, schluckt den Fehler und gibt den Sprachrecord ohne `terms` weiter.
-- Fehlt `terms` im ausgewählten Source- oder Target-Record, greift das Wiki-Sprachmenü beziehungsweise die nachfolgende Concept-Verarbeitung darauf zu. Der resultierende `TypeError` wird erst durch `showWiki()` abgefangen; das reguläre Wiki-Rendering wird nicht abgeschlossen.
-- Ein nicht als Source oder Target ausgewählter Sprachrecord ohne `terms` wird im bisherigen Browserpfad durch die vollständigen Sprachcodevergleiche übersprungen. Gültige Source- und Target-Records können weiter gerendert werden.
-- `mapConcept()` verarbeitet dagegen jeden gelieferten Sprachrecord über `detail.terms.map()`. Dadurch verwirft auch ein nicht ausgewählter Record ohne `terms` das gesamte normalisierte Concept mit einem `TypeError`.
-- Diese Asymmetrie ist der derzeit dokumentierte Blocker für die produktive Verwendung von `terminologyRepository.getConcept()` in `showWiki()`. Sie beschreibt den Ist-Zustand und legt noch keine zukünftige Fehlersemantik fest.
+**Historisches Verhalten bis zum Bugfix „Normalize missing Concept terms“:** `getFileMakerConceptDetails()` ergänzte `terms` nur bei einem truthy und erfolgreich geparsten `termlist`. Fehlendes, leeres oder syntaktisch ungültiges `termlist` ließ den Sprachrecord ohne `terms` weiterlaufen. Ausgewählte Source-/Target-Records konnten deshalb das Wiki-Rendering mit einem `TypeError` abbrechen; ein nicht ausgewählter Record wurde vom bisherigen Browserpfad übersprungen, ließ aber `mapConcept()` scheitern.
+
+**Bewusster Bugfix:** Die FileMaker-Grenze normalisiert nun jeden Concept-Sprachrecord auf ein Array unter `terms`:
+
+- Gültiges, arrayförmiges `termlist`-JSON wird unverändert als Array übernommen.
+- `"[]"`, ein fehlendes `termlist` und der leere String `""` ergeben `terms: []`.
+- Syntaktisch ungültiges `termlist`-JSON ergibt ebenfalls `terms: []`. Die API darf dafür weiterhin ausschließlich eine generische, inhaltsfreie Parsingmeldung ausgeben.
+- `mapConcept()` erhält dadurch aus dem produktiven FileMaker-Pfad zuverlässig `terms: Term[]` für jeden Sprachrecord.
+- Ausgewählte Source-/Target-Records ohne verwendbare Terminliste bleiben als vorhandene Sprachrecords erhalten; der View-Model-Fallback lautet `Keine Übersetzung`.
+- Ein defekter, nicht ausgewählter Sprachrecord verwirft das gesamte Concept nicht mehr. Der zuvor dokumentierte Blocker für `terminologyRepository.getConcept()` ist damit beseitigt.
 
 ### Benennungen
 
@@ -413,10 +415,10 @@ Header und Hauptüberschrift verwenden feste beziehungsweise sticky Positionieru
 | FT-WIKI-004 | Bild fehlt oder Request schlägt fehl | Concept öffnen | Bildcontainer bleibt beziehungsweise wird verborgen |
 | FT-WIKI-005 | Quell- und Zielinhalt vorhanden | Abschnittssprachbutton anklicken | Quell- und Zielcontainer wechseln; ausgewählter Button wird markiert |
 | FT-WIKI-006 | Source und Target teilen denselben zweistelligen Basiscode | Sprachbutton anklicken | Aktuelle Mehrdeutigkeit der Umschaltung dokumentieren; zu verifizieren |
-| FT-WIKI-TERMS-001 | Source `de-DE` besitzt kein `terms`; Target `en-GB` ist gültig | Concept öffnen | Ein `TypeError` verhindert den Abschluss des regulären Wiki-Renderings; genauer sichtbarer Restzustand ist zu verifizieren |
-| FT-WIKI-TERMS-002 | Target `en-GB` besitzt kein `terms`; Source `de-DE` ist gültig | Concept öffnen | Ein `TypeError` verhindert den Abschluss des regulären Wiki-Renderings; mögliche bereits erfolgte Menüänderungen sind zu verifizieren |
-| FT-WIKI-TERMS-003 | Source und Target sind gültig; nicht ausgewähltes `fr-FR` besitzt kein `terms` | Concept über den bisherigen Browserpfad öffnen | Der `fr-FR`-Record wird übersprungen; Source und Target können regulär gerendert werden. Derselbe Record lässt `mapConcept()` derzeit vollständig scheitern |
-| FT-WIKI-TERMS-004 | Ausgewählter Sprachrecord stammt aus FileMaker mit `termlist: "[]"` | Concept öffnen | Die API erzeugt `terms: []`; kein `TypeError` entsteht aus der Terminliste und der vorhandene Sprachrecord verwendet `Keine Übersetzung` als Preferred-Term-Fallback |
+| FT-WIKI-TERMS-001 | Source `de-DE` besitzt kein verwendbares `termlist`; Target `en-GB` ist gültig | Concept öffnen | Historisch brach ein fehlendes `terms` das Rendering per `TypeError` ab; nach dem Bugfix wird `terms: []` verwendet und Source erhält `Keine Übersetzung` |
+| FT-WIKI-TERMS-002 | Target `en-GB` besitzt kein verwendbares `termlist`; Source `de-DE` ist gültig | Concept öffnen | Historisch brach ein fehlendes `terms` das Rendering per `TypeError` ab; nach dem Bugfix wird `terms: []` verwendet und Target erhält `Keine Übersetzung` |
+| FT-WIKI-TERMS-003 | Source und Target sind gültig; nicht ausgewähltes `fr-FR` besitzt kein verwendbares `termlist` | Concept öffnen | Historisch übersprang der Browserpfad `fr-FR`, während `mapConcept()` scheiterte; nach dem Bugfix besitzt `fr-FR` `terms: []` und das gesamte Concept bleibt mapbar |
+| FT-WIKI-TERMS-004 | Ausgewählter Sprachrecord stammt aus FileMaker mit `termlist: "[]"` | Concept öffnen | Unverändert entsteht `terms: []`; kein `TypeError` entsteht aus der Terminliste und der vorhandene Sprachrecord verwendet `Keine Übersetzung` als Preferred-Term-Fallback |
 | FT-MINING-001 | Quellterminliste geladen | Mehrzeiligen Text in das Suchfeld einfügen | Suchfeld wird geleert, Inspector aktiviert und Text analysiert |
 | FT-MINING-002 | Text enthält Gewichtungen 0, 1 und 2 | Text einfügen | Treffer erscheinen mit 🚫, ⭐ und ⭐⭐ und korrekten Zählwerten |
 | FT-MINING-003 | Text enthält kurzen Terminus innerhalb eines längeren | Text einfügen | Der eingeschlossene kürzere Treffer wird unterdrückt |

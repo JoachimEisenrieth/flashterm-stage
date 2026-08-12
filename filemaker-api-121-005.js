@@ -3,6 +3,7 @@
 // ====================================================================================================
 
 import { config } from './config.js'; 
+import { normalizeFileMakerConceptRecords } from './src/infrastructure/filemaker-concept-records.js';
 export { config };
 
 // ====================================================================================================
@@ -202,17 +203,10 @@ export async function getFileMakerConceptDetails(config, conceptID) {
         if (data.response && data.response.data && data.response.data.length > 0) {
             console.log('[definitionAPI] Begriffsdetails erfolgreich geladen.');
 
-            return data.response.data.map(item => {
-                const termDetails = item.fieldData;
-                if (termDetails.termlist) {
-                    try {
-                        termDetails.terms = JSON.parse(termDetails.termlist);
-                    } catch (e) {
-                        console.error('[definitionAPI] Fehler beim Parsen der Terminliste.');
-                    }
-                }
-                return termDetails;
-            });
+            return normalizeFileMakerConceptRecords(
+                data.response.data,
+                () => console.error('[definitionAPI] Fehler beim Parsen der Terminliste.')
+            );
         } else {
             console.warn('[definitionAPI] Keine Begriffsdetails gefunden.');
             return null;
