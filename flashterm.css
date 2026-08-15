@@ -250,8 +250,43 @@ h3 {
 
 .loading {
     display: block;
+    width: fit-content;
+    margin: 48px auto 24px;
+    padding: 10px 16px;
+    color: var(--text-muted-color);
+    background-color: var(--table-header-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    box-shadow: 0 4px 12px var(--container-shadow-color);
     text-align: center;
-    font-weight: bold;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.loading::before {
+    content: "";
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin-right: 9px;
+    border: 2px solid var(--border-color);
+    border-top-color: var(--focus-color);
+    border-radius: 50%;
+    vertical-align: -3px;
+    animation: loadingSpin 0.8s linear infinite;
+}
+
+@keyframes loadingSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .loading::before {
+        animation: none;
+        border-top-color: var(--border-color);
+    }
 }
 
 .start-screen {
