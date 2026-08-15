@@ -850,7 +850,16 @@ function updateTexts(language) {
         { selector: '#inspector-start-heading', key: 'inspector_start_heading' },
         { selector: '#inspector-start-intro', key: 'inspector_start_intro' },
         { selector: '#translator-start-heading', key: 'translator_start_heading' },
-        { selector: '#translator-start-intro', key: 'translator_start_intro' }
+        { selector: '#translator-start-intro', key: 'translator_start_intro' },
+        { selector: '#language-modal-title', key: 'select_target_language' },
+        { selector: '#saveLanguageBtn', key: 'save' }
+    ];
+
+    const attributesToUpdate = [
+        { selector: '#profile-icon', attribute: 'aria-label', key: 'select_target_language' },
+        { selector: '#clear-icon', attribute: 'aria-label', key: 'clear_search' },
+        { selector: '#close-icon', attribute: 'aria-label', key: 'close_suggestions' },
+        { selector: '.close', attribute: 'aria-label', key: 'close_language_selection' }
     ];
 
     const metaDescription = document.querySelector('meta[name="description"]');
@@ -865,6 +874,14 @@ function updateTexts(language) {
             if (text) {
                 element.innerText = text;
             }
+        }
+    });
+
+    attributesToUpdate.forEach(item => {
+        const element = document.querySelector(item.selector);
+        const text = translations[language][item.key];
+        if (element && text) {
+            element.setAttribute(item.attribute, text);
         }
     });
 }
