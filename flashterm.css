@@ -1338,6 +1338,11 @@ a:active {
 
     #mining-container {
         overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .term-table {
+        min-width: 620px;
     }
 
     .term-table th,
@@ -1346,16 +1351,68 @@ a:active {
     }
 
     .container {
-        margin-top: 16px;
-        padding: 20px;
+        margin-top: 12px;
+        padding: 18px;
+        border-radius: 14px;
     }
 
     .page-wrapper {
-        padding: 0 12px 24px;
+        padding: 0 8px 24px;
     }
 
     h1 {
         position: static;
+    }
+
+    #term-title {
+        font-size: 1.55em;
+        overflow-wrap: anywhere;
+    }
+
+    .section-header {
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    #context-container tr,
+    #context-container-target tr,
+    #info-container tr,
+    #info-container-target tr {
+        display: block;
+    }
+
+    #context-container td,
+    #context-container-target td,
+    #info-container td,
+    #info-container-target td {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        border-left: 0;
+    }
+
+    #context-container td:first-child,
+    #context-container-target td:first-child,
+    #info-container td:first-child,
+    #info-container-target td:first-child {
+        width: 100%;
+        padding-bottom: 8px;
+        background-color: var(--table-header-bg);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .info-box {
+        padding: 18px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .info-box table {
+        min-width: 560px;
+    }
+
+    #image-container img {
+        max-height: 280px;
     }
     
 }
