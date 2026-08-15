@@ -564,6 +564,10 @@ label {
     margin-bottom: 36px;
 }
 
+#image-container.hidden {
+    display: none;
+}
+
 #image-container img {
     max-width: 288px; /* Maximale Breite des Bildes */
     max-height: 216px; /* Maximale Höhe des Bildes */
