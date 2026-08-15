@@ -2,10 +2,11 @@
 
 :root {
     /* Farben */
-    --active-color: #aaa;
+    --active-color: #667085;
     --highlight-color: #C43434;
-    --text-color: #4A4A4A;
-    --text-color-invers: #E0E0E0;
+    --text-color: #344054;
+    --text-muted-color: #667085;
+    --text-color-invers: #F2F4F7;
     --link-color: hsl(211, 100%, 50%);
     --link-hover-color: #0056b3;
 
@@ -13,7 +14,7 @@
     --bg-color: #fff;
     --bg-color-header: #fff;
     --bg-color-infobox: #eee;
-    --bg-color-page-wrapper: #818282;
+    --bg-color-page-wrapper: #F2F4F7;
     --bg-color-header-footer: #fff;
     --bg-color-search-field: #fff;
     --bg-color-suggestions: #F0F0F0;
@@ -23,9 +24,9 @@
 
 
     /* Ränder und Rahmen */
-    --border-color: #aaa;
+    --border-color: #D0D5DD;
     --border-color-infoBox: #aaa;
-    --brand-line-color: #ccc;
+    --brand-line-color: #D0D5DD;
 
     /* Buttons */
     --button-bg-color: #007bff;
@@ -38,7 +39,14 @@
 
     /* Container und Schatten */
     --container-bg-color: #fff;
-    --container-shadow-color: rgba(0, 0, 0, 0.1);
+    --container-shadow-color: rgba(16, 24, 40, 0.08);
+
+    /* Design-Grundlagen */
+    --surface-radius: 18px;
+    --control-radius: 14px;
+    --focus-color: #1570EF;
+    --focus-shadow: rgba(21, 112, 239, 0.2);
+    --surface-shadow: 0 12px 32px rgba(16, 24, 40, 0.08);
 
     /* Maximalbreite */
     --max-width: 900px;
@@ -55,29 +63,30 @@
 @media (prefers-color-scheme: dark) {
     :root {
         /* Farben für den Dunkelmodus */
-        --active-color: #888;
+        --active-color: #98A2B3;
         --highlight-color: #F28D8D;
-        --text-color: #E0E0E0;
-        --text-color-invers: #E0E0E0;
+        --text-color: #F2F4F7;
+        --text-muted-color: #98A2B3;
+        --text-color-invers: #F2F4F7;
         --link-color: #339dff;
         --link-hover-color: #3385d1;
 
         /* Hintergrundfarben für den Dunkelmodus */
-        --bg-color: #444;
-        --bg-color-header: #444;
+        --bg-color: #24272E;
+        --bg-color-header: #202329;
         --bg-color-infobox: #333;
-        --bg-color-page-wrapper: #333;
-        --bg-color-header-footer: #444;
-        --bg-color-search-field: #444;
-        --bg-color-suggestions: #444;
+        --bg-color-page-wrapper: #17191E;
+        --bg-color-header-footer: #202329;
+        --bg-color-search-field: #191C22;
+        --bg-color-suggestions: #24272E;
         --bg-color-rejected-suggestion: #573a3a;
         --bg-color-highlighted-term: #6C6C6C;
         --suggestions-hl-color: #373737;
 
         /* Ränder und Rahmen für den Dunkelmodus */
-        --border-color: #ccc;
+        --border-color: #475467;
         --border-color-infoBox: #888;
-        --brand-line-color: rgb(119, 119, 119);
+        --brand-line-color: #475467;
 
         /* Buttons für den Dunkelmodus */
         --button-bg-color: #166AD6;
@@ -87,8 +96,10 @@
         --icon-color: #ddd;
 
         /* Container und Schatten für den Dunkelmodus */
-        --container-bg-color: #444;
-        --container-shadow-color: rgba(0, 0, 0, 0.2);
+        --container-bg-color: #24272E;
+        --container-shadow-color: rgba(0, 0, 0, 0.24);
+        --surface-shadow: 0 16px 40px rgba(0, 0, 0, 0.24);
+        --focus-shadow: rgba(83, 177, 253, 0.28);
 
         /* Modale Fenster für den Dunkelmodus */
         --modal-bg-color: #2c2c2c;
@@ -96,7 +107,7 @@
         --modal-border-color: #444;
 
         /* Suchfeld */
-        --search-field-border-color: #ccc;
+        --search-field-border-color: #475467;
     }
 }
 
@@ -106,7 +117,9 @@
 
 .page-wrapper {
     background-color: var(--bg-color-page-wrapper);
-    padding: 0 20px;
+    min-height: 100vh;
+    padding: 0 24px 32px;
+    box-sizing: border-box;
     z-index: 850;
 }
 
@@ -116,7 +129,10 @@
 
 header {
     background-color: var(--bg-color-header);
-    padding: 20px 0 20px 0; /* Abstand oben und unten im Kopfbereich */
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 2px 12px var(--container-shadow-color);
+    box-sizing: border-box;
     display: flex;
     justify-content: center; /* Zentriert den Inhalt horizontal */
     position: fixed; /* Fixiert den Header am Bildschirm */
@@ -129,16 +145,19 @@ body {
     font-family: 'Roboto', 'Noto Sans', sans-serif;
     margin: 0;
     padding: 0;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
     color: var(--text-color);
     background-color: var(--bg-color-page-wrapper);
 }
 
 footer {
-    color: var(--text-color-invers);
+    color: var(--text-muted-color);
     text-align: center;
     max-width: var(--max-width);
     margin: 0 auto;
-    padding: 10px 10px 10px 10px;
+    padding: 24px 16px;
+    font-size: 0.875rem;
 }
 
 .logo {
@@ -154,10 +173,14 @@ footer {
 }
 
 .container {
-    margin: 70px auto 0 auto; /* Fügt oben 60px Abstand hinzu, um den Platz des Headers zu berücksichtigen */
+    margin: 88px auto 0;
     max-width: var(--max-width);
-    padding: 10px 40px 40px 40px; /* oben, rechts, unten, links */
-    background-color: var(--bg-color);
+    padding: 24px 40px 48px;
+    background-color: var(--container-bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--surface-radius);
+    box-shadow: var(--surface-shadow);
+    box-sizing: border-box;
     z-index: 800;
 }
 
@@ -168,6 +191,7 @@ footer {
 h1, h2, h3 {
     margin: 0;
     padding-bottom: 0.25em;
+    font-weight: 600;
 }
 
 h1 {
@@ -225,11 +249,12 @@ h3 {
     padding: 0;
     background-color: transparent;
     font-size: 1.7em;
+    letter-spacing: -0.02em;
 }
 
 .start-screen p {
     margin: 0;
-    color: var(--active-color);
+    color: var(--text-muted-color);
     line-height: 1.5;
 }
 
@@ -255,14 +280,26 @@ h3 {
 
 .search-field {
     width: 100%;
-    padding: 10px 90px 10px 30px; /* Platz für die Icons */
-    background-color: var(--search-field-bg-color);
+    padding: 13px 90px 13px 20px;
+    background-color: var(--bg-color-search-field);
     border: 1px solid var(--search-field-border-color);
-    border-radius: 16px;
+    border-radius: var(--control-radius);
     font-size: 16px;
-    font-weight: bold;
+    font-weight: 500;
     box-sizing: border-box;
-    color: var(--text-color)
+    color: var(--text-color);
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-field:focus {
+    border-color: var(--focus-color);
+    box-shadow: 0 0 0 3px var(--focus-shadow);
+}
+
+.search-field::placeholder {
+    color: var(--text-muted-color);
+    opacity: 1;
 }
 
 /* ================================================== */
