@@ -561,7 +561,7 @@ function handleKeyPressEvent(event) {
 
 function toggleClearButton() {
     if (searchField.value.trim() !== "") {
-        clearButton.style.display = 'block';
+        clearButton.style.display = 'flex';
     } else {
         clearButton.style.display = 'none';
     }

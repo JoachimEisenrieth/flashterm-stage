@@ -405,6 +405,26 @@ h3 {
     transform: scale(1.05);
 }
 
+.icon-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    color: var(--text-muted-color);
+    background-color: transparent;
+    border: none;
+    border-radius: 9px;
+    cursor: pointer;
+}
+
+.icon-button:focus-visible,
+.close-icon:focus-visible {
+    outline: 2px solid var(--focus-color);
+    outline-offset: 2px;
+}
+
 /* Spezifische Stile für das clear-icon */
 .clear-icon {
     position: absolute;
@@ -520,10 +540,15 @@ h3 {
 }
 
 .close-icon {
-    display: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 28px;
     height: 28px;
+    padding: 0;
     color: var(--text-muted-color);
+    background-color: transparent;
+    border: none;
     border-radius: 8px;
     cursor: pointer;
     transition: color 0.15s ease, background-color 0.15s ease;
@@ -686,7 +711,10 @@ label {
     justify-content: center;
     width: 32px;
     height: 32px;
+    padding: 0;
     color: var(--icon-color);
+    background-color: transparent;
+    border: none;
     font-size: 26px;
     font-weight: 400;
     line-height: 1;

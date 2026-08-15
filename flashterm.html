@@ -19,19 +19,23 @@
             <img id="logo" src="svg/logo-light.svg" alt="Logo" class="logo">
             <div class="search-wrapper">
                 <div class="search-container">
-                    <img id="profile-icon" src="svg/profile-icon.svg" alt="Profil" class="icon profile-icon">
+                    <button id="profile-icon" class="icon-button profile-icon" type="button" aria-label="Zielsprache auswählen">
+                        <img src="svg/profile-icon.svg" alt="" class="icon">
+                    </button>
                     <input id="search-field" type="text" placeholder="Suche..." class="search-field" autocomplete="off">
-                    <img id="clear-icon" src="svg/clear-icon.svg" alt="Löschen" class="icon clear-icon" style="display: none;">
+                    <button id="clear-icon" class="icon-button clear-icon" type="button" aria-label="Suchfeld leeren" style="display: none;">
+                        <img src="svg/clear-icon.svg" alt="" class="icon">
+                    </button>
                 </div>
                 <div class="suggestions-wrapper">
                     <div id="window-header" class="window-header">
                         <div class="left-icons">
-                            <span id="close-icon" class="close-icon" style="display: inline;">
-                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="currentColor">
+                            <button id="close-icon" class="close-icon" type="button" aria-label="Vorschläge schließen">
+                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="currentColor" aria-hidden="true" focusable="false">
                                     <path d="M0 0h24v24H0z" fill="none" />
                                     <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
                                 </svg>
-                            </span>
+                            </button>
                         </div>
                     </div>
                     <div id="suggestions" class="suggestions"></div>
@@ -144,7 +148,7 @@
         <!-- Modal Struktur -->
         <div id="language-modal" class="modal">
             <div class="modal-content">
-                <span class="close">&times;</span>
+                <button class="close" type="button" aria-label="Sprachwahl schließen">&times;</button>
                 <h2>Zielsprache</h2>
                 <select id="language-selector"></select>
                 <button id="saveLanguageBtn">Speichern</button>
