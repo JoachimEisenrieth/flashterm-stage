@@ -18,7 +18,6 @@
     --bg-color-header-footer: #fff;
     --bg-color-search-field: #fff;
     --bg-color-suggestions: #FFFFFF;
-    --bg-color-rejected-suggestion: #FEF3F2;
     --bg-color-highlighted-term: yellow;
     --suggestions-hl-color: #F2F4F7;
 
@@ -86,7 +85,6 @@
         --bg-color-header-footer: #202329;
         --bg-color-search-field: #191C22;
         --bg-color-suggestions: #24272E;
-        --bg-color-rejected-suggestion: #3D292B;
         --bg-color-highlighted-term: #6C6C6C;
         --suggestions-hl-color: #344054;
 
@@ -415,6 +413,7 @@ h3 {
 }
 
 .suggestion {
+    position: relative;
     padding: 10px 12px;
     border-radius: 9px;
     white-space: nowrap;
@@ -431,8 +430,18 @@ h3 {
 }
 
 .rejected-suggestion {
-    background-color: var(--bg-color-rejected-suggestion);
-    color: var(--text-muted-color);
+    padding-right: 44px;
+}
+
+.rejected-suggestion-icon {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    font-size: 0.9em;
+    line-height: 1;
+    filter: saturate(0.75);
+    opacity: 0.78;
+    transform: translateY(-50%);
 }
 
 .highlight {
@@ -932,6 +941,46 @@ table:not(.term-table) tbody tr:hover {
 .term-table td:first-child {
     width: 1%;
     white-space: nowrap;
+}
+
+.term-result {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+}
+
+.term-result-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.term-rating {
+    flex: 0 0 auto;
+    margin-left: auto;
+    font-size: 0.88em;
+    text-align: right;
+    white-space: nowrap;
+    filter: saturate(0.72);
+    opacity: 0.76;
+}
+
+.term-table .preferred-term-cell {
+    position: relative;
+    padding-right: 58px;
+}
+
+.term-table .preferred-term-cell.has-preferred-rating::after {
+    content: "⭐⭐";
+    position: absolute;
+    top: 50%;
+    right: 14px;
+    font-size: 0.88em;
+    line-height: 1;
+    filter: saturate(0.72);
+    opacity: 0.76;
+    transform: translateY(-50%);
 }
 
 .category-header {

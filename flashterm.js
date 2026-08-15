@@ -658,12 +658,20 @@ function showSuggestions(sourceTermList, query) {
         matchedTerms.forEach(term => {
             const div = document.createElement('div');
             div.classList.add('suggestion');
+            div.innerHTML = highlightMatch(term.term, query);
 
             if (term.weighting === 0) {
                 div.classList.add('rejected-suggestion');
-            }
 
-            div.innerHTML = highlightMatch(term.term, query);
+                const rejectedIcon = document.createElement('span');
+                const rejectedLabel = translations?.[guiLanguage]?.rejected_heading || 'Rejected';
+                rejectedIcon.classList.add('rejected-suggestion-icon');
+                rejectedIcon.textContent = '🚫';
+                rejectedIcon.setAttribute('role', 'img');
+                rejectedIcon.setAttribute('aria-label', rejectedLabel);
+                rejectedIcon.title = rejectedLabel;
+                div.prepend(rejectedIcon);
+            }
 
             div.addEventListener('click', () => {
                 if (!hasMoved) {
@@ -1522,16 +1530,27 @@ function displayMinedTerms(foundTerms) {
                 break;
         }
 
+        const categoryLabel = translations?.[guiLanguage]?.[`${category}_heading`] || category;
+        const termResult = `<div class="term-result">
+                                <span class="term-result-label"><span class="term-clickable" data-concept-id="${term.conceptID}" data-source-language="${sourceLanguage}" data-target-language="${targetLanguage}">${term.originalTerm}</span> (${count})</span>
+                                <span class="term-rating" role="img" aria-label="${categoryLabel}" title="${categoryLabel}">${symbol}</span>
+                            </div>`;
+
         if (!isTranslatorMode && term.originalTerm === preferredTerm) {
             return `<tr>
-                        <td colspan="2" style="width: 100%;">${symbol} <span class="term-clickable" data-concept-id="${term.conceptID}" data-source-language="${sourceLanguage}" data-target-language="${targetLanguage}">${term.originalTerm}</span> (${count})</td>
+                        <td colspan="2" style="width: 100%;">${termResult}</td>
                     </tr>`;
         }
 
-        const translation = preferredTerm ? preferredTerm : '–';
+        const normalizedPreferredTerm = typeof preferredTerm === 'string' ? preferredTerm.trim() : '';
+        const hasPreferredTerm = normalizedPreferredTerm !== '' && normalizedPreferredTerm !== '–' && normalizedPreferredTerm !== '-';
+        const translation = hasPreferredTerm ? preferredTerm : '–';
+        const preferredLabel = translations?.[guiLanguage]?.preferred_heading || 'Preferred';
+        const preferredRatingClass = hasPreferredTerm ? ' has-preferred-rating' : '';
+        const preferredRatingTitle = hasPreferredTerm ? ` title="${preferredLabel}"` : '';
         return `<tr>
-                    <td style="width: 50%;">${symbol} <span class="term-clickable" data-concept-id="${term.conceptID}" data-source-language="${sourceLanguage}" data-target-language="${targetLanguage}">${term.originalTerm}</span> (${count})</td>
-                    <td style="width: 50%;" class="term-clickable" data-concept-id="${term.conceptID}" data-source-language="${sourceLanguage}" data-target-language="${targetLanguage}">
+                    <td style="width: 50%;">${termResult}</td>
+                    <td style="width: 50%;" class="term-clickable preferred-term-cell${preferredRatingClass}" data-concept-id="${term.conceptID}" data-source-language="${sourceLanguage}" data-target-language="${targetLanguage}"${preferredRatingTitle}>
                         ${translation}
                     </td>
                 </tr>`;
