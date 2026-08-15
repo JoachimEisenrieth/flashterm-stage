@@ -210,16 +210,18 @@ h1, h2, h3 {
 h1 {
     font-size: 2em;
     margin-bottom: 0.75em;
-    padding-top: 0.25em;
+    padding: 0.25em 0 0.55em;
     position: sticky;
-    top: 66px;
+    top: 80px;
     z-index: 999;
-    background-color: var(--bg-color);
+    background-color: var(--container-bg-color);
+    line-height: 1.2;
+    letter-spacing: -0.025em;
 }
 
 h2 {
-    font-size: 1.5em;
-    margin: 1.5em 0 0.5em 0;
+    font-size: 1.35em;
+    margin: 1.5em 0 0.65em;
 }
 
 h3 {
@@ -229,15 +231,15 @@ h3 {
 }
 
 .line-primary {
-    border-bottom: 7px solid var(--brand-line-color);
+    border-bottom: 2px solid var(--brand-line-color);
 }
 
 .line-secondary {
-    border-bottom: 5px solid var(--brand-line-color);
+    border-bottom: 1px solid var(--brand-line-color);
 }
 
 .line-tertiary {
-    border-bottom: 3px solid var(--brand-line-color);
+    border-bottom: 1px solid var(--brand-line-color);
 }
 
 /* ================================================== */
@@ -896,17 +898,17 @@ a:active {
 /* ================================================== */
 
 .footnote {
-    font-size: 0.9em;       /* Etwas kleinere Schriftgröße */
-    color: var(--text-color);
-    margin-top: 10px;       /* Abstand zum Text */
-    padding-top: 5px;       /* Platz für den Strich */
+    font-size: 0.85em;
+    color: var(--text-muted-color);
+    margin-top: 16px;
+    padding-top: 12px;
     position: relative;     /* Position für das Pseudo-Element */
 }
 
 .footnote::before {
-    content: "";            /* Keine zusätzlichen Inhalte außer dem Strich */
-    width: 10%;             /* Strich auf 10% der Breite */
-    height: 1.5px;            /* Höhe des Strichs */
+    content: "";
+    width: 48px;
+    height: 1px;
     background-color: var(--brand-line-color); /* Farbe des Strichs */
     position: absolute;     /* Absolute Position, um es vom Text zu trennen */
     top: 0;                 /* Strich oberhalb des Texts positionieren */
@@ -927,6 +929,38 @@ a:active {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin: 0 0 16px;
+    padding: 0 0 10px;
+    line-height: 1.3;
+}
+
+#synonyms-section,
+#definition-section,
+#context-section,
+#info-section,
+#infobox-section,
+#links-section {
+    margin-top: 36px;
+}
+
+.content-source,
+.content-target,
+.content-block {
+    line-height: 1.65;
+}
+
+.info-box h1,
+.info-box h2,
+.info-box h3 {
+    position: static;
+    padding: 0;
+    background-color: transparent;
+    letter-spacing: -0.015em;
+}
+
+.info-box h1 {
+    font-size: 1.35em;
+    margin-bottom: 16px;
 }
 
 .toggle-language {
