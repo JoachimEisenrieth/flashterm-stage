@@ -1525,6 +1525,15 @@ function displayMinedTerms(foundTerms) {
         return;
     }
 
+    const hasFoundTerms = ['rejected', 'alternative', 'preferred']
+        .some(category => Object.keys(foundTerms?.[category] || {}).length > 0);
+
+    if (!hasFoundTerms) {
+        const noTermsMessage = translations?.[guiLanguage]?.no_terms_found || 'No registered terms were detected in the text.';
+        miningDiv.innerHTML = `<p class="empty-state" role="status">${noTermsMessage}</p>`;
+        return;
+    }
+
     const isTranslatorMode = document.getElementById("translator").classList.contains("active");
     const sourceLanguageName = languageNames[sourceLanguage.substring(0, 2)] || sourceLanguage;
     const targetLanguageName = languageNames[targetLanguage.substring(0, 2)] || targetLanguage;

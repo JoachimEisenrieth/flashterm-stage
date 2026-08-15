@@ -423,7 +423,7 @@ Header und Hauptüberschrift verwenden feste beziehungsweise sticky Positionieru
 | FT-MINING-002 | Text enthält Gewichtungen 0, 1 und 2 | Text einfügen | Treffer erscheinen mit 🚫, ⭐ und ⭐⭐ und korrekten Zählwerten |
 | FT-MINING-003 | Text enthält kurzen Terminus innerhalb eines längeren | Text einfügen | Der eingeschlossene kürzere Treffer wird unterdrückt |
 | FT-MINING-004 | Mining-Tabelle sichtbar | Gefundenen Terminus anklicken | Wiki-Ansicht des Concepts erscheint; aktive Modusmarkierung ist zu verifizieren |
-| FT-MINING-005 | Text ohne Treffer | Text einfügen | Leere Tabelle mit Header und Export-Icon ist gemäß Code zu erwarten; visuell verifizieren |
+| FT-MINING-005 | Text ohne Treffer | Text einfügen | Statt einer leeren Tabelle erscheint der lokalisierte Leerzustand „Im Text wurden keine hinterlegten Termini erkannt.“ beziehungsweise „No registered terms were detected in the text.“; ein Export-Icon wird nicht angeboten (bewusste UX-Verbesserung) |
 | FT-TRANSLATOR-001 | Noch kein Text analysiert | Translator anklicken | Mining-Bereich erscheint; Suchfeld fordert zum Einfügen von Text auf |
 | FT-TRANSLATOR-002 | Text wurde im Inspector analysiert | Translator anklicken | Tabelle wird mit bevorzugten Benennungen aus der Zielterminliste neu gerendert |
 | FT-TRANSLATOR-003 | Translator-Tabelle sichtbar | Zielsprache wechseln | Neue Zielterminliste wird geladen; unmittelbare Aktualisierung der sichtbaren Tabelle ist zu verifizieren |
