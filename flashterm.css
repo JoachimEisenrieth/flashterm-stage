@@ -727,27 +727,56 @@ label {
 /*  Sprach-Optionen */
 /* ================================================== */
 
+.language-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: 16px;
+    padding: 3px;
+    flex: 0 0 auto;
+    background-color: var(--mode-switch-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 9px;
+}
 
 .language-option {
-    font-size: 12pt;
-    padding: 4px 8px;
-    margin: 5px;
+    min-width: 36px;
+    min-height: 30px;
+    padding: 5px 9px;
+    margin: 0;
     border: none;
     border-radius: 6px;
     cursor: pointer;
-    background-color: var(--bg-color);
+    background-color: transparent;
+    color: var(--text-muted-color);
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 600;
+    line-height: 1;
+    text-align: center;
+    text-transform: lowercase;
+    transition: color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.language-option:not(:disabled):hover {
     color: var(--text-color);
-    width: 50px; /* Feste Breite der Tasten */
-    text-align: center; /* Text zentrieren */
+    background-color: var(--mode-hover-bg);
+}
+
+.language-option:focus-visible {
+    outline: 2px solid var(--focus-color);
+    outline-offset: 2px;
 }
 
 .language-option.selected {
-    background-color: var(--active-color);
-    color: #fff;
+    background-color: var(--focus-color);
+    color: #FFFFFF;
+    box-shadow: 0 1px 3px var(--focus-shadow);
 }
 
 .language-option.disabled {
-    opacity: 0.5;
+    color: var(--text-muted-color);
+    opacity: 0.45;
     cursor: not-allowed;
 }
 
