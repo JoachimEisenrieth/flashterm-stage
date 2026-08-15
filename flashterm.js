@@ -1343,7 +1343,7 @@ function hideImageElements(imgContainer, termImage) {
 }
 
 function showImageElements(imgContainer, termImage) {
-    if (imgContainer) imgContainer.style.display = 'block';
+    if (imgContainer) imgContainer.style.display = 'flex';
     if (termImage) termImage.style.display = 'block';
 }
 

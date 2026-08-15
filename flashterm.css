@@ -788,7 +788,7 @@ label {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 100%; /* Stellt sicher, dass der Container die volle Breite hat */
+    width: 100%;
     margin-bottom: 36px;
 }
 
@@ -797,14 +797,18 @@ label {
 }
 
 #image-container img {
-    max-width: 288px; /* Maximale Breite des Bildes */
-    max-height: 216px; /* Maximale Höhe des Bildes */
-    width: auto; /* Verhindert Verzerrungen */
-    height: auto; /* Verhindert Verzerrungen */
-    border: 2px solid #ddd; /* Dünner grauer Rand */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sanfter Schatten */
-    border-radius: 4px; /* Runde Ecken am Bild */
-    object-fit: contain; /* Beibehaltung des Seitenverhältnisses */
+    display: block;
+    max-width: min(100%, 480px);
+    max-height: 360px;
+    width: auto;
+    height: auto;
+    padding: 4px;
+    background-color: var(--table-header-bg);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--surface-shadow);
+    border-radius: var(--control-radius);
+    box-sizing: border-box;
+    object-fit: contain;
 }
 
 /* ================================================== */
