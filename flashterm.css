@@ -51,6 +51,7 @@
     --mode-active-bg: #FFFFFF;
     --mode-hover-bg: #F2F4F7;
     --mode-active-shadow: 0 2px 6px rgba(16, 24, 40, 0.1);
+    --header-icon-filter: none;
 
     /* Maximalbreite */
     --max-width: 900px;
@@ -108,6 +109,7 @@
         --mode-active-bg: #344054;
         --mode-hover-bg: #2D3139;
         --mode-active-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
+        --header-icon-filter: brightness(2.4);
 
         /* Modale Fenster für den Dunkelmodus */
         --modal-bg-color: #2c2c2c;
@@ -171,13 +173,16 @@ footer {
 .logo {
     width: 100px;
     height: auto;
-    margin-right: 20px; /* Abstand zwischen Logo und Suchfeld */
+    margin: 0;
+    flex: 0 0 auto;
 }
 
 .search-wrapper {
     position: relative;
+    flex: 1;
+    min-width: 0;
     width: 100%;
-    max-width: var(--max-width);
+    max-width: none;
 }
 
 .container {
@@ -269,7 +274,8 @@ h3 {
 .header-content {
     display: flex;
     align-items: center;
-    justify-content: center; /* Zentriert den Inhalt horizontal innerhalb des Headers */
+    justify-content: center;
+    gap: 24px;
     width: 100%;
     max-width: var(--max-width);
 }
@@ -282,8 +288,7 @@ h3 {
     position: relative;
     display: flex;
     align-items: center;
-    max-width: 840px; /* Beschränkt die Breite des Containers */
-    width: 100%; /* Passt sich an die verfügbare Breite an */
+    width: 100%;
 }
 
 .search-field {
@@ -298,6 +303,10 @@ h3 {
     color: var(--text-color);
     outline: none;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-field:hover {
+    border-color: var(--active-color);
 }
 
 .search-field:focus {
@@ -316,23 +325,27 @@ h3 {
 .icon {
     height: 24px;
     cursor: pointer;
+    opacity: 0.72;
+    filter: var(--header-icon-filter);
+    transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 .icon:hover {
-    filter: brightness(0.8);
-    transform: scale(1.1);
+    opacity: 1;
+    filter: var(--header-icon-filter);
+    transform: scale(1.05);
 }
 
 /* Spezifische Stile für das clear-icon */
 .clear-icon {
     position: absolute;
-    right: 56px;
+    right: 52px;
 }
 
 /* Spezifische Stile für das profile-icon */
 .profile-icon {
     position: absolute;
-    right: 20px;
+    right: 16px;
 }
 
 /* ================================================== */
@@ -959,14 +972,29 @@ a:active {
 /* Responsive Design */
 /* ================================================== */
 @media (max-width: 768px) {
+    header {
+        position: sticky;
+        padding: 12px 16px;
+    }
+
     .header-content {
         flex-direction: column;
+        gap: 10px;
         text-align: center;
     }
 
+    .logo {
+        width: 84px;
+    }
+
+    .search-wrapper,
+    .search-container {
+        max-width: none;
+    }
+
     .search-field {
-        max-width: 90%;
-        margin-top: 10px;
+        max-width: none;
+        margin-top: 0;
     }
 
     .mode-switch {
@@ -979,7 +1007,16 @@ a:active {
     }
 
     .container {
-        padding: 10px 20px 10px 20px; /* oben, rechts, unten, links */
+        margin-top: 16px;
+        padding: 20px;
+    }
+
+    .page-wrapper {
+        padding: 0 12px 24px;
+    }
+
+    h1 {
+        position: static;
     }
     
 }
