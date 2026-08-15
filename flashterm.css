@@ -429,11 +429,11 @@ h3 {
     color: var(--text-color);
 }
 
-.rejected-suggestion {
-    padding-right: 44px;
+.rated-suggestion {
+    padding-right: 54px;
 }
 
-.rejected-suggestion-icon {
+.suggestion-rating {
     position: absolute;
     top: 50%;
     right: 12px;

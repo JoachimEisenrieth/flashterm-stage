@@ -660,17 +660,30 @@ function showSuggestions(sourceTermList, query) {
             div.classList.add('suggestion');
             div.innerHTML = highlightMatch(term.term, query);
 
-            if (term.weighting === 0) {
-                div.classList.add('rejected-suggestion');
+            let rating;
+            switch (term.weighting) {
+                case 0:
+                    rating = { symbol: '🚫', labelKey: 'rejected_heading', fallback: 'Rejected' };
+                    break;
+                case 1:
+                    rating = { symbol: '⭐', labelKey: 'alternative_heading', fallback: 'Alternative' };
+                    break;
+                case 2:
+                    rating = { symbol: '⭐⭐', labelKey: 'preferred_heading', fallback: 'Preferred' };
+                    break;
+            }
 
-                const rejectedIcon = document.createElement('span');
-                const rejectedLabel = translations?.[guiLanguage]?.rejected_heading || 'Rejected';
-                rejectedIcon.classList.add('rejected-suggestion-icon');
-                rejectedIcon.textContent = '🚫';
-                rejectedIcon.setAttribute('role', 'img');
-                rejectedIcon.setAttribute('aria-label', rejectedLabel);
-                rejectedIcon.title = rejectedLabel;
-                div.prepend(rejectedIcon);
+            if (rating) {
+                div.classList.add('rated-suggestion');
+
+                const ratingIcon = document.createElement('span');
+                const ratingLabel = translations?.[guiLanguage]?.[rating.labelKey] || rating.fallback;
+                ratingIcon.classList.add('suggestion-rating');
+                ratingIcon.textContent = rating.symbol;
+                ratingIcon.setAttribute('role', 'img');
+                ratingIcon.setAttribute('aria-label', ratingLabel);
+                ratingIcon.title = ratingLabel;
+                div.prepend(ratingIcon);
             }
 
             div.addEventListener('click', () => {
