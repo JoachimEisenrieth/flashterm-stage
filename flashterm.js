@@ -342,9 +342,10 @@ async function switchMode(mode) {
     }
 
     // Alle Buttons auf passiv schalten
-    wiki.classList.remove("active");
-    inspector.classList.remove("active");
-    translator.classList.remove("active");
+    [wiki, inspector, translator].forEach(modeButton => {
+        modeButton.classList.remove("active");
+        modeButton.setAttribute('aria-pressed', 'false');
+    });
     document.getElementById("mining-container").style.display = "none";
     document.getElementById("wiki-container").style.display = "none";
     inspectorStartScreen?.classList.add('hidden');
@@ -352,10 +353,13 @@ async function switchMode(mode) {
 
     if (mode === "wiki") {
         wiki.classList.add("active");
+        wiki.setAttribute('aria-pressed', 'true');
     } else if (mode === "inspector") {
         inspector.classList.add("active");
+        inspector.setAttribute('aria-pressed', 'true');
     } else if (mode === "translator") {
         translator.classList.add("active");
+        translator.setAttribute('aria-pressed', 'true');
     }
 
     if (mode === "wiki") {

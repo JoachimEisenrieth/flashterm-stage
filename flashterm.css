@@ -572,7 +572,9 @@ h3 {
 
 .mode-option {
     font-size: 16px;
+    font-family: inherit;
     cursor: pointer;
+    appearance: none;
     background-color: transparent;
     color: var(--text-muted-color);
     border: none;
@@ -591,6 +593,11 @@ h3 {
 .mode-option:hover {
     color: var(--text-color);
     background-color: var(--mode-hover-bg);
+}
+
+.mode-option:focus-visible {
+    outline: 2px solid var(--focus-color);
+    outline-offset: 2px;
 }
 
 .mode-option.active {
