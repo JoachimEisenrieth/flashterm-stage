@@ -1724,7 +1724,7 @@ function logWithLevel(message, level) {
 
 function handleError(message, error) {
     if (miningDiv) {
-        miningDiv.innerHTML = `<p>${message}</p>`;
+        miningDiv.innerHTML = `<p class="error-state" role="alert">${message}</p>`;
     }
     logError(message, error);
 }

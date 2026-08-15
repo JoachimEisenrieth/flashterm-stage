@@ -20,6 +20,8 @@
     --bg-color-suggestions: #FFFFFF;
     --bg-color-highlighted-term: yellow;
     --suggestions-hl-color: #F2F4F7;
+    --error-bg-color: #FEF3F2;
+    --error-border-color: #FDA29B;
 
 
     /* Ränder und Rahmen */
@@ -87,6 +89,8 @@
         --bg-color-suggestions: #24272E;
         --bg-color-highlighted-term: #6C6C6C;
         --suggestions-hl-color: #344054;
+        --error-bg-color: #3D292B;
+        --error-border-color: #B5474D;
 
         /* Ränder und Rahmen für den Dunkelmodus */
         --border-color: #475467;
@@ -321,6 +325,19 @@ h3 {
     box-sizing: border-box;
     text-align: center;
     font-weight: 600;
+}
+
+.error-state {
+    max-width: 560px;
+    margin: 32px auto 24px;
+    padding: 16px 18px;
+    color: var(--text-color);
+    background-color: var(--error-bg-color);
+    border: 1px solid var(--error-border-color);
+    border-left-width: 4px;
+    border-radius: var(--control-radius);
+    box-sizing: border-box;
+    line-height: 1.5;
 }
 
 .header-content {
