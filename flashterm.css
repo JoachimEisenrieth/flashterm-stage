@@ -47,6 +47,10 @@
     --focus-color: #1570EF;
     --focus-shadow: rgba(21, 112, 239, 0.2);
     --surface-shadow: 0 12px 32px rgba(16, 24, 40, 0.08);
+    --mode-switch-bg: #EAECF0;
+    --mode-active-bg: #FFFFFF;
+    --mode-hover-bg: #F2F4F7;
+    --mode-active-shadow: 0 2px 6px rgba(16, 24, 40, 0.1);
 
     /* Maximalbreite */
     --max-width: 900px;
@@ -100,6 +104,10 @@
         --container-shadow-color: rgba(0, 0, 0, 0.24);
         --surface-shadow: 0 16px 40px rgba(0, 0, 0, 0.24);
         --focus-shadow: rgba(83, 177, 253, 0.28);
+        --mode-switch-bg: #191C22;
+        --mode-active-bg: #344054;
+        --mode-hover-bg: #2D3139;
+        --mode-active-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
 
         /* Modale Fenster für den Dunkelmodus */
         --modal-bg-color: #2c2c2c;
@@ -458,21 +466,25 @@ h3 {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 30px;
-    margin: 10 0 30px 0;
+    gap: 6px;
+    margin: 0 0 40px;
+    padding: 6px;
     position: relative;
-    margin-bottom: 60px;
+    background-color: var(--mode-switch-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--control-radius);
 }
 
 .mode-option {
     font-size: 16px;
     cursor: pointer;
     background-color: transparent;
-    color: #999999;
+    color: var(--text-muted-color);
     border: none;
-    transition: color 0.3s ease;
+    border-radius: 10px;
+    transition: color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
     text-align: center;
-    padding: 5px 10px;
+    padding: 10px 14px;
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -481,19 +493,24 @@ h3 {
     position: relative;
 }
 
+.mode-option:hover {
+    color: var(--text-color);
+    background-color: var(--mode-hover-bg);
+}
+
 .mode-option.active {
-    position: relative;
+    color: var(--text-color);
+    background-color: var(--mode-active-bg);
+    box-shadow: var(--mode-active-shadow);
 }
 
 .mode-option.active::after {
-    content: "";
-    position: absolute;
-    bottom: -5px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 30%;
-    height: 3px;
-    background-color: var(--active-color);
+    display: none;
+}
+
+.mode-text {
+    font-size: 0.95rem;
+    font-weight: 500;
 }
 
 .label-input-pair {
@@ -508,13 +525,16 @@ label {
 }
 
 .label-small {
-    font-size: 12px;
-    color: var(--text-color);
-    margin-bottom: 2px;
+    font-size: 0.72rem;
+    color: inherit;
+    margin-bottom: 3px;
     text-align: center;
     display: block;
     width: 100%;
     line-height: 1.2;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
     /* z-index: 1; */
     position: static;
 }
@@ -951,6 +971,11 @@ a:active {
 
     .mode-switch {
         flex-direction: column;
+    }
+
+    .mode-option {
+        width: 100%;
+        box-sizing: border-box;
     }
 
     .container {
