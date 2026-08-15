@@ -17,10 +17,10 @@
     --bg-color-page-wrapper: #F2F4F7;
     --bg-color-header-footer: #fff;
     --bg-color-search-field: #fff;
-    --bg-color-suggestions: #F0F0F0;
-    --bg-color-rejected-suggestion: #E8DCDC;
+    --bg-color-suggestions: #FFFFFF;
+    --bg-color-rejected-suggestion: #FEF3F2;
     --bg-color-highlighted-term: yellow;
-    --suggestions-hl-color: #E0E0E0;
+    --suggestions-hl-color: #F2F4F7;
 
 
     /* Ränder und Rahmen */
@@ -86,9 +86,9 @@
         --bg-color-header-footer: #202329;
         --bg-color-search-field: #191C22;
         --bg-color-suggestions: #24272E;
-        --bg-color-rejected-suggestion: #573a3a;
+        --bg-color-rejected-suggestion: #3D292B;
         --bg-color-highlighted-term: #6C6C6C;
-        --suggestions-hl-color: #373737;
+        --suggestions-hl-color: #344054;
 
         /* Ränder und Rahmen für den Dunkelmodus */
         --border-color: #475467;
@@ -360,29 +360,24 @@ h3 {
 .window-header {
     display: flex;
     align-items: center;
-    justify-content: center; /* Zentriert den Text */
-    background-color: var(--bg-color);
+    justify-content: center;
+    background-color: var(--table-header-bg);
     margin: 0;
-    padding: 15px;
-    font-size: 1.0em;
-    font-weight: bold;
-    color: #333;
-    border-bottom: 2px solid #ddd;
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border-color);
+    border-radius: calc(var(--control-radius) - 1px) calc(var(--control-radius) - 1px) 0 0;
     cursor: move;
-    position: relative; /* Ermöglicht die Positionierung der Icons */
-    height: 20px;
+    position: relative;
+    min-height: 24px;
     color: var(--text-color);
 }
 
 .window-header .left-icons {
     position: absolute;
-    left: 15px; /* Hält die Icons links ausgerichtet */
+    left: 10px;
     display: flex;
-    gap: 10px; /* Optional: Abstand zwischen den Icons */
-    align-items: center; /* Zentriert die Icons vertikal innerhalb der festgelegten Höhe */
+    gap: 8px;
+    align-items: center;
 }
 
 .window-header .title {
@@ -393,16 +388,16 @@ h3 {
 }
 .suggestions-wrapper {
     position: absolute;
-    top: calc(100% + 4px);
+    top: calc(100% + 8px);
     left: 0;
     background-color: var(--bg-color-suggestions);
     border: 1px solid var(--border-color);
-    border-radius: 12px;
+    border-radius: var(--control-radius);
     padding: 0;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
-    width: 300px; /* Hier eine feste Breite setzen */
+    box-shadow: var(--surface-shadow);
+    width: min(420px, 100%);
     min-width: 200px;
-    max-width: 90%;
+    max-width: 100%;
     box-sizing: border-box;
     display: none;
     overflow: hidden;
@@ -411,34 +406,33 @@ h3 {
 .suggestions {
     max-height: 400px;
     overflow-y: auto;
-    padding: 10px 0 10px 10px;
-    box-sizing: content-box;
-    border-bottom-left-radius: 12px;
-    border-bottom-right-radius: 12px;
+    padding: 6px;
+    box-sizing: border-box;
+    border-radius: 0 0 calc(var(--control-radius) - 1px) calc(var(--control-radius) - 1px);
     cursor: pointer;
+    scrollbar-color: var(--active-color) transparent;
+    scrollbar-width: thin;
 }
 
 .suggestion {
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border-color);
+    padding: 10px 12px;
+    border-radius: 9px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    padding-left: 4px;
-    max-width: calc(100% - 20px);
+    color: var(--text-color);
+    transition: background-color 0.15s ease, color 0.15s ease;
 }
 
-.suggestion:last-child {
-    border-bottom: none;
-}
-
-.suggestion:hover {
+.suggestion:hover,
+.suggestion.highlighted {
     background-color: var(--suggestions-hl-color);
     color: var(--text-color);
 }
 
 .rejected-suggestion {
     background-color: var(--bg-color-rejected-suggestion);
+    color: var(--text-muted-color);
 }
 
 .highlight {
@@ -447,15 +441,23 @@ h3 {
 }
 
 .suggestion.highlighted {
-    background-color: var(--suggestions-hl-color);
-    font-weight: bold;
+    box-shadow: inset 3px 0 0 var(--focus-color);
+    font-weight: 600;
 }
 
 .close-icon {
     display: none;
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
+    color: var(--text-muted-color);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.close-icon:hover {
     color: var(--text-color);
+    background-color: var(--mode-switch-bg);
 }
 
 .movable-icon {
