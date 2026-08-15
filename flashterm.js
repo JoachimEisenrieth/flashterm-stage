@@ -1,6 +1,6 @@
 // © 2025-04-18 Eisenrieth Digital Solutions. Alle Rechte vorbehalten.
 
-import { loginToFileMaker } from './filemaker-api-121-005.js';
+import { loginToFileMaker } from './filemaker-api.js';
 import { config } from './config.js';  // Konfiguration importieren
 import { getConceptSectionAvailability } from './src/app/concept-section-availability.js';
 import { createConceptViewModel } from './src/app/concept-view-model.js';

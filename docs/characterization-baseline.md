@@ -36,7 +36,7 @@ Die Werte werden beim Start nicht gegen die verfügbaren Sprachcodes validiert. 
 
 ### Unmittelbarer Modulstart
 
-Beim Laden von `flashterm-121-005.js` geschieht in dieser Reihenfolge:
+Beim Laden von `flashterm.js` geschieht in dieser Reihenfolge:
 
 1. URL-Sprachen werden ermittelt und in Modulzustand übernommen.
 2. `initialize()` wird asynchron gestartet, aber nicht abgewartet.

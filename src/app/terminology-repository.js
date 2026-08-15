@@ -3,7 +3,7 @@ import {
     fetchAvailableLanguages,
     getFileMakerConceptDetails,
     getFileMakerTerms
-} from '../../filemaker-api-121-005.js';
+} from '../../filemaker-api.js';
 import { createFileMakerTerminologyRepository } from '../repositories/filemaker-terminology-repository.js';
 
 export const terminologyRepository = createFileMakerTerminologyRepository({
