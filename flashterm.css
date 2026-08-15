@@ -30,11 +30,12 @@
     --brand-line-color: #D0D5DD;
 
     /* Buttons */
-    --button-bg-color: #007bff;
+    --button-bg-color: #175CD3;
     --button-text-color: #ffffff;
 
     /* Icons */
-    --icon-color: #aaa;
+    --icon-color: #667085;
+    --placeholder-color: #475467;
     --icon-size: 16px;
     --icon-lage: 32px;
 
@@ -98,11 +99,12 @@
         --brand-line-color: #475467;
 
         /* Buttons für den Dunkelmodus */
-        --button-bg-color: #166AD6;
-        --button-text-color: #E0E0E0;
+        --button-bg-color: #175CD3;
+        --button-text-color: #FFFFFF;
 
         /* Icons für den Dunkelmodus */
-        --icon-color: #ddd;
+        --icon-color: #B8C0CC;
+        --placeholder-color: #B8C0CC;
 
         /* Container und Schatten für den Dunkelmodus */
         --container-bg-color: #24272E;
@@ -384,7 +386,7 @@ h3 {
 }
 
 .search-field::placeholder {
-    color: var(--text-muted-color);
+    color: var(--placeholder-color);
     opacity: 1;
 }
 
@@ -394,7 +396,7 @@ h3 {
 .icon {
     height: 24px;
     cursor: pointer;
-    opacity: 0.72;
+    opacity: 0.86;
     filter: var(--header-icon-filter);
     transition: opacity 0.2s ease, transform 0.2s ease;
 }
