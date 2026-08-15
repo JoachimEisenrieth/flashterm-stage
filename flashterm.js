@@ -21,6 +21,9 @@ const closeIcon = document.getElementById('close-icon');
 const loadingIndicator = document.getElementById('loading');
 const miningDiv = document.getElementById('mining-container');
 const searchField = document.getElementById('search-field');
+const startScreen = document.getElementById('start-screen');
+const inspectorStartScreen = document.getElementById('inspector-start-screen');
+const translatorStartScreen = document.getElementById('translator-start-screen');
 
 const wiki = document.getElementById("wiki");
 const inspector = document.getElementById("inspector");
@@ -70,6 +73,10 @@ async function initialize() {
 
         // Event-Listener für UI-Elemente initialisieren
         initializeEventListeners();
+
+        if (startScreen) {
+            startScreen.classList.remove('hidden');
+        }
 
     } catch (error) {
         console.error('Fehler bei der Initialisierung:', error);
@@ -340,6 +347,8 @@ async function switchMode(mode) {
     translator.classList.remove("active");
     document.getElementById("mining-container").style.display = "none";
     document.getElementById("wiki-container").style.display = "none";
+    inspectorStartScreen?.classList.add('hidden');
+    translatorStartScreen?.classList.add('hidden');
 
     if (mode === "wiki") {
         wiki.classList.add("active");
@@ -359,6 +368,8 @@ async function switchMode(mode) {
     } else if (mode === "inspector" || mode === "translator") {
         document.getElementById("mining-container").style.display = "block";
         if (!savedText) {
+            const modeStartScreen = mode === 'inspector' ? inspectorStartScreen : translatorStartScreen;
+            modeStartScreen?.classList.remove('hidden');
             document.getElementById('search-field').placeholder = 'Fügen Sie Text per Zwischenablage ein.';
             return;
         } else {
@@ -808,7 +819,13 @@ function updateTexts(language) {
     }
 
     const elementsToUpdate = [
-        { selector: '#loading', key: 'loading' }
+        { selector: '#loading', key: 'loading' },
+        { selector: '#start-heading', key: 'start_heading' },
+        { selector: '#start-intro', key: 'start_intro' },
+        { selector: '#inspector-start-heading', key: 'inspector_start_heading' },
+        { selector: '#inspector-start-intro', key: 'inspector_start_intro' },
+        { selector: '#translator-start-heading', key: 'translator_start_heading' },
+        { selector: '#translator-start-intro', key: 'translator_start_intro' }
     ];
 
     const metaDescription = document.querySelector('meta[name="description"]');
@@ -852,6 +869,10 @@ async function showWiki(term, conceptID, sourceLanguage, targetLanguage) {
         if (concept.languages.length === 0) {
             console.error('Keine Begriffsdetails verfügbar');
             return;
+        }
+
+        if (startScreen) {
+            startScreen.classList.add('hidden');
         }
 
         createWikiLanguageMenus(concept);

@@ -213,6 +213,26 @@ h3 {
     font-weight: bold;
 }
 
+.start-screen {
+    max-width: 620px;
+    margin: 48px auto 24px;
+    text-align: center;
+}
+
+.start-screen h1 {
+    position: static;
+    margin: 0 0 12px;
+    padding: 0;
+    background-color: transparent;
+    font-size: 1.7em;
+}
+
+.start-screen p {
+    margin: 0;
+    color: var(--active-color);
+    line-height: 1.5;
+}
+
 .header-content {
     display: flex;
     align-items: center;
