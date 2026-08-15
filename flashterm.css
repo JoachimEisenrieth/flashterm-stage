@@ -13,7 +13,7 @@
     /* Hintergrundfarben */
     --bg-color: #fff;
     --bg-color-header: #fff;
-    --bg-color-infobox: #eee;
+    --bg-color-infobox: #F9FAFB;
     --bg-color-page-wrapper: #F2F4F7;
     --bg-color-header-footer: #fff;
     --bg-color-search-field: #fff;
@@ -81,7 +81,7 @@
         /* Hintergrundfarben für den Dunkelmodus */
         --bg-color: #24272E;
         --bg-color-header: #202329;
-        --bg-color-infobox: #333;
+        --bg-color-infobox: #202329;
         --bg-color-page-wrapper: #17191E;
         --bg-color-header-footer: #202329;
         --bg-color-search-field: #191C22;
@@ -679,16 +679,41 @@ label {
 /* Tabelle | allgemein */
 /* ================================================== */
 
-.table, table {
+.table,
+table:not(.term-table) {
     width: 100%;
-    border-collapse: collapse; 
+    border-collapse: separate;
+    border-spacing: 0;
     font-size: 1em;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    overflow: hidden;
 }
 
-.table th, .table td, table th, table td {
-    border: 1px solid var(--brand-line-color);
-    padding: 8px;
+.table th,
+.table td,
+table:not(.term-table) th,
+table:not(.term-table) td {
+    border: 0;
+    padding: 12px 14px;
     text-align: left;
+    vertical-align: top;
+}
+
+table:not(.term-table) tr + tr > * {
+    border-top: 1px solid var(--border-color);
+}
+
+table:not(.term-table) tr > * + * {
+    border-left: 1px solid var(--border-color);
+}
+
+table:not(.term-table) tbody tr {
+    transition: background-color 0.15s ease;
+}
+
+table:not(.term-table) tbody tr:hover {
+    background-color: var(--table-row-hover-bg);
 }
 
 /* ================================================== */
@@ -697,19 +722,28 @@ label {
 
 .synonyms-table {
     width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
+    margin-top: 0;
 }
 
 /* Erste Spalte auf feste Breite einstellen */
 .synonyms-table td:first-child {
-    width: 30px; /* Feste Breite der ersten Spalte */
-    text-align: center; /* Zentriere die Symbole in der ersten Spalte */
+    width: 38px;
+    padding-left: 10px;
+    padding-right: 10px;
+    text-align: center;
 }
 
 /* Rechte Spalte standardmäßig linksbündig lassen */
 .synonyms-table td:last-child {
     text-align: left;
+}
+
+#context-container td:first-child,
+#context-container-target td:first-child,
+#info-container td:first-child,
+#info-container-target td:first-child {
+    width: 26%;
+    font-weight: 600;
 }
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - -*/
@@ -855,34 +889,31 @@ label {
 /* Infobox Container */
 .info-box {
     background-color: var(--bg-color-infobox);
-    padding: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Leichter Schatten für mehr Tiefe */
-    border-color: 2px var(--brand-line-color);
+    padding: 24px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
 }
 
 /* Überschriften in der Infobox */
 .info-box h1 {
-    font-size: 1.75em;
-    margin: 0 0 0.25em 0;
-    padding-top: 0.25em;
-    border-bottom: 2px solid var(--border-color-infoBox);
-    padding-bottom: 0.25em;
-    position: sticky;
-    top: 125px; /* Setzt das Sticky-Verhalten mit Abstand zum oberen Rand */
-    background-color: var(--bg-color-infobox); /* Gibt der h1 einen Hintergrund */
-    z-index: 999; /* Stellt sicher, dass die h1 über anderen Elementen liegt */
+    font-size: 1.35em;
+    margin: 0 0 16px;
+    padding: 0 0 10px;
+    border-bottom: 1px solid var(--border-color-infoBox);
+    position: static;
+    background-color: transparent;
 }
 
 .info-box h2 {
-    font-size: 1.5em;
+    font-size: 1.2em;
     color: var(--text-color);
-    border-bottom: 2px solid var(--border-color-infoBox);
-    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color-infoBox);
+    padding-bottom: 6px;
     margin-bottom: 12px;
 }
 
 .info-box h3 {
-    font-size: 1.25em;
+    font-size: 1.05em;
     color: var(--text-color);
     border-bottom: 1px solid var(--brand-line-color);
     padding-bottom: 6px;
@@ -891,25 +922,40 @@ label {
 
 /* Gemeinsame Stile für alle Überschriften (falls benötigt) */
 .info-box h1, .info-box h2, .info-box h3, .info-box h4 {
-    margin-top: 20px;
+    margin-top: 24px;
     margin-left: 0;
     margin-right: 0;
 }
 
+.info-box .content-block > :first-child {
+    margin-top: 0;
+}
+
+.info-box .content-block > :last-child {
+    margin-bottom: 0;
+}
+
 /* Tabellen in der Infobox */
 .info-box table {
-    width: 100%; /* Passt die Tabelle an die Breite der Infobox an */
-    border-collapse: collapse;
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
     font-size: 1em;
-    margin-bottom: 20px; /* Abstand nach unten für visuelle Abgrenzung */
+    margin-bottom: 20px;
 }
 
 /* Tabellenzellen */
 .info-box table th, .info-box table td {
-    padding: 6px 12px; /* Etwas mehr Padding für bessere Lesbarkeit */
-    border: 2px solid var(--border-color-infoBox);
+    padding: 12px 14px;
+    border: 0;
     word-wrap: break-word; /* Erlaubt den Zeilenumbruch innerhalb der Tabellenzellen */
-    text-align: left; /* Standard Textausrichtung */
+    text-align: left;
+    vertical-align: top;
+}
+
+.info-box table th {
+    background-color: var(--table-header-bg);
+    font-weight: 600;
 }
 
 /* Infobox Bilder */
@@ -1017,14 +1063,8 @@ a:active {
 .info-box h2,
 .info-box h3 {
     position: static;
-    padding: 0;
     background-color: transparent;
     letter-spacing: -0.015em;
-}
-
-.info-box h1 {
-    font-size: 1.35em;
-    margin-bottom: 16px;
 }
 
 .toggle-language {
