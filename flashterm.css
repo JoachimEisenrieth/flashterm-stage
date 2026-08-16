@@ -1794,10 +1794,6 @@ a:active {
         padding: 20px;
     }
 
-    .concept-header.has-image #image-container {
-        order: -1;
-    }
-
     #start-screen,
     #inspector-start-screen,
     #translator-start-screen {
