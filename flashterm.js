@@ -10,6 +10,7 @@ import {
 import { getConceptSectionAvailability } from './src/app/concept-section-availability.js';
 import { createConceptViewModel } from './src/app/concept-view-model.js';
 import { serializeCsv } from './src/app/csv-export.js';
+import { getImageBasePath } from './src/app/image-path.js';
 import { parseLanguageCache, serializeLanguageCache } from './src/app/language-cache.js';
 import { getSourceLanguage } from './src/app/source-language.js';
 import { terminologyRepository } from './src/app/terminology-repository.js';
@@ -1143,7 +1144,11 @@ async function showWiki(term, conceptID, sourceLanguage, targetLanguage) {
 
         createWikiLanguageMenus(concept);
         const conceptData = createConceptViewModel(concept, sourceLanguage, targetLanguage);
-        updateDOMElements(conceptData, targetLanguage, config.imagePath);
+        updateDOMElements(
+            conceptData,
+            targetLanguage,
+            getImageBasePath(config.server, config.database, window.location.origin)
+        );
 
         document.getElementById('mining-container').style.display = 'none';
         document.getElementById('wiki-container').style.display = 'block';
@@ -1297,7 +1302,7 @@ function switchLanguage(section, language) {
 // ====================================================================================================
 // Concept anzeigen
 // ====================================================================================================
-function updateDOMElements(conceptData, targetLanguage, imagePath) {
+function updateDOMElements(conceptData, targetLanguage, imageBasePath) {
     const {
         preferredTermSource = '', preferredTermTarget = '',
         footnoteSource = [], footnoteTarget = [],
@@ -1332,7 +1337,7 @@ function updateDOMElements(conceptData, targetLanguage, imagePath) {
     }
 
     // Bild anzeigen
-    checkAndDisplayImage(fileName, imagePath);
+    checkAndDisplayImage(fileName, imageBasePath);
 
     // Synonyme anzeigen
     const synonymsContainer = document.getElementById('synonyms-container');
@@ -1619,19 +1624,19 @@ function showImageElements(imgContainer, termImage) {
 // Bilddatei verarbeiten
 // ====================================================================================================
 
-async function checkAndDisplayImage(fileName, imagePath) {
+async function checkAndDisplayImage(fileName, imageBasePath) {
     logNot(`checkAndDisplayImage aufgerufen mit fileName: ${fileName}`);
 
     const imgContainer = document.getElementById('image-container');
     const termImage = document.getElementById('term-image');
 
-    if (!fileName || !imgContainer || !termImage) {
+    if (!fileName || !imageBasePath || !imgContainer || !termImage) {
         logWarning('Fehlender fileName oder HTML-Elemente nicht gefunden.');
         hideImageElements(imgContainer, termImage);
         return;
     }
 
-    const imageUrl = `${imagePath}${fileName}`;
+    const imageUrl = `${imageBasePath}${fileName}`;
     logNot(`Versuche Bild zu laden von URL: ${imageUrl}`);
 
     try {

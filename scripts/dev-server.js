@@ -157,7 +157,9 @@ export function createDevelopmentServer({
             serveBrowserConfig(request, response, config);
             return;
         }
-        if (requestUrl.pathname === '/fmi' || requestUrl.pathname.startsWith('/fmi/')) {
+        const isFileMakerRequest = requestUrl.pathname === '/fmi' || requestUrl.pathname.startsWith('/fmi/');
+        const isImageRequest = requestUrl.pathname.startsWith('/public/RC_Data_FMS/');
+        if (isFileMakerRequest || isImageRequest) {
             proxyFileMakerRequest(
                 request,
                 response,

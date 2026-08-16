@@ -47,15 +47,16 @@ Erwartet werden diese Felder:
 
 | Feld | Zweck | Wichtige Einschränkung |
 |---|---|---|
-| `server` | FileMaker-Origin für den lokalen Proxy | Muss eine HTTPS-Origin ohne Pfad, Query oder Fragment sein |
+| `server` | FileMaker-Origin für den lokalen Proxy und die Concept-Bilder | Muss eine HTTPS-Origin ohne Pfad, Query oder Fragment sein; der Bildpfad wird daraus und aus `database` abgeleitet |
 | `database` | Name der FileMaker-Datenbank | Nicht protokollieren oder weitergeben |
 | `username` | FileMaker-Benutzer | Nicht committen oder ausgeben |
 | `password` | FileMaker-Passwort | Nicht committen oder ausgeben |
-| `imagePath` | Basisadresse für Concept-Bilder | Muss zu den ausgelieferten Bildpfaden passen |
 | `initialSourceLanguage` | Rückfall für die Ausgangssprache, falls `languageAPI` keine eindeutige Source liefert | Vollständigen erwarteten Sprachcode verwenden |
 | `initialTargetLanguage` | Standardzielsprache | Vollständigen erwarteten Sprachcode verwenden |
 
 Vorhandene lokale Konfigurationen dürfen nicht automatisch durch die Beispieldatei ersetzt werden. `config.example.js` enthält ausschließlich Platzhalter und darf keine realen Zugangsdaten erhalten.
+
+Ein separates Feld `imagePath` wird nicht mehr verwendet. Falls es in einer bestehenden lokalen Konfiguration noch vorhanden ist, kann es bei einer bewussten lokalen Anpassung entfernt werden. Der Bildpfad entsteht automatisch aus `server` und `database`.
 
 ## 3. Entwicklungsserver starten
 
@@ -79,7 +80,7 @@ Für ein bestimmtes Sprachpaar können `source` und `target` übergeben werden:
 http://127.0.0.1:8000/?source=de-DE&target=en-GB
 ```
 
-Die Beispielcodes müssen durch Sprachcodes ersetzt werden, die in der angeschlossenen Installation tatsächlich vorhanden sind. Unbekannte Sprachcodes werden beim Start derzeit nicht vorab validiert.
+Die Beispielcodes müssen durch Sprachcodes ersetzt werden, die in der angeschlossenen Installation tatsächlich vorhanden sind. Ein abweichender `source`-Code wird beim Start auf die in FileMaker markierte Source korrigiert. Ein unbekannter `target`-Code wird weiterhin erst bei der nächsten bestätigten Sprachwahl bereinigt.
 
 ## 4. Alternativen Port verwenden
 
@@ -97,8 +98,9 @@ Der lokale Server stellt zwei Funktionen unter derselben Browser-Origin bereit:
 
 1. Er liefert HTML, CSS, JavaScript, JSON und Assets direkt aus dem Repository aus.
 2. Er leitet Requests unter `/fmi/` an den in `config.js` hinterlegten HTTPS-FileMaker-Origin weiter.
+3. Er leitet Bildanfragen unter `/public/RC_Data_FMS/` an denselben Origin weiter.
 
-Für den Browser erzeugt er eine virtuelle `/config.js`, in der ausschließlich `config.server` auf `''` gesetzt wird. Dadurch verwendet der Browser relative `/fmi/`-Adressen und umgeht lokale Cross-Origin-Probleme. Die lokale Datei `config.js` selbst wird nicht verändert.
+Für den Browser erzeugt er eine virtuelle `/config.js`, in der ausschließlich `config.server` auf `''` gesetzt wird. Dadurch verwendet der Browser relative `/fmi/`- und Bildadressen und umgeht lokale Cross-Origin-Probleme. Die lokale Datei `config.js` selbst wird nicht verändert.
 
 Der Server besitzt kein Live Reload. Nach Änderungen muss die Seite im Browser manuell neu geladen werden.
 
@@ -111,9 +113,10 @@ Nach dem Öffnen der Anwendung mindestens kontrollieren:
 3. Die Ladeanzeige verschwindet nach der Initialisierung.
 4. Source- und Target-Sprache erscheinen in den Modusbeschriftungen.
 5. Eine bekannte Suche liefert Vorschläge.
-6. Inspector und Translator reagieren auf eingefügten Text.
-7. Ein Zielsprachenwechsel aktualisiert den Translator.
-8. Es erscheinen keine unerwarteten Browserfehler.
+6. Bei einem Concept mit Bilddatei wird das Bild angezeigt.
+7. Inspector und Translator reagieren auf eingefügten Text.
+8. Ein Zielsprachenwechsel aktualisiert den Translator.
+9. Es erscheinen keine unerwarteten Browserfehler.
 
 Zugangsdaten, Session-Token und vollständige FileMaker-Antworten dürfen bei der Fehlersuche weder kopiert noch in Tickets oder Testprotokolle übernommen werden.
 
@@ -127,7 +130,7 @@ Vor und nach Änderungen:
 npm test
 ```
 
-Der erwartete aktuelle Stand ist `73/73` erfolgreiche Tests. Einige Dev-Server-Tests öffnen temporäre Loopback-Ports. In eingeschränkten Ausführungsumgebungen kann dafür eine lokale Freigabe erforderlich sein.
+Der erwartete aktuelle Stand ist `77/77` erfolgreiche Tests. Einige Dev-Server-Tests öffnen temporäre Loopback-Ports. In eingeschränkten Ausführungsumgebungen kann dafür eine lokale Freigabe erforderlich sein.
 
 Zusätzliche Prüfungen nach JavaScript-Änderungen:
 

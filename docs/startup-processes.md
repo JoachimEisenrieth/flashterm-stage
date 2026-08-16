@@ -192,9 +192,9 @@ Der Ablauf in `scripts/dev-server.js` ist:
 5. HTTP-Server ausschließlich an `127.0.0.1` binden.
 6. Statische Dateien direkt aus der Projektwurzel ausliefern; `/` wird auf `index.html` abgebildet.
 7. Für `/config.js` ein virtuelles ES-Modul erzeugen. Es übernimmt die lokale Konfiguration, ersetzt aber ausschließlich `server` durch `''` und setzt `Cache-Control: no-store`.
-8. Requests unter `/fmi/` mit Methode, Body und relevanten Headern an den konfigurierten HTTPS-FileMaker-Origin weiterleiten.
+8. Requests unter `/fmi/` sowie Bildanfragen unter `/public/RC_Data_FMS/` mit Methode, Body und relevanten Headern an den konfigurierten HTTPS-FileMaker-Origin weiterleiten.
 
-Dadurch gehen Browser-API-Aufrufe im Entwicklungsbetrieb an denselben lokalen Origin. Der lokale Server übernimmt die Weiterleitung und vermeidet die sonst nötige direkte Cross-Origin-Verbindung. Die übrigen Konfigurationsfelder – einschließlich browserseitig benötigter Anmeldedaten – bleiben Bestandteil des virtuellen Moduls.
+Dadurch gehen Browser-API- und Bildaufrufe im Entwicklungsbetrieb an denselben lokalen Origin. Der lokale Server übernimmt die Weiterleitung und vermeidet die sonst nötige direkte Cross-Origin-Verbindung. Die übrigen Konfigurationsfelder – einschließlich browserseitig benötigter Anmeldedaten – bleiben Bestandteil des virtuellen Moduls.
 
 Der Entwicklungsserver besitzt keinen Watcher und kein Live Reload. Änderungen werden nach einem manuellen Browser-Reload wirksam.
 

@@ -12,7 +12,6 @@ const fixtureConfig = {
     database: 'TEST_DATABASE',
     username: 'TEST_USER',
     password: 'TEST_PASSWORD',
-    imagePath: 'https://images.test.example/',
     initialSourceLanguage: 'de-DE',
     initialTargetLanguage: 'en-GB'
 };
@@ -61,7 +60,7 @@ test('virtual config changes only the browser server value', async t => {
     assert.equal(source.includes(fixtureConfig.server), false);
 });
 
-test('proxies FileMaker methods, headers, bodies, and responses without proxying other paths', async t => {
+test('proxies FileMaker methods, image paths, headers, bodies, and responses without proxying other paths', async t => {
     const calls = [];
     function proxyRequest(url, options, callback) {
         const request = new PassThrough();
@@ -116,6 +115,12 @@ test('proxies FileMaker methods, headers, bodies, and responses without proxying
     assert.equal(calls[1].headers.authorization, 'Bearer TEST_TOKEN');
     assert.equal(calls[1].headers['content-type'], 'application/json');
     assert.equal(calls[1].body, JSON.stringify({ test: true }));
+
+    const imageResponse = await fetch(`${origin}/public/RC_Data_FMS/TEST_DATABASE/Files/Images/test.png`);
+    assert.equal(imageResponse.status, 200);
+    assert.equal(calls.length, 5);
+    assert.equal(calls[4].url, 'https://filemaker.test.example/public/RC_Data_FMS/TEST_DATABASE/Files/Images/test.png');
+    assert.equal(calls[4].method, 'GET');
 });
 
 test('rejects non-HTTPS FileMaker upstream servers', () => {

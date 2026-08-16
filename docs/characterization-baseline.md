@@ -299,7 +299,8 @@ Der Sprachcache wird als `{ version: 3, guiLanguage, languages: [{ code, name, i
 ### Bilder
 
 - `fileName` stammt aus den Concept-Daten der Ausgangssprache.
-- Die URL wird durch direktes Anhängen an `config.imagePath` gebildet.
+- Die Bildbasisadresse wird aus `config.server` und `config.database` nach dem Muster `/public/RC_Data_FMS/<Datenbank>/Files/Images/` abgeleitet. Die Dateibezeichnung wird daran angehängt.
+- Im lokalen Entwicklungsbetrieb wird dieselbe relative Bildadresse durch den Development-Proxy an `config.server` weitergeleitet.
 - Vor der Anzeige wird die Bild-URL per `fetch()` geprüft.
 - Bei erfolgreicher Response wird `src` gesetzt und der Bildbereich angezeigt.
 - Bei fehlender Datei, Request-Fehler oder fehlenden Elementen wird der Bildbereich ausgeblendet.
