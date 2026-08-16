@@ -1138,8 +1138,8 @@ table:not(.term-table) tbody tr:hover {
     border-collapse: separate;
     border-spacing: 0;
     overflow: hidden;
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
+    border: 1px solid var(--concept-header-border);
+    border-radius: 14px;
     background-color: var(--container-bg-color);
 }
 
@@ -1149,7 +1149,8 @@ table:not(.term-table) tbody tr:hover {
     justify-content: flex-end;
     flex-wrap: wrap;
     gap: 10px 18px;
-    margin: 0 4px 10px;
+    margin: 0 4px 12px;
+    color: var(--text-muted-color);
 }
 
 .term-legend-item {
@@ -1157,7 +1158,7 @@ table:not(.term-table) tbody tr:hover {
     align-items: center;
     gap: 6px;
     font-size: 0.78em;
-    font-weight: 600;
+    font-weight: 500;
     white-space: nowrap;
 }
 
@@ -1174,24 +1175,26 @@ table:not(.term-table) tbody tr:hover {
 }
 
 .term-table th {
-    background-color: var(--table-header-bg);
+    background-color: var(--concept-header-bg);
     font-weight: 600;
 }
 
 .term-table thead tr:first-child th {
+    padding-top: 14px;
     padding-bottom: 4px;
     color: var(--text-color);
 }
 
 .term-table thead tr:last-child th {
     padding-top: 4px;
+    padding-bottom: 14px;
     color: var(--text-muted-color);
     font-size: 0.82em;
     font-weight: 500;
 }
 
 .term-table tbody td {
-    border-top: 1px solid var(--border-color);
+    border-top: 1px solid var(--section-divider-color);
 }
 
 .term-table tbody tr {
@@ -1199,7 +1202,7 @@ table:not(.term-table) tbody tr:hover {
 }
 
 .term-table tbody tr:hover {
-    background-color: var(--table-row-hover-bg);
+    background-color: var(--concept-header-bg);
 }
 
 .term-table .category-header {
@@ -1596,8 +1599,8 @@ a:active {
     .term-table tbody tr {
         display: block;
         overflow: hidden;
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
+        border: 1px solid var(--concept-header-border);
+        border-radius: 14px;
         background-color: var(--container-bg-color);
     }
 
@@ -1610,7 +1613,7 @@ a:active {
     }
 
     .term-table tbody td + td {
-        border-top: 1px solid var(--border-color);
+        border-top: 1px solid var(--section-divider-color);
     }
 
     .term-table tbody td::before {
