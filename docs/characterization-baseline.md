@@ -167,7 +167,7 @@ Normales Tippen im Inspector führt bei nicht leerer Eingabe wieder in den Wiki-
 
 - Oberhalb der Ergebnistabelle erscheint neben der Bewertungslegende die Formatwahl „Ergebnisse exportieren“ mit getrennten Schaltflächen für Excel, CSV und JSON.
 - Auf breiten Ansichten bleibt diese Werkzeugleiste beim Scrollen unterhalb des festen Seitenheaders sichtbar. Auf Ansichten bis 768 px scrollt sie aus Platzgründen normal mit und darf in eine eigene Zeile umbrechen.
-- Excel exportiert ausschließlich die sichtbare Ergebnistabelle.
+- Excel erzeugt aus dem Prüfergebnis einen menschenlesbaren Bericht mit Titel, Modus, Sprache beziehungsweise Sprachpaar, Exportzeit, Ergebniszusammenfassung und ausgeschriebenen Bewertungen.
 - CSV exportiert die gefundenen Termini mit Bewertung, Trefferzahl, Vorzugsbenennung und den beteiligten Sprachcodes.
 - JSON exportiert ausschließlich das bereits berechnete Prüfergebnis; der zuvor geleerte Inhalt des Suchfelds wird dafür nicht erneut ausgewertet.
 
@@ -191,7 +191,7 @@ Normales Tippen im Inspector führt bei nicht leerer Eingabe wieder in den Wiki-
 
 ### Export
 
-Der Translator verwendet dieselbe Formatwahl wie der Inspector. Der Excel-Export enthält die aktuell sichtbare Tabelle einschließlich zielsprachiger Benennungen; CSV und JSON enthalten die gefundenen Termini sowie die ermittelten Vorzugsbenennungen.
+Der Translator verwendet dieselbe Formatwahl wie der Inspector. Der Excel-Bericht enthält die gefundenen Termini und zielsprachigen Vorzugsbenennungen; CSV und JSON enthalten dieselben fachlichen Kerndaten in maschinenlesbarer Form.
 
 ## 5. Sprachwechsel
 
@@ -335,10 +335,11 @@ Header und Hauptüberschrift verwenden feste beziehungsweise sticky Positionieru
 ### Excel
 
 - Auslöser ist die Schaltfläche „Excel“ in der Werkzeugzeile oberhalb der Term-Mining-Tabelle.
-- Datenquelle ist die aktuell gerenderte `.term-table` im DOM.
-- SheetJS wandelt die Tabelle in ein Worksheet um.
-- Der Downloadname lautet `mined_terms.xlsx`.
-- Im Translator enthält die Tabelle die aktuell gerenderten zielsprachigen Benennungen.
+- Datenquelle ist das bereits berechnete Prüfergebnis, nicht mehr die gerenderte HTML-Tabelle.
+- Der Bericht enthält einen Titelbereich mit Modus, Sprache beziehungsweise Sprachpaar, lokalisiertem Exportzeitpunkt und einer Zusammenfassung aus unterschiedlichen Termini und gesamten Fundstellen.
+- Die Ergebnistabelle enthält ausschließlich die vier menschenlesbaren Spalten Terminus, ausgeschriebene Bewertung, Anzahl und Vorzugsbenennung. Sprachcodes bleiben den maschinenlesbaren CSV-/JSON-Exporten vorbehalten.
+- Das Arbeitsblatt verwendet passende Spalten- und Zeilenmaße, eine zusammengefasste Titelzeile und Autofilter. Eine farbige Zellgestaltung oder fixierte Tabellenkopfzeile wird mit der vorhandenen SheetJS Community Edition nicht erzeugt.
+- Der Downloadname lautet `flashterm_report_<source>-<preferred-language>.xlsx`.
 
 ### JSON
 
@@ -447,7 +448,7 @@ Header und Hauptüberschrift verwenden feste beziehungsweise sticky Positionieru
 | FT-RESP-001 | Viewport breiter als 768 px | Anwendung öffnen | Horizontale Header- und Modusstruktur |
 | FT-RESP-002 | Viewport höchstens 768 px | Anwendung öffnen | Header und Modusnavigation werden vertikal, Container-Padding wird reduziert |
 | FT-RESP-003 | Lange Mining-Ergebnisliste bei breitem Viewport | Nach unten scrollen | Bewertungslegende und Exportauswahl bleiben unterhalb des festen Seitenheaders sichtbar; der Tabellenkopf scrollt normal mit |
-| FT-EXPORT-001 | Mining-Tabelle sichtbar | „Excel“ anklicken | Ausschließlich `mined_terms.xlsx` wird aus der sichtbaren Tabelle erzeugt |
+| FT-EXPORT-001 | Mining-Tabelle sichtbar | „Excel“ anklicken | Ausschließlich `flashterm_report_<source>-<preferred-language>.xlsx` wird als lesbarer Bericht mit Metadaten und ausgeschriebenen Bewertungen erzeugt |
 | FT-EXPORT-002 | Paste-basierter Mining-Ablauf mit Treffern | „JSON“ anklicken | Ausschließlich `termlist_<source>-<target>.json` wird aus dem bereits berechneten Prüfergebnis erzeugt |
 | FT-EXPORT-003 | Mining-Tabelle sichtbar | Excel und JSON nacheinander exportieren | Excel und JSON werden jeweils nur durch ihre eigene Schaltfläche ausgelöst |
 | FT-EXPORT-004 | Mining-Tabelle mit Treffern sichtbar | „CSV“ anklicken | Eine UTF-8-CSV mit Bewertung, Anzahl, Vorzugsbenennung und Sprachcodes wird erzeugt; die anderen Exportformate werden nicht ausgelöst |

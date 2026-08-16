@@ -841,18 +841,18 @@ async function exportTerms() {
     URL.revokeObjectURL(url);
 }
 
-function exportTermsToCsv() {
+function createTermExportData() {
     const isTranslatorMode = translator.classList.contains('active');
     const preferredTermList = isTranslatorMode ? targetTermList : sourceTermList;
     const preferredDesignationLanguage = isTranslatorMode ? targetLanguage : sourceLanguage;
-    const exportData = [];
+    const rows = [];
 
     for (const category in foundTerms) {
         for (const term in foundTerms[category]) {
             const record = foundTerms[category][term];
             const preferredDesignation = retrievePreferredTerm(record.conceptID, preferredTermList);
 
-            exportData.push({
+            rows.push({
                 term: record.originalTerm || term,
                 category,
                 count: record.count,
@@ -863,7 +863,17 @@ function exportTermsToCsv() {
         }
     }
 
-    const csv = `\uFEFF${serializeCsv(exportData)}`;
+    return {
+        isTranslatorMode,
+        preferredDesignationLanguage,
+        rows
+    };
+}
+
+function exportTermsToCsv() {
+    const { preferredDesignationLanguage, rows } = createTermExportData();
+
+    const csv = `\uFEFF${serializeCsv(rows)}`;
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -1805,7 +1815,7 @@ function displayMinedTerms(foundTerms) {
         };
 
         exportContainer.append(
-            createExportButton('Excel', exportTableToExcel),
+            createExportButton('Excel', exportTermsToExcel),
             createExportButton('CSV', exportTermsToCsv),
             createExportButton('JSON', exportTerms)
         );
@@ -1831,24 +1841,90 @@ function displayMinedTerms(foundTerms) {
     }
 }
 
-// Die Export-Funktion für Excel
-function exportTableToExcel() {
-    const table = document.querySelector('.term-table');
-    if (!table) {
-        console.error('No table found to export');
-        return;
-    }
+function exportTermsToExcel() {
+    const { isTranslatorMode, preferredDesignationLanguage, rows } = createTermExportData();
+    const sourceLanguageName = cachedLanguageOptions?.find(language => language.code === sourceLanguage)?.name || sourceLanguage;
+    const preferredLanguageName = cachedLanguageOptions?.find(language => language.code === preferredDesignationLanguage)?.name
+        || preferredDesignationLanguage;
+    const reportTitle = translations?.[guiLanguage]?.export_report_title || 'Terminology review';
+    const modeLabel = isTranslatorMode ? 'Translator' : 'Inspector';
+    const termCount = rows.length;
+    const occurrenceCount = rows.reduce((total, row) => total + row.count, 0);
+    const createdAt = new Intl.DateTimeFormat(guiLanguage, {
+        dateStyle: 'medium',
+        timeStyle: 'short'
+    }).format(new Date());
+    const labels = {
+        mode: translations?.[guiLanguage]?.export_report_mode || 'Mode',
+        language: translations?.[guiLanguage]?.export_report_language || 'Language',
+        languages: translations?.[guiLanguage]?.export_report_languages || 'Languages',
+        created: translations?.[guiLanguage]?.export_report_created || 'Created',
+        result: translations?.[guiLanguage]?.export_report_result || 'Result',
+        summary: translations?.[guiLanguage]?.export_report_summary || '{terms} distinct terms · {occurrences} occurrences',
+        term: translations?.[guiLanguage]?.found_term || 'Found term',
+        category: translations?.[guiLanguage]?.export_report_rating || 'Rating',
+        count: translations?.[guiLanguage]?.export_report_count || 'Count',
+        preferredDesignation: translations?.[guiLanguage]?.preferred_designation || 'Preferred designation'
+    };
+    const languageLabel = isTranslatorMode ? labels.languages : labels.language;
+    const languageDescription = isTranslatorMode
+        ? `${sourceLanguageName} (${sourceLanguage}) → ${preferredLanguageName} (${preferredDesignationLanguage})`
+        : `${sourceLanguageName} (${sourceLanguage})`;
+    const summary = labels.summary
+        .replace('{terms}', termCount)
+        .replace('{occurrences}', occurrenceCount);
+    const sheetRows = [
+        [reportTitle],
+        [labels.mode, modeLabel],
+        [languageLabel, languageDescription],
+        [labels.created, createdAt],
+        [labels.result, summary],
+        [],
+        [
+            labels.term,
+            labels.category,
+            labels.count,
+            labels.preferredDesignation
+        ],
+        ...rows.map(row => [
+            row.term,
+            translations?.[guiLanguage]?.[`${row.category}_heading`] || row.category,
+            row.count,
+            row.preferredDesignation
+        ])
+    ];
 
-    // Erstelle ein Arbeitsblatt aus der Tabelle
     /* global XLSX */
     const workbook = XLSX.utils.book_new();
-    const worksheet = XLSX.utils.table_to_sheet(table);
+    const worksheet = XLSX.utils.aoa_to_sheet(sheetRows);
+    const lastTableRow = sheetRows.length;
 
-    // Füge das Arbeitsblatt dem Arbeitsbuch hinzu
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Termini');
+    worksheet['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 3 } }];
+    worksheet['!cols'] = [
+        { wch: 30 },
+        { wch: 18 },
+        { wch: 10 },
+        { wch: 34 }
+    ];
+    worksheet['!rows'] = [{ hpt: 28 }, { hpt: 20 }, { hpt: 20 }, { hpt: 20 }, { hpt: 20 }, { hpt: 10 }, { hpt: 24 }];
+    worksheet['!autofilter'] = { ref: `A7:D${lastTableRow}` };
 
-    // Exportiere das Arbeitsbuch als Excel-Datei
-    XLSX.writeFile(workbook, 'mined_terms.xlsx');
+    workbook.Props = {
+        Title: reportTitle,
+        Subject: `${modeLabel}: ${sourceLanguage} → ${preferredDesignationLanguage}`,
+        Author: 'flashterm',
+        CreatedDate: new Date()
+    };
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, reportTitle.substring(0, 31));
+
+    const sourceLang = sourceLanguage.replace('-', '_');
+    const preferredLang = preferredDesignationLanguage.replace('-', '_');
+    XLSX.writeFile(
+        workbook,
+        `flashterm_report_${sourceLang}-${preferredLang}.xlsx`,
+        { cellStyles: true, compression: true }
+    );
 }
 
 // ====================================================================================================
