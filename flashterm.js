@@ -1608,6 +1608,8 @@ function displayMinedTerms(foundTerms) {
     const isTranslatorMode = document.getElementById("translator").classList.contains("active");
     const sourceLanguageName = languageNames[sourceLanguage.substring(0, 2)] || sourceLanguage;
     const targetLanguageName = languageNames[targetLanguage.substring(0, 2)] || targetLanguage;
+    const foundTermLabel = translations?.[guiLanguage]?.found_term || 'Found term';
+    const preferredDesignationLabel = translations?.[guiLanguage]?.preferred_designation || 'Preferred designation';
 
     const createTableRow = (term, count, category, preferredTerm) => {
         let ratingClass = '';
@@ -1635,7 +1637,7 @@ function displayMinedTerms(foundTerms) {
 
         if (!isTranslatorMode && term.originalTerm === preferredTerm) {
             return `<tr>
-                        <td colspan="2" style="width: 100%;">${termResult}</td>
+                        <td colspan="2" style="width: 100%;" data-label="${foundTermLabel}">${termResult}</td>
                     </tr>`;
         }
 
@@ -1647,8 +1649,8 @@ function displayMinedTerms(foundTerms) {
             ? `<span class="term-rating rating-preferred" role="img" aria-label="${preferredLabel}" title="${preferredLabel}">${ratingIcons.preferred}</span>`
             : '';
         return `<tr>
-                    <td style="width: 50%;">${termResult}</td>
-                    <td style="width: 50%;" class="term-clickable preferred-term-cell" data-concept-id="${term.conceptID}" data-source-language="${sourceLanguage}" data-target-language="${targetLanguage}">
+                    <td style="width: 50%;" data-label="${foundTermLabel}">${termResult}</td>
+                    <td style="width: 50%;" class="term-clickable preferred-term-cell" data-label="${preferredDesignationLabel}" data-concept-id="${term.conceptID}" data-source-language="${sourceLanguage}" data-target-language="${targetLanguage}">
                         <div class="preferred-term-content"><span class="preferred-term-label">${translation}</span>${preferredRating}</div>
                     </td>
                 </tr>`;

@@ -1476,12 +1476,69 @@ a:active {
     }
 
     #mining-container {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
+        overflow-x: visible;
     }
 
     .term-table {
-        min-width: 620px;
+        display: block;
+        min-width: 0;
+        overflow: visible;
+        border: 0;
+        background-color: transparent;
+    }
+
+    .term-table thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+
+    .term-table tbody {
+        display: grid;
+        gap: 12px;
+    }
+
+    .term-table tbody tr {
+        display: block;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        background-color: var(--container-bg-color);
+    }
+
+    .term-table tbody td,
+    .term-table tbody td:first-child {
+        display: block;
+        width: 100% !important;
+        box-sizing: border-box;
+        white-space: normal;
+    }
+
+    .term-table tbody td + td {
+        border-top: 1px solid var(--border-color);
+    }
+
+    .term-table tbody td::before {
+        content: attr(data-label);
+        display: block;
+        margin-bottom: 6px;
+        color: var(--text-muted-color);
+        font-size: 0.72em;
+        font-weight: 600;
+        letter-spacing: 0.035em;
+        text-transform: uppercase;
+    }
+
+    .term-table .term-result-label,
+    .term-table .preferred-term-label {
+        overflow: visible;
+        text-overflow: clip;
     }
 
     .term-table th,
