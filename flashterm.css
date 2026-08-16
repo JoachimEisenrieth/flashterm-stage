@@ -380,16 +380,18 @@ h3 {
 }
 
 .empty-state {
-    max-width: 420px;
+    max-width: 560px;
     margin: 48px auto 24px;
-    padding: 20px 24px;
+    padding: 22px 24px;
     color: var(--text-muted-color);
-    background-color: var(--table-header-bg);
-    border: 1px dashed var(--border-color);
-    border-radius: var(--control-radius);
+    background-color: var(--concept-header-bg);
+    border: 1px solid var(--concept-header-border);
+    border-radius: 14px;
+    box-shadow: var(--mode-active-shadow);
     box-sizing: border-box;
     text-align: center;
-    font-weight: 600;
+    font-weight: 500;
+    line-height: 1.5;
 }
 
 .error-state {
