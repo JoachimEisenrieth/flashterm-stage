@@ -1114,6 +1114,7 @@ table:not(.term-table) tbody tr:hover {
     min-width: 0;
     position: static;
     background-color: transparent;
+    border-bottom: 0;
 }
 
 .concept-term + .concept-term {
