@@ -188,7 +188,7 @@ Normales Tippen im Inspector führt bei nicht leerer Eingabe wieder in den Wiki-
 - Wird Text direkt im aktiven Translator eingefügt, bleibt der Translator aktiv und zeigt unmittelbar die zweisprachige Ergebnistabelle. Dies behebt das frühere unbeabsichtigte Zurückspringen in den Inspector.
 - Ein Klick auf einen Terminus öffnet dessen Wiki-Ansicht.
 - Ein Wechsel der Zielsprache lädt die neue Zielterminliste.
-- Wenn der Translator während des Zielsprachwechsels aktiv ist, wird die vorhandene Tabelle nicht ausdrücklich sofort neu gerendert. Ein erneuter Moduswechsel rendert sie aus dem aktuellen Zustand neu. **Zu verifizieren.**
+- Wenn der Translator während eines erfolgreichen Zielsprachwechsels aktiv ist und bereits Text analysiert wurde, wird die sichtbare Tabelle unmittelbar mit der neu geladenen Zielterminliste gerendert. Bei einem Ladefehler wird sie nicht mit der alten Zielterminliste unter der neuen Sprache neu aufgebaut.
 
 ### Export
 
@@ -432,7 +432,7 @@ Header und Hauptüberschrift verwenden feste beziehungsweise sticky Positionieru
 | FT-MINING-005 | Text ohne Treffer | Text einfügen | Statt einer leeren Tabelle erscheint der lokalisierte Leerzustand „Im Text wurden keine hinterlegten Termini erkannt.“ beziehungsweise „No registered terms were detected in the text.“; Exportaktionen werden nicht angeboten (bewusste UX-Verbesserung) |
 | FT-TRANSLATOR-001 | Noch kein Text analysiert | Translator anklicken | Mining-Bereich erscheint; Suchfeld fordert zum Einfügen von Text auf |
 | FT-TRANSLATOR-002 | Text wurde im Inspector analysiert | Translator anklicken | Tabelle wird mit bevorzugten Benennungen aus der Zielterminliste neu gerendert |
-| FT-TRANSLATOR-003 | Translator-Tabelle sichtbar | Zielsprache wechseln | Neue Zielterminliste wird geladen; unmittelbare Aktualisierung der sichtbaren Tabelle ist zu verifizieren |
+| FT-TRANSLATOR-003 | Translator-Tabelle sichtbar | Zielsprache wechseln | Nach erfolgreichem Laden der neuen Zielterminliste aktualisieren sich Tabellenkopf und Vorzugsbenennungen unmittelbar, ohne erneuten Modusklick |
 | FT-TRANSLATOR-004 | Translator aktiv, noch kein Text analysiert | Mehrzeiligen Text in das Suchfeld einfügen | Translator bleibt aktiv und zeigt die erkannten Termini unmittelbar mit den Vorzugsbenennungen der Zielsprache |
 | FT-LANG-001 | Anwendung initialisiert | Profil-Icon anklicken | Modal öffnet; FileMaker-Sprachoptionen ersetzen den initialen lokalen Selector-Inhalt |
 | FT-LANG-002 | Modal offen | Andere Zielsprache speichern | Target wird gespeichert, URL und Titel ändern sich, Zielterminliste wird neu geladen |

@@ -522,10 +522,13 @@ async function switchTargetLanguage(newTargetLanguage) {
     console.log(`Titel auf ${sourceLanguage} ➔ ${targetLanguage} gesetzt`);
 
     // Begriffe und Übersetzungen für die neue Zielsprache laden
+    let targetTermsLoaded = false;
     try {
         console.log(`Lade Begriffe für die Zielsprache: ${targetLanguage}`);
-        await fetchTargetTermList(targetLanguage);
-        console.log('Zielsprach-Begriffe erfolgreich geladen');
+        targetTermsLoaded = await fetchTargetTermList(targetLanguage);
+        if (targetTermsLoaded) {
+            console.log('Zielsprach-Begriffe erfolgreich geladen');
+        }
     } catch (error) {
         console.error('Fehler beim Laden der Zielsprach-Begriffe:', error);
     }
@@ -550,6 +553,8 @@ async function switchTargetLanguage(newTargetLanguage) {
         } else {
             console.warn('Kein Term oder conceptID ausgewählt. Wiki kann nicht aktualisiert werden.');
         }
+    } else if (currentMode === 'translator' && targetTermsLoaded && savedText) {
+        displayMinedTerms(foundTerms);
     } else {
         console.log('Nutzer ist nicht im Wiki-Modus. Keine Aktualisierung des Wiki-Inhalts erforderlich.');
     }
@@ -666,11 +671,13 @@ async function fetchTargetTermList(language) {
     try {
         targetTermList = await terminologyRepository.getTerms(language);
         console.log(`Termliste geladen: ${language}`);
+        return true;
     } catch (error) {
         if (error instanceof SyntaxError) {
             handleError('Error parsing termlistField', error);
         }
         console.error('Fehler beim Laden der Termliste:', error);
+        return false;
     } finally {
         hideLoadingIndicator();
     }
