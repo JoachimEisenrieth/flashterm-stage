@@ -58,6 +58,7 @@
     --mode-hover-bg: #F2F4F7;
     --mode-active-shadow: 0 2px 6px rgba(16, 24, 40, 0.1);
     --header-icon-filter: none;
+    --logo-filter: brightness(0.56) sepia(0.1);
     --table-header-bg: #F9FAFB;
     --table-row-hover-bg: #F9FAFB;
     --concept-header-bg: #FFFCF7;
@@ -126,6 +127,7 @@
         --mode-hover-bg: #2D3139;
         --mode-active-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
         --header-icon-filter: brightness(2.4);
+        --logo-filter: none;
         --table-header-bg: #2D3139;
         --table-row-hover-bg: #292D34;
         --concept-header-bg: #2B2926;
@@ -190,11 +192,20 @@ footer {
     font-size: 0.875rem;
 }
 
+.logo-wordmark {
+    width: 110px;
+    aspect-ratio: 227 / 47;
+    overflow: hidden;
+    flex: 0 0 auto;
+}
+
 .logo {
-    width: 100px;
+    display: block;
+    width: 100%;
     height: auto;
     margin: 0;
-    flex: 0 0 auto;
+    filter: var(--logo-filter);
+    transform: translateY(-48.35%);
 }
 
 .search-wrapper {
@@ -1493,8 +1504,8 @@ a:active {
         text-align: center;
     }
 
-    .logo {
-        width: 84px;
+    .logo-wordmark {
+        width: 92px;
     }
 
     .search-wrapper,

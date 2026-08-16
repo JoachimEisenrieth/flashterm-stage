@@ -16,7 +16,9 @@
 <body>
     <header>
         <div class="header-content">
-            <img id="logo" src="svg/logo-light.svg" alt="Logo" class="logo">
+            <div class="logo-wordmark">
+                <img id="logo" src="svg/logo-grau.svg" alt="flashterm" class="logo">
+            </div>
             <div class="search-wrapper">
                 <div class="search-container">
                     <input id="search-field" type="text" placeholder="Suche..." class="search-field" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="suggestions" aria-expanded="false">
@@ -180,7 +182,7 @@
                     logo.src = 'svg/logo-dark.svg';
                 } else {
                     favicon.href = 'flashterm-light.ico';
-                    logo.src = 'svg/logo-light.svg';
+                    logo.src = 'svg/logo-grau.svg';
                 }
             }
 
