@@ -238,11 +238,22 @@ async function initializeEventListeners() {
 
     // -------------------------------------------------------------------------------------------------
     // Modales Fenster – Profil
-    // -------------------------------------------------------------------------------------------------    
+    // -------------------------------------------------------------------------------------------------
+    const languageModal = document.getElementById('language-modal');
+    const closeLanguageModalButton = document.querySelector('.close');
+    let languageModalTrigger = null;
+
+    const closeLanguageModal = () => {
+        languageModal.style.display = 'none';
+        languageModalTrigger?.focus();
+    };
+
     document.getElementById('profile-icon').addEventListener('click', async function () {
 
         // Modales Fenster öffnen
-        document.getElementById('language-modal').style.display = 'block';
+        languageModalTrigger = document.activeElement;
+        languageModal.style.display = 'block';
+        closeLanguageModalButton.focus();
 
         try {
             // Sprachoptionen laden
@@ -253,14 +264,19 @@ async function initializeEventListeners() {
         }
     });
 
-    document.querySelector('.close').addEventListener('click', function () {
-        document.getElementById('language-modal').style.display = 'none';
+    closeLanguageModalButton.addEventListener('click', closeLanguageModal);
+
+    languageModal.addEventListener('keydown', event => {
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            closeLanguageModal();
+        }
     });
 
     document.getElementById('saveLanguageBtn').addEventListener('click', function () {
         const selectedLanguage = document.getElementById('language-selector').value;
         switchTargetLanguage(selectedLanguage);  // Funktion zur Zielsprache wechseln
-        document.getElementById('language-modal').style.display = 'none';
+        closeLanguageModal();
     });
 
     setupLanguageToggle('language-toggle-links', 'links-container', 'links-container-target');
