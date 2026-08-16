@@ -1165,6 +1165,26 @@ table:not(.term-table) tbody tr:hover {
     text-overflow: ellipsis;
 }
 
+.term-clickable {
+    padding: 0;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    background: none;
+    border: 0;
+    cursor: pointer;
+}
+
+.term-clickable:hover {
+    text-decoration: underline;
+}
+
+.term-clickable:focus-visible {
+    outline: 2px solid var(--focus-color);
+    outline-offset: 3px;
+    border-radius: 3px;
+}
+
 .term-rating {
     display: inline-flex;
     flex: 0 0 auto;
@@ -1426,6 +1446,11 @@ a:active {
 .export-icon:hover {
     background-color: var(--mode-hover-bg);
     transform: translateY(-1px);
+}
+
+.export-icon:focus-visible {
+    outline: 2px solid var(--focus-color);
+    outline-offset: 3px;
 }
 
 /* ================================================== */

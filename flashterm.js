@@ -1631,7 +1631,7 @@ function displayMinedTerms(foundTerms) {
 
         const categoryLabel = translations?.[guiLanguage]?.[`${category}_heading`] || category;
         const termResult = `<div class="term-result">
-                                <span class="term-result-label"><span class="term-clickable" data-concept-id="${term.conceptID}" data-source-language="${sourceLanguage}" data-target-language="${targetLanguage}">${term.originalTerm}</span> (${count})</span>
+                                <span class="term-result-label"><button type="button" class="term-clickable" data-concept-id="${term.conceptID}" data-source-language="${sourceLanguage}" data-target-language="${targetLanguage}">${term.originalTerm}</button> (${count})</span>
                                 <span class="term-rating ${ratingClass}" role="img" aria-label="${categoryLabel}" title="${categoryLabel}">${ratingIcon}</span>
                             </div>`;
 
@@ -1650,8 +1650,8 @@ function displayMinedTerms(foundTerms) {
             : '';
         return `<tr>
                     <td style="width: 50%;" data-label="${foundTermLabel}">${termResult}</td>
-                    <td style="width: 50%;" class="term-clickable preferred-term-cell" data-label="${preferredDesignationLabel}" data-concept-id="${term.conceptID}" data-source-language="${sourceLanguage}" data-target-language="${targetLanguage}">
-                        <div class="preferred-term-content"><span class="preferred-term-label">${translation}</span>${preferredRating}</div>
+                    <td style="width: 50%;" class="preferred-term-cell" data-label="${preferredDesignationLabel}">
+                        <button type="button" class="preferred-term-content term-clickable" data-concept-id="${term.conceptID}" data-source-language="${sourceLanguage}" data-target-language="${targetLanguage}"><span class="preferred-term-label">${translation}</span>${preferredRating}</button>
                     </td>
                 </tr>`;
     };
@@ -1709,6 +1709,12 @@ function displayMinedTerms(foundTerms) {
         const exportIcon = document.createElement('img');
         exportIcon.src = 'svg/export-icon-light.svg'; // Helles Icon für den Hellmodus
         exportIcon.classList.add('export-icon');
+        const exportLabel = translations?.[guiLanguage]?.export || 'Export';
+        exportIcon.alt = '';
+        exportIcon.setAttribute('role', 'button');
+        exportIcon.setAttribute('tabindex', '0');
+        exportIcon.setAttribute('aria-label', exportLabel);
+        exportIcon.title = exportLabel;
 
         // Füge das Icon in das Container-Div ein
         iconContainer.appendChild(exportIcon);
@@ -1724,6 +1730,12 @@ function displayMinedTerms(foundTerms) {
 
         // Event-Listener für das SVG-Icon
         exportIcon.addEventListener('click', exportTableToExcel);
+        exportIcon.addEventListener('keydown', event => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                exportIcon.click();
+            }
+        });
 
         document.querySelectorAll('.term-clickable').forEach(element => {
             element.addEventListener('click', function () {
