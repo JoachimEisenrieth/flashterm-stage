@@ -19,10 +19,10 @@
             <img id="logo" src="svg/logo-light.svg" alt="Logo" class="logo">
             <div class="search-wrapper">
                 <div class="search-container">
+                    <input id="search-field" type="text" placeholder="Suche..." class="search-field" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="suggestions" aria-expanded="false">
                     <button id="profile-icon" class="icon-button profile-icon" type="button" aria-label="Zielsprache auswählen">
                         <img src="svg/profile-icon.svg" alt="" class="icon">
                     </button>
-                    <input id="search-field" type="text" placeholder="Suche..." class="search-field" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="suggestions" aria-expanded="false">
                     <button id="clear-icon" class="icon-button clear-icon" type="button" aria-label="Suchfeld leeren" style="display: none;">
                         <img src="svg/clear-icon.svg" alt="" class="icon">
                     </button>
@@ -142,6 +142,7 @@
                     <h1 id="translator-start-heading">Terminologiegestützt übersetzen</h1>
                     <p id="translator-start-intro">Füge einen Text ein, um erkannte Fachbegriffe mit ihren bevorzugten Benennungen in der Zielsprache gegenüberzustellen.</p>
                 </div>
+                <div id="mining-status" class="visually-hidden" role="status" aria-live="polite"></div>
                 <div id="mining-container" class="hidden"></div>
             </div>
         </div>

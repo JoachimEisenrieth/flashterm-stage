@@ -40,6 +40,7 @@ const clearButton = document.getElementById('clear-icon');
 const closeIcon = document.getElementById('close-icon');
 const loadingIndicator = document.getElementById('loading');
 const miningDiv = document.getElementById('mining-container');
+const miningStatus = document.getElementById('mining-status');
 const searchField = document.getElementById('search-field');
 const startScreen = document.getElementById('start-screen');
 const inspectorStartScreen = document.getElementById('inspector-start-screen');
@@ -270,6 +271,21 @@ async function initializeEventListeners() {
         if (event.key === 'Escape') {
             event.preventDefault();
             closeLanguageModal();
+            return;
+        }
+
+        if (event.key === 'Tab') {
+            const focusableElements = [...languageModal.querySelectorAll('button:not(:disabled), select:not(:disabled)')];
+            const firstFocusableElement = focusableElements[0];
+            const lastFocusableElement = focusableElements[focusableElements.length - 1];
+
+            if (event.shiftKey && document.activeElement === firstFocusableElement) {
+                event.preventDefault();
+                lastFocusableElement.focus();
+            } else if (!event.shiftKey && document.activeElement === lastFocusableElement) {
+                event.preventDefault();
+                firstFocusableElement.focus();
+            }
         }
     });
 
@@ -1640,6 +1656,10 @@ function displayMinedTerms(foundTerms) {
     const hasFoundTerms = ['rejected', 'alternative', 'preferred']
         .some(category => Object.keys(foundTerms?.[category] || {}).length > 0);
 
+    if (miningStatus) {
+        miningStatus.textContent = '';
+    }
+
     if (!hasFoundTerms) {
         const noTermsMessage = translations?.[guiLanguage]?.no_terms_found || 'No registered terms were detected in the text.';
         miningDiv.innerHTML = `<p class="empty-state" role="status">${noTermsMessage}</p>`;
@@ -1647,6 +1667,12 @@ function displayMinedTerms(foundTerms) {
     }
 
     const isTranslatorMode = document.getElementById("translator").classList.contains("active");
+    const foundTermCount = ['rejected', 'alternative', 'preferred']
+        .reduce((count, category) => count + Object.keys(foundTerms[category]).length, 0);
+    if (miningStatus) {
+        miningStatus.textContent = (translations?.[guiLanguage]?.terms_found || '{count} registered terms found.')
+            .replace('{count}', foundTermCount);
+    }
     const sourceLanguageName = languageNames[sourceLanguage.substring(0, 2)] || sourceLanguage;
     const targetLanguageName = languageNames[targetLanguage.substring(0, 2)] || targetLanguage;
     const foundTermLabel = translations?.[guiLanguage]?.found_term || 'Found term';
