@@ -1570,6 +1570,7 @@ function hideEmptySections() {
             if (section.id === 'term-title') {
                 hasContent = section.textContent.trim() !== '';  // Wenn leer, ausblenden
                 section.classList.toggle('hidden', !hasContent);
+                document.getElementById('concept-header')?.classList.toggle('hidden', !hasContent);
             } else {
 
                 let sourceContainer = section.querySelector('.content-source');
@@ -1611,13 +1612,21 @@ function isContainerEmpty(container) {
 }
 
 function hideImageElements(imgContainer, termImage) {
-    if (imgContainer) imgContainer.style.display = 'none';
+    if (imgContainer) {
+        imgContainer.style.display = 'none';
+        imgContainer.classList.add('hidden');
+    }
     if (termImage) termImage.style.display = 'none';
+    document.getElementById('concept-header')?.classList.remove('has-image');
 }
 
 function showImageElements(imgContainer, termImage) {
-    if (imgContainer) imgContainer.style.display = 'flex';
+    if (imgContainer) {
+        imgContainer.classList.remove('hidden');
+        imgContainer.style.display = 'flex';
+    }
     if (termImage) termImage.style.display = 'block';
+    document.getElementById('concept-header')?.classList.add('has-image');
 }
 
 // ====================================================================================================
