@@ -16,6 +16,26 @@ let sourceTermList = [];
 let targetTermList = [];
 let searchMode = 'contains';
 
+const ratingIcons = {
+    preferred: '<svg class="rating-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="m8 12 2.5 2.5L16 9"></path></svg>',
+    alternative: '<svg class="rating-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle></svg>',
+    rejected: '<svg class="rating-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M5.64 5.64 18.36 18.36"></path></svg>'
+};
+
+function getRatingLegend() {
+    const preferred = translations?.[guiLanguage]?.preferred_heading || 'Preferred';
+    const alternative = translations?.[guiLanguage]?.alternative_heading || 'Alternative';
+    const rejected = translations?.[guiLanguage]?.rejected_heading || 'Rejected';
+
+    return {
+        label: translations?.[guiLanguage]?.rating_legend || 'Terminology status legend',
+        items: `
+            <span class="term-legend-item rating-preferred">${ratingIcons.preferred}<span>${preferred}</span></span>
+            <span class="term-legend-item rating-alternative">${ratingIcons.alternative}<span>${alternative}</span></span>
+            <span class="term-legend-item rating-rejected">${ratingIcons.rejected}<span>${rejected}</span></span>`
+    };
+}
+
 const clearButton = document.getElementById('clear-icon');
 const closeIcon = document.getElementById('close-icon');
 const loadingIndicator = document.getElementById('loading');
@@ -659,6 +679,13 @@ function showSuggestions(sourceTermList, query) {
             return;
         }
 
+        const suggestionLegend = document.getElementById('suggestion-legend');
+        if (suggestionLegend) {
+            const legend = getRatingLegend();
+            suggestionLegend.setAttribute('aria-label', legend.label);
+            suggestionLegend.innerHTML = legend.items;
+        }
+
         matchedTerms.forEach(term => {
             const div = document.createElement('div');
             div.classList.add('suggestion');
@@ -667,13 +694,13 @@ function showSuggestions(sourceTermList, query) {
             let rating;
             switch (term.weighting) {
                 case 0:
-                    rating = { symbol: '🚫', labelKey: 'rejected_heading', fallback: 'Rejected' };
+                    rating = { icon: ratingIcons.rejected, className: 'rating-rejected', labelKey: 'rejected_heading', fallback: 'Rejected' };
                     break;
                 case 1:
-                    rating = { symbol: '⭐', labelKey: 'alternative_heading', fallback: 'Alternative' };
+                    rating = { icon: ratingIcons.alternative, className: 'rating-alternative', labelKey: 'alternative_heading', fallback: 'Alternative' };
                     break;
                 case 2:
-                    rating = { symbol: '⭐⭐', labelKey: 'preferred_heading', fallback: 'Preferred' };
+                    rating = { icon: ratingIcons.preferred, className: 'rating-preferred', labelKey: 'preferred_heading', fallback: 'Preferred' };
                     break;
             }
 
@@ -682,8 +709,8 @@ function showSuggestions(sourceTermList, query) {
 
                 const ratingIcon = document.createElement('span');
                 const ratingLabel = translations?.[guiLanguage]?.[rating.labelKey] || rating.fallback;
-                ratingIcon.classList.add('suggestion-rating');
-                ratingIcon.textContent = rating.symbol;
+                ratingIcon.classList.add('suggestion-rating', rating.className);
+                ratingIcon.innerHTML = rating.icon;
                 ratingIcon.setAttribute('role', 'img');
                 ratingIcon.setAttribute('aria-label', ratingLabel);
                 ratingIcon.title = ratingLabel;
@@ -1081,9 +1108,21 @@ function updateDOMElements(conceptData, targetLanguage, imagePath) {
     const termTitleElement = document.getElementById('term-title');
     if (termTitleElement) {
         termTitleElement.innerHTML = '';
-        const termTitle = `${preferredTermSource}${preferredTermTarget ? ` | <span class="target-language">${preferredTermTarget}</span>` : ''}`;
-        const stars = `<span style="float: right;">⭐⭐</span>`;
-        termTitleElement.innerHTML = `${stars}${termTitle}`;
+        const preferredDesignationLabel = translations?.[guiLanguage]?.preferred_designation || 'Preferred designation';
+        const sourceLanguageName = cachedLanguageOptions?.find(language => language.code === sourceLanguage)?.name || sourceLanguage;
+        const targetLanguageName = cachedLanguageOptions?.find(language => language.code === targetLanguage)?.name || targetLanguage;
+        const sourceTitle = `
+            <span class="concept-term concept-term-source">
+                <span class="concept-term-label">${sourceLanguageName} · ${preferredDesignationLabel}</span>
+                <span class="concept-term-value" lang="${sourceLanguage}">${preferredTermSource}</span>
+            </span>`;
+        const targetTitle = preferredTermTarget
+            ? `<span class="concept-term concept-term-target">
+                    <span class="concept-term-label">${targetLanguageName} · ${preferredDesignationLabel}</span>
+                    <span class="concept-term-value" lang="${targetLanguage}">${preferredTermTarget}</span>
+               </span>`
+            : '';
+        termTitleElement.innerHTML = `${sourceTitle}${targetTitle}`;
     }
 
     // Bild anzeigen
@@ -1199,13 +1238,15 @@ function generateSynonymsContent(synonyms) {
     }
     let content = '<table class="synonyms-table">';
 
-    const alternativeIcon = '⭐'; // Symbol für Alternativbegriffe
+    const alternativeLabel = translations?.[guiLanguage]?.alternative_heading || 'Alternative';
+    const alternativeIcon = `<span class="synonym-rating rating-alternative" role="img" aria-label="${alternativeLabel}" title="${alternativeLabel}">${ratingIcons.alternative}</span>`;
     synonyms.alternative.forEach(term => {
         const isSelected = term === selectedTerm; // Überprüfen, ob dies die gewählte Benennung ist
         content += `<tr><td>${alternativeIcon}</td><td><span class="${isSelected ? 'highlighted-term' : ''}">${term}</span></td></tr>`;
     });
 
-    const rejectedIcon = '🚫'; // Symbol für abgelehnte Begriffe
+    const rejectedLabel = translations?.[guiLanguage]?.rejected_heading || 'Rejected';
+    const rejectedIcon = `<span class="synonym-rating rating-rejected" role="img" aria-label="${rejectedLabel}" title="${rejectedLabel}">${ratingIcons.rejected}</span>`;
     synonyms.rejected.forEach(term => {
         const isSelected = term === selectedTerm; // Überprüfen, ob dies die gewählte Benennung ist
         content += `<tr><td>${rejectedIcon}</td><td><span class="${isSelected ? 'highlighted-term' : ''}">${term}</span></td></tr>`;
@@ -1560,23 +1601,27 @@ function displayMinedTerms(foundTerms) {
     const targetLanguageName = languageNames[targetLanguage.substring(0, 2)] || targetLanguage;
 
     const createTableRow = (term, count, category, preferredTerm) => {
-        let symbol = '';
+        let ratingClass = '';
+        let ratingIcon = '';
         switch (category) {
             case 'rejected':
-                symbol = '🚫';
+                ratingClass = 'rating-rejected';
+                ratingIcon = ratingIcons.rejected;
                 break;
             case 'alternative':
-                symbol = '⭐';
+                ratingClass = 'rating-alternative';
+                ratingIcon = ratingIcons.alternative;
                 break;
             case 'preferred':
-                symbol = '⭐⭐';
+                ratingClass = 'rating-preferred';
+                ratingIcon = ratingIcons.preferred;
                 break;
         }
 
         const categoryLabel = translations?.[guiLanguage]?.[`${category}_heading`] || category;
         const termResult = `<div class="term-result">
                                 <span class="term-result-label"><span class="term-clickable" data-concept-id="${term.conceptID}" data-source-language="${sourceLanguage}" data-target-language="${targetLanguage}">${term.originalTerm}</span> (${count})</span>
-                                <span class="term-rating" role="img" aria-label="${categoryLabel}" title="${categoryLabel}">${symbol}</span>
+                                <span class="term-rating ${ratingClass}" role="img" aria-label="${categoryLabel}" title="${categoryLabel}">${ratingIcon}</span>
                             </div>`;
 
         if (!isTranslatorMode && term.originalTerm === preferredTerm) {
@@ -1589,12 +1634,13 @@ function displayMinedTerms(foundTerms) {
         const hasPreferredTerm = normalizedPreferredTerm !== '' && normalizedPreferredTerm !== '–' && normalizedPreferredTerm !== '-';
         const translation = hasPreferredTerm ? preferredTerm : '–';
         const preferredLabel = translations?.[guiLanguage]?.preferred_heading || 'Preferred';
-        const preferredRatingClass = hasPreferredTerm ? ' has-preferred-rating' : '';
-        const preferredRatingTitle = hasPreferredTerm ? ` title="${preferredLabel}"` : '';
+        const preferredRating = hasPreferredTerm
+            ? `<span class="term-rating rating-preferred" role="img" aria-label="${preferredLabel}" title="${preferredLabel}">${ratingIcons.preferred}</span>`
+            : '';
         return `<tr>
                     <td style="width: 50%;">${termResult}</td>
-                    <td style="width: 50%;" class="term-clickable preferred-term-cell${preferredRatingClass}" data-concept-id="${term.conceptID}" data-source-language="${sourceLanguage}" data-target-language="${targetLanguage}"${preferredRatingTitle}>
-                        ${translation}
+                    <td style="width: 50%;" class="term-clickable preferred-term-cell" data-concept-id="${term.conceptID}" data-source-language="${sourceLanguage}" data-target-language="${targetLanguage}">
+                        <div class="preferred-term-content"><span class="preferred-term-label">${translation}</span>${preferredRating}</div>
                     </td>
                 </tr>`;
     };
@@ -1617,7 +1663,11 @@ function displayMinedTerms(foundTerms) {
     };
 
     const preferredLanguageName = isTranslatorMode ? targetLanguageName : sourceLanguageName;
+    const legend = getRatingLegend();
+    const legendContent = `
+            <div class="term-legend" aria-label="${legend.label}">${legend.items}</div>`;
     let tableContent = `
+            ${legendContent}
             <table class="term-table">
                 <thead>
                     <tr>
