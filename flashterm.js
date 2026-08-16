@@ -586,7 +586,7 @@ function handleInputEvent(event, eventType) {
                 searchField.dispatchEvent(new Event('input')); // Löst das Input-Event aus
 
                 if (query !== "") {
-                    switchMode('inspector');
+                    switchMode(currentMode === 'translator' ? 'translator' : 'inspector');
                 }
                 termMining();
             }, 10); // Eine kurze Verzögerung, um sicherzustellen, dass der eingefügte Wert verfügbar ist

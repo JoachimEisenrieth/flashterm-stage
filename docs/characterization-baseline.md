@@ -126,7 +126,7 @@ Der primäre Inspector-Ablauf ist ein Paste-Event:
 1. Nach einer Verzögerung von 10 ms wird der eingefügte, getrimmte Text gelesen.
 2. Der Text wird in `savedText` gespeichert.
 3. Das sichtbare Suchfeld wird geleert und ein künstliches `input`-Event ausgelöst.
-4. Bei nicht leerem Text wird in den Inspector-Modus gewechselt.
+4. Bei nicht leerem Text bleibt ein bereits aktiver Translator erhalten; aus Wiki beziehungsweise Inspector wird in den Inspector-Modus gewechselt.
 5. `termMining()` wird aufgerufen.
 
 Normales Tippen im Inspector führt bei nicht leerer Eingabe wieder in den Wiki-Modus. Die Inspector-Funktion ist damit aktuell primär auf Einfügen per Zwischenablage ausgerichtet.
@@ -185,6 +185,7 @@ Normales Tippen im Inspector führt bei nicht leerer Eingabe wieder in den Wiki-
 ### Benutzerinteraktionen
 
 - Der Translator wird über die Modusnavigation aktiviert.
+- Wird Text direkt im aktiven Translator eingefügt, bleibt der Translator aktiv und zeigt unmittelbar die zweisprachige Ergebnistabelle. Dies behebt das frühere unbeabsichtigte Zurückspringen in den Inspector.
 - Ein Klick auf einen Terminus öffnet dessen Wiki-Ansicht.
 - Ein Wechsel der Zielsprache lädt die neue Zielterminliste.
 - Wenn der Translator während des Zielsprachwechsels aktiv ist, wird die vorhandene Tabelle nicht ausdrücklich sofort neu gerendert. Ein erneuter Moduswechsel rendert sie aus dem aktuellen Zustand neu. **Zu verifizieren.**
@@ -432,6 +433,7 @@ Header und Hauptüberschrift verwenden feste beziehungsweise sticky Positionieru
 | FT-TRANSLATOR-001 | Noch kein Text analysiert | Translator anklicken | Mining-Bereich erscheint; Suchfeld fordert zum Einfügen von Text auf |
 | FT-TRANSLATOR-002 | Text wurde im Inspector analysiert | Translator anklicken | Tabelle wird mit bevorzugten Benennungen aus der Zielterminliste neu gerendert |
 | FT-TRANSLATOR-003 | Translator-Tabelle sichtbar | Zielsprache wechseln | Neue Zielterminliste wird geladen; unmittelbare Aktualisierung der sichtbaren Tabelle ist zu verifizieren |
+| FT-TRANSLATOR-004 | Translator aktiv, noch kein Text analysiert | Mehrzeiligen Text in das Suchfeld einfügen | Translator bleibt aktiv und zeigt die erkannten Termini unmittelbar mit den Vorzugsbenennungen der Zielsprache |
 | FT-LANG-001 | Anwendung initialisiert | Profil-Icon anklicken | Modal öffnet; FileMaker-Sprachoptionen ersetzen den initialen lokalen Selector-Inhalt |
 | FT-LANG-002 | Modal offen | Andere Zielsprache speichern | Target wird gespeichert, URL und Titel ändern sich, Zielterminliste wird neu geladen |
 | FT-LANG-003 | Wiki mit ausgewähltem Concept | Zielsprache wechseln | Concept wird für das neue Sprachpaar erneut geladen |
