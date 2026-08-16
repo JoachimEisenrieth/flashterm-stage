@@ -200,6 +200,8 @@ Zu dokumentieren:
 
 Nicht sofort mehrere Integrationen beginnen. Zunächst genau eine zweite realistische Quelle oder einen Austauschstandard auswählen. Mögliche Kandidaten werden erst anhand konkreter Nutzeranforderungen bewertet.
 
+Als konkrete Explorationsidee ist ein lokaler TBX-Viewer dokumentiert. Er könnte TBX-Dateien ohne automatische Serverübertragung über die bestehende Oberfläche nutzbar machen und später eine kontrollierte Grundlage für AI-gestützte Erklärungen, Textprüfung und Qualitätsanalyse bilden. Das Konzept, seine Leitplanken und offenen Validierungsfragen stehen in [`docs/tbx-viewer-ai-concept.md`](tbx-viewer-ai-concept.md).
+
 Abnahmekriterium:
 
 - Dieselbe stage-Oberfläche läuft ohne Sonderlogik gegen zwei unterschiedliche Quellen.
