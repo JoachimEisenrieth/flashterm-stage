@@ -4,19 +4,22 @@
       {
         "fieldData": {
           "languageCode": "xx-XX",
-          "language": "Alpha language"
+          "language": "Alpha language",
+          "source": "xx-XX"
         }
       },
       {
         "fieldData": {
           "languageCode": "yy-YY",
-          "language": "Beta language"
+          "language": "Beta language",
+          "source": "xx-XX"
         }
       },
       {
         "fieldData": {
           "languageCode": "zz-ZZ",
-          "language": "Gamma language"
+          "language": "Gamma language",
+          "source": "xx-XX"
         }
       }
     ]

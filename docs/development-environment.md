@@ -52,7 +52,7 @@ Erwartet werden diese Felder:
 | `username` | FileMaker-Benutzer | Nicht committen oder ausgeben |
 | `password` | FileMaker-Passwort | Nicht committen oder ausgeben |
 | `imagePath` | Basisadresse für Concept-Bilder | Muss zu den ausgelieferten Bildpfaden passen |
-| `initialSourceLanguage` | Standardsprache der Terminologiesuche | Vollständigen erwarteten Sprachcode verwenden |
+| `initialSourceLanguage` | Rückfall für die Ausgangssprache, falls `languageAPI` keine eindeutige Source liefert | Vollständigen erwarteten Sprachcode verwenden |
 | `initialTargetLanguage` | Standardzielsprache | Vollständigen erwarteten Sprachcode verwenden |
 
 Vorhandene lokale Konfigurationen dürfen nicht automatisch durch die Beispieldatei ersetzt werden. `config.example.js` enthält ausschließlich Platzhalter und darf keine realen Zugangsdaten erhalten.
@@ -127,7 +127,7 @@ Vor und nach Änderungen:
 npm test
 ```
 
-Der erwartete aktuelle Stand ist `68/68` erfolgreiche Tests. Einige Dev-Server-Tests öffnen temporäre Loopback-Ports. In eingeschränkten Ausführungsumgebungen kann dafür eine lokale Freigabe erforderlich sein.
+Der erwartete aktuelle Stand ist `73/73` erfolgreiche Tests. Einige Dev-Server-Tests öffnen temporäre Loopback-Ports. In eingeschränkten Ausführungsumgebungen kann dafür eine lokale Freigabe erforderlich sein.
 
 Zusätzliche Prüfungen nach JavaScript-Änderungen:
 

@@ -68,9 +68,9 @@ test('getLanguages calls only the language API and returns mapped languages', as
     concept: []
   });
   assert.deepEqual(result, [
-    { code: 'xx-XX', name: 'Alpha language' },
-    { code: 'yy-YY', name: 'Beta language' },
-    { code: 'zz-ZZ', name: 'Gamma language' }
+    { code: 'xx-XX', name: 'Alpha language', isSource: true },
+    { code: 'yy-YY', name: 'Beta language', isSource: false },
+    { code: 'zz-ZZ', name: 'Gamma language', isSource: false }
   ]);
 });
 

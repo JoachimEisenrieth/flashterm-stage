@@ -11,6 +11,7 @@ import { getConceptSectionAvailability } from './src/app/concept-section-availab
 import { createConceptViewModel } from './src/app/concept-view-model.js';
 import { serializeCsv } from './src/app/csv-export.js';
 import { parseLanguageCache, serializeLanguageCache } from './src/app/language-cache.js';
+import { getSourceLanguage } from './src/app/source-language.js';
 import { terminologyRepository } from './src/app/terminology-repository.js';
 
 const langParams = getLanguageParamsFromURL();
@@ -85,6 +86,7 @@ async function initialize() {
 
             // Sprachoptionen für das GUI laden und cachen
             const languagesLoaded = await fetchAndCacheLanguageOptions(guiLanguage);
+            const sourceLanguageResolved = applySourceLanguageFromOptions();
 
             // Quell-Termini für die Ausgangssprache laden
             const sourceTermsLoaded = await fetchSourceTermList(sourceLanguage);
@@ -105,6 +107,7 @@ async function initialize() {
             const isDegraded = [
                 translationsLoaded,
                 languagesLoaded,
+                sourceLanguageResolved,
                 sourceTermsLoaded,
                 targetTermsLoaded
             ].includes(false);
@@ -367,7 +370,7 @@ function initializeEventListeners() {
 }
 
 // ====================================================================================================
-// Verwende initialSourceLanguage und initialTargetLanguage aus config.js
+// Verwende URL- und Konfigurationswerte bis die führende Source aus languageAPI geladen wurde.
 // ====================================================================================================
 function getGuiLanguage() {
     const browserLanguage = navigator.language || navigator.userLanguage || 'en-GB';
@@ -756,6 +759,22 @@ async function fetchTargetTermList(language) {
 // Sprachoptionen laden
 // ====================================================================================================
 let cachedLanguageOptions = null;
+
+function applySourceLanguageFromOptions() {
+    const configuredSourceLanguage = getSourceLanguage(cachedLanguageOptions);
+    if (!configuredSourceLanguage) {
+        logWarning('Keine eindeutige Source-Sprache in den Sprachdaten gefunden.');
+        return false;
+    }
+
+    if (sourceLanguage !== configuredSourceLanguage.code) {
+        sourceLanguage = configuredSourceLanguage.code;
+        updateURLWithLanguages(sourceLanguage, targetLanguage);
+    }
+
+    return true;
+}
+
 async function fetchAndCacheLanguageOptions(guiLanguage) {
     // Überprüfe, ob die Sprachdaten bereits im SessionStorage vorhanden sind
     const cachedData = sessionStorage.getItem('languageData');
@@ -997,10 +1016,14 @@ function updateModeText() {
             ? targetLanguageData.name
             : targetLanguage.toUpperCase();
 
+        const sourceLanguageLabel = sourceLanguageData?.isSource
+            ? `${sourceLanguageName} · Source`
+            : sourceLanguageName;
+
         // Hier werden zwei schmale Leerzeichen (&thinsp;) verwendet
-        const wikiText = `${sourceLanguageName} &thinsp;&thinsp;|&thinsp;&thinsp; ${targetLanguageName}`;
-        const inspectorText = `${sourceLanguageName}`;
-        const translatorText = `${sourceLanguageName} ➔ ${targetLanguageName}`;
+        const wikiText = `${sourceLanguageLabel} &thinsp;&thinsp;|&thinsp;&thinsp; ${targetLanguageName}`;
+        const inspectorText = `${sourceLanguageLabel}`;
+        const translatorText = `${sourceLanguageLabel} ➔ ${targetLanguageName}`;
 
         const wikiElement = document.getElementById('wiki');
         if (wikiElement) {

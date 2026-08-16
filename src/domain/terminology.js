@@ -16,7 +16,9 @@ export function parseTermList(data) {
 export function mapLanguages(records) {
     return records.map(record => ({
         code: record.fieldData.languageCode,
-        name: record.fieldData.language
+        name: record.fieldData.language,
+        isSource: Boolean(record.fieldData.source)
+            && record.fieldData.source === record.fieldData.languageCode
     }));
 }
 

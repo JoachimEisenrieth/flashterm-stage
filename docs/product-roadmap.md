@@ -19,7 +19,7 @@ flashterm stage besitzt bereits einen belastbaren fachlichen Kern und drei unter
 - Die Concept-Darstellung ist vom FileMaker-Rohformat entkoppelt.
 - Excel unterstützt die menschliche Auswertung; CSV und JSON unterstützen technische Weiterverarbeitung.
 - Die Oberfläche besitzt eine konsistente, warme und zurückhaltende Gestaltung sowie Light und Dark Mode.
-- Characterization Baseline, anonymisierte Fixtures und 68 Unit-Tests sichern wichtige bestehende Verträge.
+- Characterization Baseline, anonymisierte Fixtures und 73 Unit-Tests sichern wichtige bestehende Verträge.
 - Der lokale Development-Proxy ermöglicht realistische Browserprüfungen ohne Änderungen am FileMaker-Server.
 
 ### Noch nicht produktreif gelöst

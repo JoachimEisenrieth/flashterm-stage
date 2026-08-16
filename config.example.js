@@ -4,6 +4,6 @@ export const config = {
     username: 'YOUR_FILEMAKER_USERNAME',
     password: 'YOUR_FILEMAKER_PASSWORD',
     imagePath: 'https://your-image-server.example.com/path/to/images/',
-    initialSourceLanguage: 'SOURCE_LANGUAGE_CODE',
+    initialSourceLanguage: 'SOURCE_LANGUAGE_CODE', // Fallback, falls languageAPI keine eindeutige Source liefert
     initialTargetLanguage: 'TARGET_LANGUAGE_CODE'
 };

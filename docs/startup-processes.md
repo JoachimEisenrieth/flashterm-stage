@@ -63,7 +63,7 @@ Kann eine statische Modulabhängigkeit – insbesondere `config.js` – nicht ge
 Sobald der Modulbaum verfügbar ist, führt `flashterm.js` synchron folgende Schritte aus:
 
 1. `getLanguageParamsFromURL()` liest `source` und `target`.
-2. Fehlende Werte fallen auf `config.initialSourceLanguage` und `config.initialTargetLanguage` zurück; für ein weiterhin fehlendes Target wird `''` verwendet.
+2. Fehlende Werte fallen zunächst auf `config.initialSourceLanguage` und `config.initialTargetLanguage` zurück; für ein weiterhin fehlendes Target wird `''` verwendet.
 3. Die GUI-Sprache wird aus der Browserlocale ermittelt.
 4. DOM-Referenzen und initiale Modulzustände werden aufgebaut.
 5. Die zentralen Event-Listener werden genau einmal registriert.
@@ -92,7 +92,7 @@ sequenceDiagram
     Init->>Cache: Token und lokale Ablaufzeit speichern
     Init->>Static: translations.json laden
     Static-->>Init: GUI-Texte
-    Init->>Cache: Sprachcache V2 prüfen
+    Init->>Cache: Sprachcache V3 prüfen
     alt gültiger Cache für GUI-Sprache
         Cache-->>Init: normalisierte Sprachoptionen
     else Cachemiss
@@ -100,6 +100,7 @@ sequenceDiagram
         FM-->>Init: Sprachrecords
         Init->>Cache: normalisierte Optionen speichern
     end
+    Init->>Init: Eindeutige Source ermitteln; URL korrigieren
     Init->>FM: Quellterminliste laden
     FM-->>Init: Termrecords
     Init->>FM: Zielterminliste laden
@@ -133,7 +134,9 @@ Anschließend wird `json/translations.json` geladen und die vorhandenen überset
 
 ### 5.3 Sprachoptionen und Cache
 
-`fetchAndCacheLanguageOptions()` prüft `sessionStorage.languageData`. Wiederverwendet wird ausschließlich ein syntaktisch gültiges V2-Envelope für die aktuelle GUI-Sprache. Bei einem Cachemiss lädt das Repository die Sprachoptionen aus FileMaker und speichert die normalisierte Liste wieder im Session Storage.
+`fetchAndCacheLanguageOptions()` prüft `sessionStorage.languageData`. Wiederverwendet wird ausschließlich ein syntaktisch gültiges V3-Envelope für die aktuelle GUI-Sprache. Es enthält neben Sprachcode und Name die normalisierte Source-Kennzeichnung. Der frühere V2-Cache wird bewusst verworfen. Bei einem Cachemiss lädt das Repository die Sprachoptionen aus FileMaker und speichert die normalisierte Liste wieder im Session Storage.
+
+Nach dem Laden ermittelt `getSourceLanguage()` genau eine Sprache mit `isSource: true`. Ihr Code ersetzt einen abweichenden vorläufigen URL- oder Config-Wert und wird in die URL geschrieben. Fehlt eine eindeutige Source, läuft die Anwendung mit dem bisherigen Rückfallwert im Zustand `degraded` weiter.
 
 Fehler in diesem Schritt werden innerhalb der Funktion behandelt. Die Initialisierung läuft mit fehlenden Sprachoptionen weiter; die Modusbeschriftungen können dann nicht vollständig aktualisiert werden.
 
@@ -244,7 +247,7 @@ Bereits umgesetzt sind die expliziten Zustände `starting`, `ready`, `degraded` 
 1. **Sprachquellen vereinheitlichen.** Der lokale `languages.json`-Pfad und der FileMaker-/Cache-Pfad sollten nicht denselben Selector unabhängig befüllen. Eine einzige Quelle mit klar dokumentiertem Fallback beseitigt Timing-Abhängigkeiten.
 2. **Unabhängige Abrufe parallelisieren.** Nach erfolgreicher Anmeldung können Übersetzungen, Sprachoptionen sowie Quell- und Zielterminologie grundsätzlich parallel geladen werden. Dafür sind isolierte Fehlerbehandlung und eine zentrale Ladezustandszählung erforderlich.
 3. **Leeres Target nicht abrufen.** Ohne Zielsprachcode kann die Zielterminliste direkt auf leer gesetzt werden. Das spart einen unnötigen API-Request und vermeidet unklare FileMaker-Reaktionen.
-4. **URL-Sprachen validieren.** Nach dem Laden der Sprachoptionen sollten unbekannte `source`-/`target`-Werte kontrolliert auf Konfigurationswerte oder eine sichtbare Auswahl zurückfallen. Locale-Codes müssen vollständig verglichen werden.
+4. **Zielsprache validieren.** Die Source wird inzwischen aus der FileMaker-Mastersprache abgeleitet. Ein unbekannter `target`-Wert sollte noch kontrolliert auf eine gespeicherte oder sichtbare Auswahl zurückfallen. Locale-Codes müssen vollständig verglichen werden.
 5. **Initialisierung explizit abwarten.** Eine zentrale `bootstrap()`-Funktion kann synchrone UI-Vorbereitung und asynchrone Datenbereitschaft in einer nachvollziehbaren Reihenfolge koordinieren, statt `initialize()` unbeobachtet zu starten.
 6. **Ladeanzeige zentral verwalten.** Ein Request-Zähler oder phasenbezogener Ladezustand verhindert vorzeitiges Ausblenden und Flackern, insbesondere nach einer Parallelisierung.
 

@@ -4,25 +4,25 @@ import test from 'node:test';
 import { parseLanguageCache, serializeLanguageCache } from '../../src/app/language-cache.js';
 
 const languages = [
-  { code: 'xx-XX', name: 'Alpha language' },
-  { code: 'yy-YY', name: 'Beta language' }
+  { code: 'xx-XX', name: 'Alpha language', isSource: true },
+  { code: 'yy-YY', name: 'Beta language', isSource: false }
 ];
 
-test('serializes languages using the exact V2 cache envelope', () => {
+test('serializes languages using the exact V3 cache envelope', () => {
   assert.deepEqual(JSON.parse(serializeLanguageCache('ui-XX', languages)), {
-    version: 2,
+    version: 3,
     guiLanguage: 'ui-XX',
     languages
   });
 });
 
-test('returns languages from a valid V2 cache for the current GUI locale', () => {
+test('returns languages from a valid V3 cache for the current GUI locale', () => {
   const serialized = serializeLanguageCache('ui-XX', languages);
 
   assert.deepEqual(parseLanguageCache(serialized, 'ui-XX'), languages);
 });
 
-test('rejects a V2 cache for a different GUI locale', () => {
+test('rejects a V3 cache for a different GUI locale', () => {
   const serialized = serializeLanguageCache('ui-XX', languages);
 
   assert.equal(parseLanguageCache(serialized, 'ui-YY'), null);
@@ -54,13 +54,21 @@ test('rejects missing versions and non-array languages', () => {
   }), 'ui-XX'), null);
 
   assert.equal(parseLanguageCache(JSON.stringify({
-    version: 2,
+    version: 3,
     guiLanguage: 'ui-XX',
     languages: {}
   }), 'ui-XX'), null);
 });
 
-test('accepts an empty languages array in an otherwise valid V2 cache', () => {
+test('rejects the previous V2 cache envelope', () => {
+  assert.equal(parseLanguageCache(JSON.stringify({
+    version: 2,
+    guiLanguage: 'ui-XX',
+    languages: languages.map(({ code, name }) => ({ code, name }))
+  }), 'ui-XX'), null);
+});
+
+test('accepts an empty languages array in an otherwise valid V3 cache', () => {
   const serialized = serializeLanguageCache('ui-XX', []);
 
   assert.deepEqual(parseLanguageCache(serialized, 'ui-XX'), []);

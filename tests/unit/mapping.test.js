@@ -16,16 +16,16 @@ const conceptRecords = conceptFixture.response.data.map(({ fieldData }) => ({
 
 test('maps multiple FileMaker language records to internal languages', () => {
   assert.deepEqual(mapLanguages(languageFixture.response.data), [
-    { code: 'xx-XX', name: 'Alpha language' },
-    { code: 'yy-YY', name: 'Beta language' },
-    { code: 'zz-ZZ', name: 'Gamma language' }
+    { code: 'xx-XX', name: 'Alpha language', isSource: true },
+    { code: 'yy-YY', name: 'Beta language', isSource: false },
+    { code: 'zz-ZZ', name: 'Gamma language', isSource: false }
   ]);
 });
 
 test('characterizes structural language mapping edge cases', () => {
   assert.deepEqual(mapLanguages([]), []);
   assert.deepEqual(mapLanguages([{ fieldData: {} }]), [
-    { code: undefined, name: undefined }
+    { code: undefined, name: undefined, isSource: false }
   ]);
   assert.throws(() => mapLanguages([{}]), TypeError);
 });
