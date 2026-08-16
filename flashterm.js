@@ -1632,12 +1632,12 @@ function retrievePreferredTerm(conceptID, termList) {
 }
 
 function setupExportClickHandlers() {
-    const exportIcons = document.querySelectorAll('.export-icon');
-    if (exportIcons.length > 0) {
-        exportIcons.forEach(icon => {
-            if (!icon.hasListener) {
-                icon.addEventListener('click', exportTerms);
-                icon.hasListener = true;
+    const exportButtons = document.querySelectorAll('.export-button');
+    if (exportButtons.length > 0) {
+        exportButtons.forEach(button => {
+            if (!button.hasListener) {
+                button.addEventListener('click', exportTerms);
+                button.hasListener = true;
             }
         });
     }
@@ -1770,26 +1770,25 @@ function displayMinedTerms(foundTerms) {
     if (typeof miningDiv !== 'undefined' && miningDiv) {
         miningDiv.innerHTML = tableContent;
 
-        // Erstelle ein Container-Div, um das Icon nach der Tabelle zu platzieren
-        const iconContainer = document.createElement('div');
-        iconContainer.style.position = 'relative'; // Verhindert, dass das Icon an den oberen Rand der Seite gedrängt wird
+        const exportContainer = document.createElement('div');
+        exportContainer.classList.add('export-actions');
 
-        // SVG-Icon als externes Bild hinzufügen
+        const exportButton = document.createElement('button');
+        exportButton.type = 'button';
+        exportButton.classList.add('export-button');
+
         const exportIcon = document.createElement('img');
-        exportIcon.src = 'svg/export-icon-light.svg'; // Helles Icon für den Hellmodus
-        exportIcon.classList.add('export-icon');
-        const exportLabel = translations?.[guiLanguage]?.export || 'Export';
+        exportIcon.src = 'svg/export-icon-light.svg';
+        exportIcon.classList.add('export-button-icon');
         exportIcon.alt = '';
-        exportIcon.setAttribute('role', 'button');
-        exportIcon.setAttribute('tabindex', '0');
-        exportIcon.setAttribute('aria-label', exportLabel);
-        exportIcon.title = exportLabel;
 
-        // Füge das Icon in das Container-Div ein
-        iconContainer.appendChild(exportIcon);
+        const exportLabel = translations?.[guiLanguage]?.export_results || 'Export results';
+        const exportText = document.createElement('span');
+        exportText.textContent = exportLabel;
+        exportButton.append(exportIcon, exportText);
+        exportContainer.appendChild(exportButton);
 
-        // Füge das Icon-Container-Div nach der Tabelle ein
-        miningDiv.appendChild(iconContainer);
+        miningDiv.appendChild(exportContainer);
 
         // Media Query für den Dark Mode
         const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -1797,14 +1796,7 @@ function displayMinedTerms(foundTerms) {
             exportIcon.src = 'svg/export-icon-dark.svg'; // Dunkles Icon für den Dunkelmodus
         }
 
-        // Event-Listener für das SVG-Icon
-        exportIcon.addEventListener('click', exportTableToExcel);
-        exportIcon.addEventListener('keydown', event => {
-            if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault();
-                exportIcon.click();
-            }
-        });
+        exportButton.addEventListener('click', exportTableToExcel);
 
         document.querySelectorAll('.term-clickable').forEach(element => {
             element.addEventListener('click', function () {

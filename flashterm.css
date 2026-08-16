@@ -1496,30 +1496,45 @@ a:active {
 }
 
 /* ================================================== */
-/* Icon [Export]                                      */
+/* Export                                             */
 /* ================================================== */
-.export-icon {
-    width: var(--icon-lage);
-    height: var(--icon-lage);
-    cursor: pointer;
-    display: block;
+.export-actions {
+    display: flex;
+    justify-content: center;
     margin: 28px auto 0;
-    padding: 10px;
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    background-color: var(--mode-switch-bg);
-    box-sizing: content-box;
-    transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
-.export-icon:hover {
+.export-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 42px;
+    padding: 10px 16px;
+    color: var(--text-color);
+    background-color: var(--concept-header-bg);
+    border: 1px solid var(--concept-header-border);
+    border-radius: 12px;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+}
+
+.export-button:hover {
+    border-color: var(--active-color);
     background-color: var(--mode-hover-bg);
     transform: translateY(-1px);
 }
 
-.export-icon:focus-visible {
+.export-button:focus-visible {
     outline: 2px solid var(--focus-color);
     outline-offset: 3px;
+}
+
+.export-button-icon {
+    width: 18px;
+    height: 18px;
 }
 
 /* ================================================== */
