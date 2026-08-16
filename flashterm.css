@@ -584,7 +584,6 @@ h3 {
 }
 
 .suggestion.highlighted {
-    box-shadow: inset 3px 0 0 var(--focus-color);
     font-weight: 600;
 }
 
