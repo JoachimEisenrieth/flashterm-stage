@@ -1012,13 +1012,18 @@ function createLanguageMenuForSection(section, availability) {
     languageToggleElement.innerHTML = '';  // Leeren, falls vorherige Einträge existieren
     allLanguages.forEach((lang, index) => {
         const langCode = lang.substring(0, 2);
+        const languageName = cachedLanguageOptions?.find(language => language.code === lang)?.name || lang;
         const button = document.createElement('button');
         button.classList.add('language-option');
 
         // Wenn die Sprache verfügbar ist, zeige den Sprachcode
         if (availableLanguages.includes(lang)) {
+            const showLanguageLabel = (translations?.[guiLanguage]?.show_language || 'Show {language}')
+                .replace('{language}', languageName);
             button.textContent = langCode;
             button.setAttribute('data-lang', langCode);
+            button.setAttribute('aria-label', showLanguageLabel);
+            button.title = showLanguageLabel;
 
             // Markiere die erste Sprache als ausgewählt
             if (index === 0) {
@@ -1032,7 +1037,11 @@ function createLanguageMenuForSection(section, availability) {
             });
         } else {
             // Wenn die Sprache keinen Inhalt hat, zeige einen Gedankenstrich und mache den Button inaktiv
+            const unavailableLanguageLabel = (translations?.[guiLanguage]?.language_unavailable || 'No content available in {language}')
+                .replace('{language}', languageName);
             button.textContent = '–';
+            button.setAttribute('aria-label', unavailableLanguageLabel);
+            button.title = unavailableLanguageLabel;
             button.disabled = true;
             button.classList.add('disabled');
         }
