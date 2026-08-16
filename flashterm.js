@@ -161,7 +161,7 @@ async function initializeEventListeners() {
             if (isClickingSuggestion) {
                 isClickingSuggestion = false;
                 if (!hasMoved && e.target !== closeIcon) {
-                    suggestionsWrapper.style.display = 'none';
+                    hideSuggestions();
                 }
             }
         });
@@ -203,7 +203,7 @@ async function initializeEventListeners() {
         searchField.addEventListener('blur', (e) => {
             setTimeout(() => {
                 if (!isClickingSuggestion && !hasMoved && e.relatedTarget !== closeIcon) {
-                    suggestionsWrapper.style.display = 'none';
+                    hideSuggestions();
                 }
             }, 100);
         });
@@ -333,8 +333,24 @@ function shiftWindowPosition() {
 
 function highlightSuggestionAtIndex(index, suggestions) {
     suggestions.forEach((el, i) => {
-        el.classList.toggle('highlighted', i === index);
+        const isSelected = i === index;
+        el.classList.toggle('highlighted', isSelected);
+        el.setAttribute('aria-selected', String(isSelected));
     });
+
+    const selectedSuggestion = suggestions[index];
+    if (selectedSuggestion) {
+        searchField.setAttribute('aria-activedescendant', selectedSuggestion.id);
+    } else {
+        searchField.removeAttribute('aria-activedescendant');
+    }
+}
+
+function hideSuggestions() {
+    suggestionsWrapper.style.display = 'none';
+    selectedSuggestionIndex = -1;
+    searchField.setAttribute('aria-expanded', 'false');
+    searchField.removeAttribute('aria-activedescendant');
 }
 
 // ====================================================================================================
@@ -573,6 +589,10 @@ function handleKeyPressEvent(event) {
                 termMining();
                 toggleClearButton();
             }
+        } else if (event.key === 'Escape') {
+            event.preventDefault();
+            hideSuggestions();
+            searchField.focus();
         }
     } catch (error) {
         logError('Fehler bei Tastatureingabe', error);
@@ -661,7 +681,7 @@ function showSuggestions(sourceTermList, query) {
 
     if (query.length === 0) {
         if (!hasMoved) {
-            suggestionsWrapper.style.display = 'none';
+            hideSuggestions();
         }
         return;
     }
@@ -674,7 +694,7 @@ function showSuggestions(sourceTermList, query) {
 
         if (matchedTerms.length === 0) {
             if (!hasMoved) {
-                suggestionsWrapper.style.display = 'none';
+                hideSuggestions();
             }
             return;
         }
@@ -686,9 +706,12 @@ function showSuggestions(sourceTermList, query) {
             suggestionLegend.innerHTML = legend.items;
         }
 
-        matchedTerms.forEach(term => {
+        matchedTerms.forEach((term, index) => {
             const div = document.createElement('div');
             div.classList.add('suggestion');
+            div.id = `suggestion-${index}`;
+            div.setAttribute('role', 'option');
+            div.setAttribute('aria-selected', 'false');
             div.innerHTML = highlightMatch(term.term, query);
 
             let rating;
@@ -719,7 +742,7 @@ function showSuggestions(sourceTermList, query) {
 
             div.addEventListener('click', () => {
                 if (!hasMoved) {
-                    suggestionsWrapper.style.display = 'none';
+                    hideSuggestions();
                 }
                 showWiki(term.term, term.conceptID, sourceLanguage, targetLanguage);
             });
@@ -732,6 +755,7 @@ function showSuggestions(sourceTermList, query) {
         highlightSuggestionAtIndex(selectedSuggestionIndex, allSuggestions);
 
         suggestionsWrapper.style.display = 'block';
+        searchField.setAttribute('aria-expanded', 'true');
 
     } catch (e) {
         handleError('Regex Error in showSuggestions', e);
@@ -886,6 +910,7 @@ function updateTexts(language) {
         { selector: '#profile-icon', attribute: 'aria-label', key: 'select_target_language' },
         { selector: '#clear-icon', attribute: 'aria-label', key: 'clear_search' },
         { selector: '#close-icon', attribute: 'aria-label', key: 'close_suggestions' },
+        { selector: '#suggestions', attribute: 'aria-label', key: 'search_suggestions' },
         { selector: '.close', attribute: 'aria-label', key: 'close_language_selection' }
     ];
 
