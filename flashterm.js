@@ -932,8 +932,10 @@ function updateTexts(language) {
         { selector: '#start-intro', key: 'start_intro' },
         { selector: '#inspector-start-heading', key: 'inspector_start_heading' },
         { selector: '#inspector-start-intro', key: 'inspector_start_intro' },
+        { selector: '#inspector-start-hint', key: 'inspector_start_hint' },
         { selector: '#translator-start-heading', key: 'translator_start_heading' },
         { selector: '#translator-start-intro', key: 'translator_start_intro' },
+        { selector: '#translator-start-hint', key: 'translator_start_hint' },
         { selector: '#language-modal-title', key: 'select_target_language' },
         { selector: '#saveLanguageBtn', key: 'save' }
     ];
