@@ -6,6 +6,8 @@ Stand: Initial Import auf Branch `main`
 
 Diese Baseline beschreibt das aktuell im Repository implementierte Verhalten. Sie ist keine Anforderungsspezifikation und beschreibt ausdrücklich nicht, wie sich die Anwendung künftig verhalten sollte.
 
+Eine zusammenhängende Darstellung der Browser-, Entwicklungs- und Teststartprozesse sowie priorisierte Optimierungsvorschläge enthält [`startup-processes.md`](startup-processes.md).
+
 Kennzeichnungen:
 
 - **Code-basiert:** Das Verhalten ist direkt aus dem vorhandenen Code ableitbar.
@@ -39,26 +41,28 @@ Die Werte werden beim Start nicht gegen die verfügbaren Sprachcodes validiert. 
 Beim Laden von `flashterm.js` geschieht in dieser Reihenfolge:
 
 1. URL-Sprachen werden ermittelt und in Modulzustand übernommen.
-2. `initialize()` wird asynchron gestartet, aber nicht abgewartet.
-3. `switchMode("wiki")` aktiviert unmittelbar den Wiki-Modus.
-4. Das Suchfeld erhält den Fokus.
+2. Die GUI-Sprache wird aus der Browsersprache ermittelt.
+3. Die zentralen Event-Handler werden genau einmal registriert.
+4. `switchMode("wiki")` aktiviert unmittelbar den Wiki-Modus.
+5. `initialize()` wird asynchron gestartet, aber nicht abgewartet.
+6. Der Bootstrap-Zustand `starting` deaktiviert Suchfeld, Löschaktion, Sprachwahl und Speichern bis zum Abschluss der Initialisierung. Die Modusnavigation bleibt verfügbar.
 
 ### Asynchrone Initialisierung
 
 `initialize()` führt nacheinander aus:
 
 1. Anmeldung an FileMaker.
-2. Ermittlung der GUI-Sprache aus der Browsersprache:
-   - Browser beginnt mit `de` → `de-DE`
-   - alle anderen Browser-Sprachen → `en-GB`
-3. Laden von `json/translations.json` und Aktualisieren der vorhandenen übersetzbaren UI-Elemente.
-4. Laden beziehungsweise Wiederverwenden der normalisierten Sprachoptionen aus einem versionierten, an die GUI-Sprache gebundenen Cache.
-5. Laden und Parsen der Terminliste der Ausgangssprache.
-6. Laden und Parsen der Terminliste der Zielsprache.
-7. Aktualisieren des Dokumenttitels und der Modusbeschriftungen.
-8. Registrieren der Haupt-Event-Handler.
+2. Laden von `json/translations.json` und Aktualisieren der vorhandenen übersetzbaren UI-Elemente.
+3. Laden beziehungsweise Wiederverwenden der normalisierten Sprachoptionen aus einem versionierten, an die GUI-Sprache gebundenen Cache.
+4. Laden und Parsen der Terminliste der Ausgangssprache.
+5. Laden und Parsen der Terminliste der Zielsprache.
+6. Aktualisieren des Dokumenttitels und der Modusbeschriftungen.
+7. Anzeigen der Wiki-Startfläche.
+8. Wechsel in `ready`, wenn alle Schritte erfolgreich waren, andernfalls in `degraded`.
 
-Die Schritte laufen überwiegend seriell. Ein Fehler beim Login beendet den gesamten Initialisierungsblock; die nachfolgenden Haupt-Event-Handler werden dann nicht registriert. Fehler beim Laden oder Parsen einer einzelnen Terminliste werden dagegen innerhalb der jeweiligen Ladefunktion abgefangen. Die zuvor vorhandene Terminliste bleibt dabei unverändert; während der ersten Initialisierung ist sie noch leer.
+Die Abrufe laufen weiterhin seriell. Ein Fehler beim Login wechselt in `failed`; datenabhängige Bedienelemente bleiben deaktiviert und eine lokalisierte Wiederholungsaktion wird angeboten. Fehler beim Laden von Übersetzungen, Sprachoptionen oder Terminlisten werden innerhalb der jeweiligen Ladefunktion abgefangen und führen nach Abschluss in `degraded`. Bereits geladene Funktionen bleiben nutzbar; die Wiederholungsaktion startet die vollständige Initialisierung erneut.
+
+Ein Guard verhindert parallele Initialisierungen. Da die Event-Handler außerhalb von `initialize()` genau einmal registriert werden, entstehen bei Wiederholungen keine doppelten Listener. Nach `ready` oder `degraded` wird das Suchfeld aktiviert und fokussiert.
 
 ### FileMaker-Login
 
@@ -382,7 +386,7 @@ Header und Hauptüberschrift verwenden feste beziehungsweise sticky Positionieru
 
 ### API-Fehler
 
-- Loginfehler beenden die Hauptinitialisierung und werden in der Konsole protokolliert.
+- Loginfehler beenden den aktuellen Initialisierungsversuch, wechseln in `failed` und bieten einen erneuten Versuch an. Die Modusnavigation bleibt verfügbar; datenabhängige Bedienelemente bleiben deaktiviert.
 - Fehler beim Laden von Sprachdaten können über `handleError()` als Text im Mining-Container landen.
 - Netzwerk-/API-Fehler beim Laden einer Terminliste werden protokolliert; die zuvor vorhandene Terminliste bleibt unverändert.
 - Enthält ein `termlist`-Feld ungültiges JSON, wird `handleError('Error parsing termlistField', error)` aufgerufen und die gesamte Terminlistenantwort verworfen. Die zuvor vorhandene Source- beziehungsweise Target-Terminliste bleibt unverändert. Dies ist ein bewusster Bugfix gegenüber dem früheren partiellen Ergebnis mit `undefined`-Einträgen.
@@ -404,12 +408,17 @@ Header und Hauptüberschrift verwenden feste beziehungsweise sticky Positionieru
 
 ## 10. Manuelle Smoke-Test-Matrix
 
+Der integrierte Durchlauf vom 16. August 2026 ist in [`smoke-test-2026-08-16.md`](smoke-test-2026-08-16.md) gegen die folgenden Characterization-IDs protokolliert.
+
 | Test-ID | Ausgangszustand | Aktion | Erwartetes aktuelles Verhalten |
 |---|---|---|---|
 | FT-START-001 | Gültige Konfiguration, keine Query-Parameter | `index.html` öffnen | Weiterleitung zu `flashterm.html`; Wiki aktiv; Suchfeld fokussiert; Sprachen aus Konfiguration |
 | FT-START-002 | URL mit `source` und `target` | `index.html?source=…&target=…` öffnen | Parameter bleiben nach Weiterleitung erhalten und bestimmen das initiale Sprachpaar |
 | FT-START-003 | Erreichbares FileMaker, leerer Session Storage | Anwendung öffnen | Login, Sprachdaten, Quell- und Zielterminliste werden seriell geladen; Loading-Anzeige verschwindet anschließend |
-| FT-START-004 | FileMaker-Login schlägt fehl | Anwendung öffnen | Wiki-Grundzustand bleibt sichtbar, Hauptinitialisierung endet, zentrale Event-Handler fehlen; Details manuell verifizieren |
+| FT-START-004 | FileMaker-Login schlägt fehl | Anwendung öffnen | Wiki-Grundzustand und Modusnavigation bleiben sichtbar; ein lokalisierter `failed`-Zustand bietet „Erneut versuchen“ an; datenabhängige Bedienelemente bleiben deaktiviert |
+| FT-START-005 | Initialisierung läuft | Datenabhängige Aktionen verwenden | Suche, Löschen und Sprachwahl sind bis `ready` oder `degraded` deaktiviert; Moduswechsel bleiben möglich |
+| FT-START-006 | Übersetzungen, Sprachoptionen oder eine Terminliste können nicht geladen werden | Initialisierung abschließen | `degraded` wird angezeigt; geladene Funktionen bleiben nutzbar und ein erneuter vollständiger Initialisierungsversuch wird angeboten |
+| FT-START-007 | `failed` oder `degraded` sichtbar | „Erneut versuchen“ mehrfach verwenden | Pro Klick läuft höchstens eine Initialisierung; Hauptinteraktionen werden nicht mehrfach ausgeführt |
 | FT-SEARCH-001 | Initialisierung abgeschlossen | Teilstring eines bekannten Terms tippen | Passende Ausgangstermini erscheinen case- und diakritika-unabhängig als Suggestions |
 | FT-SEARCH-002 | Suggestions sichtbar | `ArrowDown`, `ArrowUp`, `Enter` verwenden | Markierung bewegt sich; Enter aktiviert die markierte Suggestion |
 | FT-SEARCH-003 | Suggestions sichtbar | Suggestion anklicken | Concept-Daten werden geladen und Wiki-Ansicht wird angezeigt |
@@ -465,7 +474,7 @@ Folgende Punkte lassen sich ohne laufendes FileMaker-System oder echten Browsera
 
 1. Initialer Selector-Inhalt und zeitliche Wechselwirkung zwischen lokaler und FileMaker-Sprachliste.
 2. Verhalten bei ungültigen Source-/Target-Codes gegen die tatsächlich eingesetzten FileMaker-Layouts.
-3. Sichtbarer Zustand bei Loginfehlern, weil die Haupt-Event-Registrierung dann ausbleibt.
+3. Visuelle Darstellung und Fokusführung der neuen Zustände `failed` und `degraded` sowie der Wiederholungsaktion.
 4. Leeres, zuvor verschobenes Suggestions-Fenster bei null Treffern.
 5. Modusmarkierung nach Klick auf einen Mining-Tabelleneintrag und Wechsel in die Wiki-Ansicht.
 6. Sofortige oder verzögerte Translator-Aktualisierung nach Zielsprachwechsel.

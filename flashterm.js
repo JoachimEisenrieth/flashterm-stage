@@ -2,6 +2,11 @@
 
 import { loginToFileMaker } from './filemaker-api.js';
 import { config } from './config.js';  // Konfiguration importieren
+import {
+    BootstrapState,
+    createInitializationGuard,
+    getBootstrapPresentation
+} from './src/app/bootstrap-state.js';
 import { getConceptSectionAvailability } from './src/app/concept-section-availability.js';
 import { createConceptViewModel } from './src/app/concept-view-model.js';
 import { serializeCsv } from './src/app/csv-export.js';
@@ -40,6 +45,9 @@ function getRatingLegend() {
 const clearButton = document.getElementById('clear-icon');
 const closeIcon = document.getElementById('close-icon');
 const loadingIndicator = document.getElementById('loading');
+const startupStatus = document.getElementById('startup-status');
+const startupStatusMessage = document.getElementById('startup-status-message');
+const startupRetryButton = document.getElementById('startup-retry');
 const miningDiv = document.getElementById('mining-container');
 const miningStatus = document.getElementById('mining-status');
 const searchField = document.getElementById('search-field');
@@ -52,63 +60,109 @@ const inspector = document.getElementById("inspector");
 const translator = document.getElementById("translator");
 
 let term = '';
-let guiLanguage = '';
+let guiLanguage = getGuiLanguage();
+let bootstrapState = BootstrapState.STARTING;
+const initializationGuard = createInitializationGuard();
 
 let selectedTerm = '';
 let selectedConceptID = '';
 
 let selectedSuggestionIndex = -1;
 
-initialize();
-
-switchMode("wiki");
-searchField.focus();
-
 // ====================================================================================================
 // Initialisierung
 // ====================================================================================================
 async function initialize() {
-    try {
-        // An FileMaker anmelden
-        await loginToFileMaker();
+    return initializationGuard.run(async () => {
+        renderBootstrapState(BootstrapState.STARTING);
 
-        // GUI-Sprache basierend auf der Browsersprache festlegen
-        guiLanguage = (navigator.language || navigator.userLanguage).startsWith('de') ? 'de-DE' : 'en-GB';
+        try {
+            // An FileMaker anmelden
+            await loginToFileMaker();
 
-        // GUI-Übersetzungen für die gewählte Sprache laden
-        await loadGuiTranslations(guiLanguage);
+            // GUI-Übersetzungen für die gewählte Sprache laden
+            const translationsLoaded = await loadGuiTranslations(guiLanguage);
 
-        // Sprachoptionen für das GUI laden und cachen
-        await fetchAndCacheLanguageOptions(guiLanguage);
+            // Sprachoptionen für das GUI laden und cachen
+            const languagesLoaded = await fetchAndCacheLanguageOptions(guiLanguage);
 
-        // Quell-Termini für die Ausgangssprache laden
-        await fetchSourceTermList(sourceLanguage);
+            // Quell-Termini für die Ausgangssprache laden
+            const sourceTermsLoaded = await fetchSourceTermList(sourceLanguage);
 
-        // Ziel-Termini für die Zielsprache laden
-        await fetchTargetTermList(targetLanguage);
+            // Ziel-Termini für die Zielsprache laden
+            const targetTermsLoaded = await fetchTargetTermList(targetLanguage);
 
-        // Titel des Tabs entsprechend den Sprachen setzen
-        setTitle(sourceLanguage, targetLanguage);
+            // Titel des Tabs entsprechend den Sprachen setzen
+            setTitle(sourceLanguage, targetLanguage);
 
-        // Hier die Modustexte aktualisieren
-        updateModeText(); // <--- Hinzufügen
+            // Hier die Modustexte aktualisieren
+            updateModeText(); // <--- Hinzufügen
 
-        // Event-Listener für UI-Elemente initialisieren
-        initializeEventListeners();
+            if (startScreen) {
+                startScreen.classList.remove('hidden');
+            }
 
-        if (startScreen) {
-            startScreen.classList.remove('hidden');
+            const isDegraded = [
+                translationsLoaded,
+                languagesLoaded,
+                sourceTermsLoaded,
+                targetTermsLoaded
+            ].includes(false);
+            renderBootstrapState(isDegraded ? BootstrapState.DEGRADED : BootstrapState.READY);
+
+        } catch (error) {
+            renderBootstrapState(BootstrapState.FAILED);
+            logError('Fehler bei der Initialisierung', error);
         }
+    });
+}
 
-    } catch (error) {
-        console.error('Fehler bei der Initialisierung:', error);
+function renderBootstrapState(state) {
+    bootstrapState = state;
+    const presentation = getBootstrapPresentation(state, guiLanguage);
+
+    if (presentation.showLoading) {
+        showLoadingIndicator();
+    } else {
+        hideLoadingIndicator();
     }
+
+    if (startupStatus && startupStatusMessage && startupRetryButton) {
+        startupStatus.classList.toggle('hidden', !presentation.showStatus);
+        startupStatus.classList.toggle('startup-state-degraded', state === BootstrapState.DEGRADED);
+        startupStatus.classList.toggle('startup-state-failed', state === BootstrapState.FAILED);
+        startupStatus.setAttribute('role', presentation.role);
+        startupStatus.setAttribute('aria-live', presentation.ariaLive);
+        startupStatusMessage.textContent = presentation.message;
+        startupRetryButton.textContent = presentation.retryLabel;
+        startupRetryButton.classList.toggle('hidden', !presentation.showRetry);
+        startupRetryButton.disabled = state === BootstrapState.STARTING;
+    }
+
+    setDataControlsEnabled(presentation.enableDataControls);
+    if (presentation.enableDataControls) {
+        searchField?.focus();
+    }
+}
+
+function setDataControlsEnabled(enabled) {
+    [
+        searchField,
+        clearButton,
+        document.getElementById('profile-icon'),
+        document.getElementById('language-selector'),
+        document.getElementById('saveLanguageBtn')
+    ].forEach(element => {
+        if (element) {
+            element.disabled = !enabled;
+        }
+    });
 }
 
 // ====================================================================================================
 // Event Listener initialisieren
 // ====================================================================================================
-async function initializeEventListeners() {
+function initializeEventListeners() {
 
     // -----------------------------------------------------------------------------------------------
     // Buttons für Moduswechsel
@@ -298,6 +352,12 @@ async function initializeEventListeners() {
 
     setupLanguageToggle('language-toggle-links', 'links-container', 'links-container-target');
 
+    startupRetryButton?.addEventListener('click', () => {
+        if (bootstrapState === BootstrapState.FAILED || bootstrapState === BootstrapState.DEGRADED) {
+            void initialize();
+        }
+    });
+
 
     // -------------------------------------------------------------------------------------------------
     // Logout
@@ -309,6 +369,11 @@ async function initializeEventListeners() {
 // ====================================================================================================
 // Verwende initialSourceLanguage und initialTargetLanguage aus config.js
 // ====================================================================================================
+function getGuiLanguage() {
+    const browserLanguage = navigator.language || navigator.userLanguage || 'en-GB';
+    return browserLanguage.startsWith('de') ? 'de-DE' : 'en-GB';
+}
+
 function getLanguageParamsFromURL() {
     const params = new URLSearchParams(window.location.search);
     return {
@@ -397,8 +462,10 @@ async function loadGuiTranslations(language) {
         translations = await response.json();
         updateTexts(language);
         logNot(`Translations loaded successfully for language: ${language}`);
+        return Boolean(translations?.[language]);
     } catch (error) {
         logError('Error while loading the translations file.', error);
+        return false;
     }
 }
 
@@ -653,11 +720,13 @@ async function fetchSourceTermList(language) {
     try {
         sourceTermList = await terminologyRepository.getTerms(language);
         console.log(`Termliste geladen: ${language}`);
+        return true;
     } catch (error) {
         if (error instanceof SyntaxError) {
             handleError('Error parsing termlistField', error);
         }
         console.error('Fehler beim Laden der Termliste:', error);
+        return false;
     } finally {
         hideLoadingIndicator();
     }
@@ -693,7 +762,7 @@ async function fetchAndCacheLanguageOptions(guiLanguage) {
     const cachedLanguages = parseLanguageCache(cachedData, guiLanguage);
     if (cachedLanguages !== null) {
         cachedLanguageOptions = cachedLanguages;
-        return; // Keine API-Abfrage nötig
+        return cachedLanguages.length > 0; // Keine API-Abfrage nötig
     }
 
     try {
@@ -702,11 +771,14 @@ async function fetchAndCacheLanguageOptions(guiLanguage) {
         if (cachedLanguageOptions && cachedLanguageOptions.length > 0) {
             // Speichere die Daten im SessionStorage für zukünftige Sitzungen
             sessionStorage.setItem('languageData', serializeLanguageCache(guiLanguage, cachedLanguageOptions));
+            return true;
         } else {
             logWarning('Keine Sprachdaten gefunden.');
+            return false;
         }
     } catch (error) {
         handleError('Fehler beim Abrufen der Sprachdaten', error);
+        return false;
     }
 }
 
@@ -1935,15 +2007,11 @@ function exportTermsToExcel() {
 }
 
 // ====================================================================================================
-// Direkter Wechsel der Modi durch Klick
+// Initialer UI- und Anwendungsstart
 // ====================================================================================================
-document.querySelectorAll('.mode-option').forEach(option => {
-    option.addEventListener('click', function () {
-        document.querySelector('.mode-option.active').classList.remove('active');
-        this.classList.add('active');
-        // Weitere Aktionen für den Moduswechsel hier
-    });
-});
+initializeEventListeners();
+switchMode('wiki');
+void initialize();
 
 // ====================================================================================================
 // Zentrale Logging-Funktion

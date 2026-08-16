@@ -348,6 +348,56 @@ h3 {
     }
 }
 
+.startup-state {
+    max-width: 560px;
+    margin: 32px auto 24px;
+    padding: 20px 22px;
+    color: var(--text-color);
+    background-color: var(--concept-header-bg);
+    border: 1px solid var(--concept-header-border);
+    border-left-width: 4px;
+    border-radius: var(--control-radius);
+    box-sizing: border-box;
+    line-height: 1.5;
+}
+
+.startup-state-failed {
+    background-color: var(--error-bg-color);
+    border-color: var(--error-border-color);
+}
+
+.startup-state p {
+    margin: 0;
+}
+
+.startup-retry {
+    margin-top: 16px;
+    padding: 9px 14px;
+    color: var(--button-text-color);
+    background-color: var(--button-bg-color);
+    border: 0;
+    border-radius: 9px;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.startup-retry:hover {
+    filter: brightness(0.92);
+}
+
+.startup-retry:focus-visible {
+    outline: 2px solid var(--focus-color);
+    outline-offset: 2px;
+}
+
+.startup-retry:disabled,
+.search-field:disabled,
+.icon-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
 .start-screen {
     max-width: 620px;
     margin: 48px auto 24px;
