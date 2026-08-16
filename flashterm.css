@@ -6,6 +6,7 @@
     --highlight-color: #C43434;
     --text-color: #344054;
     --text-muted-color: #667085;
+    --product-name-color: #8B6F52;
     --text-color-invers: #F2F4F7;
     --link-color: hsl(211, 100%, 50%);
     --link-hover-color: #0056b3;
@@ -83,6 +84,7 @@
         --highlight-color: #F28D8D;
         --text-color: #F2F4F7;
         --text-muted-color: #98A2B3;
+        --product-name-color: #D0B48D;
         --text-color-invers: #F2F4F7;
         --link-color: #339dff;
         --link-hover-color: #3385d1;
@@ -192,11 +194,17 @@ footer {
     font-size: 0.875rem;
 }
 
+.brand-lockup {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
 .logo-wordmark {
     width: 110px;
     aspect-ratio: 227 / 47;
     overflow: hidden;
-    flex: 0 0 auto;
 }
 
 .logo {
@@ -206,6 +214,16 @@ footer {
     margin: 0;
     filter: var(--logo-filter);
     transform: translateY(-48.35%);
+}
+
+.brand-product-name {
+    margin-top: 3px;
+    padding-left: 0.22em;
+    color: var(--product-name-color);
+    font-size: 0.62rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    line-height: 1;
 }
 
 .search-wrapper {
