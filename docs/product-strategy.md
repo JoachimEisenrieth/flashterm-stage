@@ -17,6 +17,10 @@ flashterm stage soll langfristig nicht an ein bestimmtes Backstage-System gebund
 
 flashterm stage ist kein weiteres Terminologieverwaltungssystem. Es ist die anwendungsnahe Oberfläche zwischen gepflegten Terminologiedaten und den Menschen, die diese Daten bei ihrer täglichen Arbeit benötigen.
 
+Die zugrunde liegende Produkthypothese lautet: In der heutigen Terminologiearbeit besteht häufig eine Lücke zwischen der fachlichen Freigabe im Terminologiesystem und der tatsächlichen Anwendung durch einen größeren Kreis von Mitarbeitenden. flashterm stage besetzt diesen fehlenden Baustein.
+
+> **Terminologiearbeit endet nicht mit der Freigabe. flashterm stage beginnt dort.**
+
 Das Produkt unterstützt insbesondere:
 
 - das schnelle Finden einer Benennung,
@@ -25,6 +29,40 @@ Das Produkt unterstützt insbesondere:
 - die Prüfung vorhandener Texte auf hinterlegte Terminologie,
 - die terminologiegestützte Gegenüberstellung von Ausgangs- und Zielbenennungen,
 - die verständliche Weitergabe und technische Weiterverarbeitung von Ergebnissen.
+
+## Zielgruppen
+
+Die primäre Zielgruppe sind Mitarbeitende eines Unternehmens, die Terminologie in ihrer täglichen Arbeit anwenden, ohne selbst Teil der zentralen Terminologieredaktion sein zu müssen. Dazu gehören insbesondere:
+
+- Marketing und Unternehmenskommunikation,
+- technische und fachliche Dokumentation,
+- Zulassung und andere regulierte Bereiche,
+- Übersetzung und Lokalisierung,
+- weitere Bereiche, die Inhalte erstellen, prüfen, freigeben oder weiterverwenden.
+
+Diese Nutzerinnen und Nutzer benötigen keine Oberfläche zur Pflege komplexer Terminologiebestände. Sie benötigen schnellen Zugriff auf freigegebene Benennungen, verständliche Begriffsinformationen und eine verlässliche Prüfung ihrer Inhalte.
+
+Terminologiefachleute bilden eine wichtige sekundäre Zielgruppe. Sie stellen backstage die Datenqualität sicher und profitieren davon, dass freigegebene Terminologie über stage einen größeren Anwenderkreis erreicht.
+
+Der gemeinsame Kernablauf der primären Zielgruppe lautet:
+
+> Ich möchte einen Begriff oder Text schnell prüfen, damit ich freigegebene Terminologie vor Veröffentlichung, Freigabe oder Übersetzung korrekt anwende.
+
+Aus dieser Zielgruppe ergibt sich eine Produkthypothese: Der Inspector kann langfristig der wichtigste Einstieg in die regelmäßige Nutzung werden. Wiki bleibt die gezielte Wissensansicht; Translator erweitert den Ablauf für mehrsprachige Aufgaben. Diese Gewichtung wird zunächst mit realen Nutzerinnen und Nutzern validiert und nicht allein aus technischer Sicht festgelegt.
+
+## Nutzungs- und Verbreitungsstrategie
+
+flashterm stage startet als eigenständige Webanwendung, die Mitarbeitende bewusst öffnen. Dieser erste Produktzustand soll den fehlenden Vermittlungsbaustein in der bestehenden Terminologiearbeit unmittelbar nutzbar und organisatorisch sichtbar machen.
+
+Für den Einstieg gelten deshalb folgende Prioritäten:
+
+- ohne Kenntnis des Backstage-Systems verständlich sein,
+- über einen klaren Zugang schnell erreichbar sein,
+- Suche und Textprüfung ohne lange Einarbeitung ermöglichen,
+- verlässliche, freigegebene Terminologie in den Mittelpunkt stellen,
+- den Nutzen für verschiedene Unternehmensbereiche in einer gemeinsamen Oberfläche zeigen.
+
+Eine spätere Integration in Word, Redaktionssysteme, Übersetzungswerkzeuge oder andere Arbeitsumgebungen bleibt ein mögliches Ausbauziel. Sie wird jedoch erst priorisiert, nachdem der eigenständige Produktnutzen bestätigt und die quellenneutrale API stabil ist. Integrationen sollen dieselben fachlichen Fähigkeiten von stage nutzen und keine voneinander abweichenden Einzellösungen bilden.
 
 Als kurzer Leitsatz wird verwendet:
 
@@ -129,6 +167,7 @@ Caching, Darstellung und Exporte arbeiten auf normalisierten Daten und dürfen n
 
 - flashterm stage ersetzt nicht die redaktionelle Terminologiearbeit.
 - Das Produkt erzwingt kein bestimmtes Terminologieprogramm.
+- Plugins und Einbettungen in Drittsysteme sind für den ersten eigenständigen Produktzustand kein Muss.
 - Eine neue API soll keine FileMaker-Strukturen unter neutralen Namen nach außen reichen.
 - Ein Frameworkwechsel oder vollständiger Rewrite ist kein eigenständiges Produktziel.
 - Historisch gewachsenes Verhalten wird nicht ungeprüft zum dauerhaften fachlichen Vertrag erklärt.
