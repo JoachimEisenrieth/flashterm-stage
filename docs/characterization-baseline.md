@@ -154,7 +154,7 @@ Normales Tippen im Inspector führt bei nicht leerer Eingabe wieder in den Wiki-
   - alternative → ⭐
   - preferred → ⭐⭐
 - Im Inspector stammt die bevorzugte Benennung aus der Ausgangssprachliste.
-- Auch bei null Treffern wird nach aktuellem Code eine leere Tabelle mit Header sowie ein Export-Icon erzeugt. **Zu verifizieren.**
+- Bei null Treffern erscheint der lokalisierte Leerzustand; Exportaktionen werden nicht angeboten.
 
 ### Interaktion mit gefundenen Termini
 
@@ -165,10 +165,10 @@ Normales Tippen im Inspector führt bei nicht leerer Eingabe wieder in den Wiki-
 
 ### Export aus dem Inspector
 
-- Das dynamisch erzeugte Export-Icon erhält zunächst einen Excel-Handler.
-- Danach kann `setupExportClickHandlers()` demselben Icon zusätzlich einen JSON-Handler geben.
-- Weil das Suchfeld nach dem Paste-Ablauf leer ist, beendet der JSON-Handler den Export normalerweise mit einem Hinweis auf eine leere Eingabe.
-- Erwartbares aktuelles Browserverhalten ist daher: Excel-Download und möglicherweise zusätzlich ein Alert des JSON-Pfads. **Bekannte Inkonsistenz / zu verifizieren.**
+- Oberhalb der Ergebnistabelle erscheint neben der Bewertungslegende die Formatwahl „Ergebnisse exportieren“ mit getrennten Schaltflächen für Excel und JSON.
+- Auf breiten Ansichten bleibt diese Werkzeugleiste beim Scrollen unterhalb des festen Seitenheaders sichtbar. Auf Ansichten bis 768 px scrollt sie aus Platzgründen normal mit und darf in eine eigene Zeile umbrechen.
+- Excel exportiert ausschließlich die sichtbare Ergebnistabelle.
+- JSON exportiert ausschließlich das bereits berechnete Prüfergebnis; der zuvor geleerte Inhalt des Suchfelds wird dafür nicht erneut ausgewertet.
 
 ## 4. Translator
 
@@ -190,7 +190,7 @@ Normales Tippen im Inspector führt bei nicht leerer Eingabe wieder in den Wiki-
 
 ### Export
 
-Der Translator verwendet dasselbe dynamische Export-Icon und dieselben Excel-/JSON-Handler wie der Inspector. Der Excel-Export enthält die aktuell sichtbare Tabelle einschließlich zielsprachiger Benennungen.
+Der Translator verwendet dieselbe Formatwahl wie der Inspector. Der Excel-Export enthält die aktuell sichtbare Tabelle einschließlich zielsprachiger Benennungen; der JSON-Export enthält die gefundenen Termini, Kategorien und bevorzugten Übersetzungen.
 
 ## 5. Sprachwechsel
 
@@ -312,8 +312,8 @@ Nach dem Rendering werden Abschnitte ohne sichtbaren Quell- und Zielinhalt per `
 - CSS-Variablen werden über `prefers-color-scheme: dark` überschrieben.
 - Ein Inline-Skript setzt beim Start passend zum Systemmodus Favicon und Logo.
 - Änderungen des Systemmodus aktualisieren Favicon und Logo über einen `matchMedia`-Listener.
-- Das Export-Icon wählt sein helles oder dunkles Asset beim Erzeugen anhand des dann aktuellen Systemmodus.
-- Für ein bereits gerendertes Export-Icon existiert kein eigener Listener auf spätere Theme-Wechsel. **Zu verifizieren.**
+- Die Export-Schaltflächen wählen ihr helles oder dunkles Icon beim Erzeugen anhand des dann aktuellen Systemmodus.
+- Für bereits gerenderte Export-Schaltflächen existiert kein eigener Listener auf spätere Theme-Wechsel. **Zu verifizieren.**
 
 ### Handbuch
 
@@ -334,7 +334,7 @@ Header und Hauptüberschrift verwenden feste beziehungsweise sticky Positionieru
 
 ### Excel
 
-- Auslöser ist das dynamisch erzeugte Export-Icon unter der Term-Mining-Tabelle.
+- Auslöser ist die Schaltfläche „Excel“ in der Werkzeugzeile oberhalb der Term-Mining-Tabelle.
 - Datenquelle ist die aktuell gerenderte `.term-table` im DOM.
 - SheetJS wandelt die Tabelle in ein Worksheet um.
 - Der Downloadname lautet `mined_terms.xlsx`.
@@ -342,14 +342,11 @@ Header und Hauptüberschrift verwenden feste beziehungsweise sticky Positionieru
 
 ### JSON
 
-- `exportTerms()` sieht einen JSON-Download vor.
-- Die vorgesehene Datenstruktur enthält Terminus, Kategorie und optional bevorzugte Übersetzung.
-- Der vorgesehene Dateiname lautet `termlist_<source>-<target>.json`.
-- Der Handler liest jedoch den aktuellen Suchfeldwert, während der Paste-/Mining-Ablauf das Suchfeld zuvor leert.
-- Zusätzlich wird `extractTermsFromText()` in diesem Pfad ohne die erforderliche Terminliste aufgerufen.
-- Derselbe Export-Icon-Knoten kann gleichzeitig den Excel- und JSON-Handler besitzen.
-
-**Bekannte Inkonsistenz / zu verifizieren:** Ob im praktischen Hauptablauf zusätzlich zum Excel-Download ein Alert erscheint, ob ein JSON-Download erreichbar ist und ob dabei ein Laufzeitfehler auftritt.
+- Auslöser ist die Schaltfläche „JSON“ in der Werkzeugzeile oberhalb der Term-Mining-Tabelle.
+- `exportTerms()` verwendet das bereits von `termMining()` berechnete Prüfergebnis.
+- Die Datenstruktur enthält Terminus, Kategorie und optional bevorzugte Übersetzung.
+- Der Dateiname lautet `termlist_<source>-<target>.json`.
+- Excel und JSON werden getrennt ausgelöst; ein Klick erzeugt nur das ausgewählte Format.
 
 ## 9. Fehler- und Sonderfälle
 
@@ -363,7 +360,7 @@ Header und Hauptüberschrift verwenden feste beziehungsweise sticky Positionieru
 
 - Leeres normales Input blendet das Clear-Icon aus und in der Regel die Suggestions.
 - Ein leeres Paste-Event speichert leeren Text und ruft trotzdem `termMining()` auf, wechselt aber nicht ausdrücklich in den Inspector.
-- JSON-Export mit leerem Suchfeld zeigt einen Alert und erzeugt keine JSON-Datei.
+- Das nach dem Paste-Ablauf geleerte Suchfeld verhindert den JSON-Export des bereits berechneten Prüfergebnisses nicht.
 
 ### Fehlende FileMaker-Daten
 
@@ -423,7 +420,7 @@ Header und Hauptüberschrift verwenden feste beziehungsweise sticky Positionieru
 | FT-MINING-002 | Text enthält Gewichtungen 0, 1 und 2 | Text einfügen | Treffer erscheinen mit 🚫, ⭐ und ⭐⭐ und korrekten Zählwerten |
 | FT-MINING-003 | Text enthält kurzen Terminus innerhalb eines längeren | Text einfügen | Der eingeschlossene kürzere Treffer wird unterdrückt |
 | FT-MINING-004 | Mining-Tabelle sichtbar | Gefundenen Terminus anklicken | Wiki-Ansicht des Concepts erscheint; aktive Modusmarkierung ist zu verifizieren |
-| FT-MINING-005 | Text ohne Treffer | Text einfügen | Statt einer leeren Tabelle erscheint der lokalisierte Leerzustand „Im Text wurden keine hinterlegten Termini erkannt.“ beziehungsweise „No registered terms were detected in the text.“; ein Export-Icon wird nicht angeboten (bewusste UX-Verbesserung) |
+| FT-MINING-005 | Text ohne Treffer | Text einfügen | Statt einer leeren Tabelle erscheint der lokalisierte Leerzustand „Im Text wurden keine hinterlegten Termini erkannt.“ beziehungsweise „No registered terms were detected in the text.“; Exportaktionen werden nicht angeboten (bewusste UX-Verbesserung) |
 | FT-TRANSLATOR-001 | Noch kein Text analysiert | Translator anklicken | Mining-Bereich erscheint; Suchfeld fordert zum Einfügen von Text auf |
 | FT-TRANSLATOR-002 | Text wurde im Inspector analysiert | Translator anklicken | Tabelle wird mit bevorzugten Benennungen aus der Zielterminliste neu gerendert |
 | FT-TRANSLATOR-003 | Translator-Tabelle sichtbar | Zielsprache wechseln | Neue Zielterminliste wird geladen; unmittelbare Aktualisierung der sichtbaren Tabelle ist zu verifizieren |
@@ -439,12 +436,13 @@ Header und Hauptüberschrift verwenden feste beziehungsweise sticky Positionieru
 | FT-LANG-CACHE-005 | Gültiges V2-Envelope für die aktuelle GUI-Sprache | Anwendung neu laden | Sprachen werden aus dem Cache übernommen; kein erneuter Sprachabruf |
 | FT-THEME-001 | Systemmodus Light | Anwendung öffnen | Light-Variablen, Light-Favicon und Light-Logo werden verwendet |
 | FT-THEME-002 | Systemmodus Dark | Anwendung öffnen | Dark-Variablen, Dark-Favicon und Dark-Logo werden verwendet |
-| FT-THEME-003 | Export-Icon bereits sichtbar | Systemmodus wechseln | Logo/Favicon ändern sich; bestehendes Export-Icon-Verhalten verifizieren |
+| FT-THEME-003 | Export-Schaltflächen bereits sichtbar | Systemmodus wechseln | Logo/Favicon ändern sich; bestehendes Verhalten der Export-Icons verifizieren |
 | FT-RESP-001 | Viewport breiter als 768 px | Anwendung öffnen | Horizontale Header- und Modusstruktur |
 | FT-RESP-002 | Viewport höchstens 768 px | Anwendung öffnen | Header und Modusnavigation werden vertikal, Container-Padding wird reduziert |
-| FT-EXPORT-001 | Mining-Tabelle sichtbar | Export-Icon anklicken | `mined_terms.xlsx` wird aus der sichtbaren Tabelle erzeugt |
-| FT-EXPORT-002 | Paste-basierter Mining-Ablauf | Export-Icon anklicken | Excel-Download plus möglicher JSON-Alert durch Doppelbindung; exakt verifizieren |
-| FT-EXPORT-003 | Potenziell erreichbarer JSON-Pfad mit nicht leerem Suchfeld | Export auslösen | Erreichbarkeit und möglicher Fehler wegen fehlender Terminlistenübergabe dokumentieren |
+| FT-RESP-003 | Lange Mining-Ergebnisliste bei breitem Viewport | Nach unten scrollen | Bewertungslegende und Exportauswahl bleiben unterhalb des festen Seitenheaders sichtbar; der Tabellenkopf scrollt normal mit |
+| FT-EXPORT-001 | Mining-Tabelle sichtbar | „Excel“ anklicken | Ausschließlich `mined_terms.xlsx` wird aus der sichtbaren Tabelle erzeugt |
+| FT-EXPORT-002 | Paste-basierter Mining-Ablauf mit Treffern | „JSON“ anklicken | Ausschließlich `termlist_<source>-<target>.json` wird aus dem bereits berechneten Prüfergebnis erzeugt |
+| FT-EXPORT-003 | Mining-Tabelle sichtbar | Beide Formate nacheinander exportieren | Excel und JSON werden jeweils nur durch ihre eigene Schaltfläche ausgelöst |
 | FT-ERROR-001 | Lokal abgelaufene Tokenzeit | API-Aktion auslösen | Neuer FileMaker-Login erfolgt vor dem Request |
 | FT-ERROR-002 | Server lehnt lokal als gültig betrachteten Token ab | API-Aktion auslösen | Kein zentraler Retry; konkretes UI-/Konsolenverhalten dokumentieren |
 | FT-ERROR-003 | Concept enthält fehlerhaftes JSON in `definition`, `context`, `info` oder `hyperLink` | Concept öffnen | Das betroffene Feld verwendet seinen leeren Fallback und übrige Bereiche werden soweit möglich gerendert; der heutige Browserpfad protokolliert den Feldfehler, während `mapConcept()` dieselben Fallbackdaten ohne feldbezogenes Log erzeugt |
@@ -462,7 +460,7 @@ Folgende Punkte lassen sich ohne laufendes FileMaker-System oder echten Browsera
 6. Sofortige oder verzögerte Translator-Aktualisierung nach Zielsprachwechsel.
 7. Sprachumschaltung bei zwei Locale-Codes mit identischem zweistelligem Basiscode.
 8. Verfügbarkeit der Link-Sprachbuttons bei FileMaker-Daten im Feld `hyperLink`.
-9. Tatsächliche Doppelwirkung des Export-Icons: Excel-Download, Alert und möglicher JSON-Pfad.
+9. Praktischer Download und Inhalt der getrennten Excel- und JSON-Exporte.
 10. Verhalten bei serverseitig abgelaufener FileMaker-Session trotz lokal verlängerter Ablaufzeit.
 11. Visuelle Darstellung bei 768 px, kleineren Viewports, Browser-Zoom und langen Sprachbezeichnungen.
-12. Verhalten eines bereits sichtbaren Export-Icons bei einem Theme-Wechsel.
+12. Verhalten bereits sichtbarer Export-Icons bei einem Theme-Wechsel.

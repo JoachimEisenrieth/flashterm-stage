@@ -805,18 +805,6 @@ function highlightMatch(term, query) {
 }
 
 async function exportTerms() {
-    if (!searchField || !sourceTermList.length) {
-        alert('Die JSON-Datei wurde nicht geladen oder ist leer.');
-        return;
-    }
-
-    const text = searchField.value.trim();
-    if (!text) {
-        alert('Bitte geben Sie einen Text ein.');
-        return;
-    }
-
-    const foundTerms = extractTermsFromText(text);
     const exportData = [];
 
     const isTwoLanguageMode = targetLanguage && targetLanguage !== '';
@@ -1535,8 +1523,6 @@ function termMining() {
     // Setze den Fokus auf die Ergebnisse
     miningDiv.focus();
 
-    // Füge Export-Listener hinzu (für zukünftiges Exportieren von Ergebnissen)
-    setupExportClickHandlers();
 }
 
 function extractTermsFromText(text, termList) {
@@ -1629,18 +1615,6 @@ function isPartOfLongerTerm(position, term, termOccurrences) {
 function retrievePreferredTerm(conceptID, termList) {
     const preferredTerm = termList.find(term => term.conceptID === conceptID && term.weighting === 2);
     return preferredTerm ? preferredTerm.term : '–';
-}
-
-function setupExportClickHandlers() {
-    const exportButtons = document.querySelectorAll('.export-button');
-    if (exportButtons.length > 0) {
-        exportButtons.forEach(button => {
-            if (!button.hasListener) {
-                button.addEventListener('click', exportTerms);
-                button.hasListener = true;
-            }
-        });
-    }
 }
 
 function displayMinedTerms(foundTerms) {
@@ -1747,7 +1721,7 @@ function displayMinedTerms(foundTerms) {
     const legendContent = `
             <div class="term-legend" aria-label="${legend.label}">${legend.items}</div>`;
     let tableContent = `
-            ${legendContent}
+            <div class="term-toolbar">${legendContent}</div>
             <table class="term-table">
                 <thead>
                     <tr>
@@ -1772,31 +1746,44 @@ function displayMinedTerms(foundTerms) {
 
         const exportContainer = document.createElement('div');
         exportContainer.classList.add('export-actions');
-
-        const exportButton = document.createElement('button');
-        exportButton.type = 'button';
-        exportButton.classList.add('export-button');
-
-        const exportIcon = document.createElement('img');
-        exportIcon.src = 'svg/export-icon-light.svg';
-        exportIcon.classList.add('export-button-icon');
-        exportIcon.alt = '';
+        exportContainer.setAttribute('role', 'group');
 
         const exportLabel = translations?.[guiLanguage]?.export_results || 'Export results';
-        const exportText = document.createElement('span');
-        exportText.textContent = exportLabel;
-        exportButton.append(exportIcon, exportText);
-        exportContainer.appendChild(exportButton);
+        exportContainer.setAttribute('aria-label', exportLabel);
 
-        miningDiv.appendChild(exportContainer);
+        const exportHeading = document.createElement('span');
+        exportHeading.classList.add('export-actions-label');
+        exportHeading.textContent = exportLabel;
+        exportContainer.appendChild(exportHeading);
 
-        // Media Query für den Dark Mode
         const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        if (darkModeMediaQuery.matches) {
-            exportIcon.src = 'svg/export-icon-dark.svg'; // Dunkles Icon für den Dunkelmodus
-        }
+        const exportIconSource = darkModeMediaQuery.matches
+            ? 'svg/export-icon-dark.svg'
+            : 'svg/export-icon-light.svg';
 
-        exportButton.addEventListener('click', exportTableToExcel);
+        const createExportButton = (label, handler) => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.classList.add('export-button');
+
+            const icon = document.createElement('img');
+            icon.src = exportIconSource;
+            icon.classList.add('export-button-icon');
+            icon.alt = '';
+
+            const text = document.createElement('span');
+            text.textContent = label;
+            button.append(icon, text);
+            button.addEventListener('click', handler);
+
+            return button;
+        };
+
+        exportContainer.append(
+            createExportButton('Excel', exportTableToExcel),
+            createExportButton('JSON', exportTerms)
+        );
+        miningDiv.querySelector('.term-toolbar').appendChild(exportContainer);
 
         document.querySelectorAll('.term-clickable').forEach(element => {
             element.addEventListener('click', function () {
