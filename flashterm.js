@@ -4,6 +4,7 @@ import { loginToFileMaker } from './filemaker-api.js';
 import { config } from './config.js';  // Konfiguration importieren
 import { getConceptSectionAvailability } from './src/app/concept-section-availability.js';
 import { createConceptViewModel } from './src/app/concept-view-model.js';
+import { serializeCsv } from './src/app/csv-export.js';
 import { parseLanguageCache, serializeLanguageCache } from './src/app/language-cache.js';
 import { terminologyRepository } from './src/app/terminology-repository.js';
 
@@ -837,6 +838,43 @@ async function exportTerms() {
     a.download = `termlist_${sourceLang}-${targetLang}.json`;
 
     a.click();
+    URL.revokeObjectURL(url);
+}
+
+function exportTermsToCsv() {
+    const isTranslatorMode = translator.classList.contains('active');
+    const preferredTermList = isTranslatorMode ? targetTermList : sourceTermList;
+    const preferredDesignationLanguage = isTranslatorMode ? targetLanguage : sourceLanguage;
+    const exportData = [];
+
+    for (const category in foundTerms) {
+        for (const term in foundTerms[category]) {
+            const record = foundTerms[category][term];
+            const preferredDesignation = retrievePreferredTerm(record.conceptID, preferredTermList);
+
+            exportData.push({
+                term: record.originalTerm || term,
+                category,
+                count: record.count,
+                preferredDesignation: preferredDesignation === '–' ? '' : preferredDesignation,
+                termLanguage: sourceLanguage,
+                preferredDesignationLanguage
+            });
+        }
+    }
+
+    const csv = `\uFEFF${serializeCsv(exportData)}`;
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const sourceLang = sourceLanguage.replace('-', '_');
+    const targetLang = preferredDesignationLanguage
+        ? preferredDesignationLanguage.replace('-', '_')
+        : 'none';
+
+    link.href = url;
+    link.download = `termlist_${sourceLang}-${targetLang}.csv`;
+    link.click();
     URL.revokeObjectURL(url);
 }
 
@@ -1756,24 +1794,11 @@ function displayMinedTerms(foundTerms) {
         exportHeading.textContent = exportLabel;
         exportContainer.appendChild(exportHeading);
 
-        const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        const exportIconSource = darkModeMediaQuery.matches
-            ? 'svg/export-icon-dark.svg'
-            : 'svg/export-icon-light.svg';
-
         const createExportButton = (label, handler) => {
             const button = document.createElement('button');
             button.type = 'button';
             button.classList.add('export-button');
-
-            const icon = document.createElement('img');
-            icon.src = exportIconSource;
-            icon.classList.add('export-button-icon');
-            icon.alt = '';
-
-            const text = document.createElement('span');
-            text.textContent = label;
-            button.append(icon, text);
+            button.textContent = label;
             button.addEventListener('click', handler);
 
             return button;
@@ -1781,6 +1806,7 @@ function displayMinedTerms(foundTerms) {
 
         exportContainer.append(
             createExportButton('Excel', exportTableToExcel),
+            createExportButton('CSV', exportTermsToCsv),
             createExportButton('JSON', exportTerms)
         );
         miningDiv.querySelector('.term-toolbar').appendChild(exportContainer);

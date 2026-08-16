@@ -1532,7 +1532,6 @@ a:active {
 .export-button {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
     min-height: 42px;
     padding: 10px 16px;
     color: var(--text-color);
@@ -1555,11 +1554,6 @@ a:active {
 .export-button:focus-visible {
     outline: 2px solid var(--focus-color);
     outline-offset: 3px;
-}
-
-.export-button-icon {
-    width: 18px;
-    height: 18px;
 }
 
 /* ================================================== */

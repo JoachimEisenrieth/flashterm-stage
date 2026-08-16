@@ -165,9 +165,10 @@ Normales Tippen im Inspector führt bei nicht leerer Eingabe wieder in den Wiki-
 
 ### Export aus dem Inspector
 
-- Oberhalb der Ergebnistabelle erscheint neben der Bewertungslegende die Formatwahl „Ergebnisse exportieren“ mit getrennten Schaltflächen für Excel und JSON.
+- Oberhalb der Ergebnistabelle erscheint neben der Bewertungslegende die Formatwahl „Ergebnisse exportieren“ mit getrennten Schaltflächen für Excel, CSV und JSON.
 - Auf breiten Ansichten bleibt diese Werkzeugleiste beim Scrollen unterhalb des festen Seitenheaders sichtbar. Auf Ansichten bis 768 px scrollt sie aus Platzgründen normal mit und darf in eine eigene Zeile umbrechen.
 - Excel exportiert ausschließlich die sichtbare Ergebnistabelle.
+- CSV exportiert die gefundenen Termini mit Bewertung, Trefferzahl, Vorzugsbenennung und den beteiligten Sprachcodes.
 - JSON exportiert ausschließlich das bereits berechnete Prüfergebnis; der zuvor geleerte Inhalt des Suchfelds wird dafür nicht erneut ausgewertet.
 
 ## 4. Translator
@@ -190,7 +191,7 @@ Normales Tippen im Inspector führt bei nicht leerer Eingabe wieder in den Wiki-
 
 ### Export
 
-Der Translator verwendet dieselbe Formatwahl wie der Inspector. Der Excel-Export enthält die aktuell sichtbare Tabelle einschließlich zielsprachiger Benennungen; der JSON-Export enthält die gefundenen Termini, Kategorien und bevorzugten Übersetzungen.
+Der Translator verwendet dieselbe Formatwahl wie der Inspector. Der Excel-Export enthält die aktuell sichtbare Tabelle einschließlich zielsprachiger Benennungen; CSV und JSON enthalten die gefundenen Termini sowie die ermittelten Vorzugsbenennungen.
 
 ## 5. Sprachwechsel
 
@@ -312,8 +313,7 @@ Nach dem Rendering werden Abschnitte ohne sichtbaren Quell- und Zielinhalt per `
 - CSS-Variablen werden über `prefers-color-scheme: dark` überschrieben.
 - Ein Inline-Skript setzt beim Start passend zum Systemmodus Favicon und Logo.
 - Änderungen des Systemmodus aktualisieren Favicon und Logo über einen `matchMedia`-Listener.
-- Die Export-Schaltflächen wählen ihr helles oder dunkles Icon beim Erzeugen anhand des dann aktuellen Systemmodus.
-- Für bereits gerenderte Export-Schaltflächen existiert kein eigener Listener auf spätere Theme-Wechsel. **Zu verifizieren.**
+- Die Export-Schaltflächen verwenden kompakte Textlabels ohne wiederholtes Download-Icon und übernehmen ihre Farben über die Theme-Variablen.
 
 ### Handbuch
 
@@ -347,6 +347,13 @@ Header und Hauptüberschrift verwenden feste beziehungsweise sticky Positionieru
 - Die Datenstruktur enthält Terminus, Kategorie und optional bevorzugte Übersetzung.
 - Der Dateiname lautet `termlist_<source>-<target>.json`.
 - Excel und JSON werden getrennt ausgelöst; ein Klick erzeugt nur das ausgewählte Format.
+
+### CSV
+
+- Auslöser ist die Schaltfläche „CSV“ in der Werkzeugzeile oberhalb der Term-Mining-Tabelle.
+- Der UTF-8-Export verwendet Semikolon als Trennzeichen und die stabilen Spalten `term`, `category`, `count`, `preferredDesignation`, `termLanguage` und `preferredDesignationLanguage`.
+- Trennzeichen, Anführungszeichen und Zeilenumbrüche in Werten werden maskiert. Mit `=`, `+`, `-` oder `@` beginnende Werte werden für Tabellenkalkulationen neutralisiert.
+- Der Dateiname lautet `termlist_<source>-<preferred-language>.csv`.
 
 ## 9. Fehler- und Sonderfälle
 
@@ -436,13 +443,14 @@ Header und Hauptüberschrift verwenden feste beziehungsweise sticky Positionieru
 | FT-LANG-CACHE-005 | Gültiges V2-Envelope für die aktuelle GUI-Sprache | Anwendung neu laden | Sprachen werden aus dem Cache übernommen; kein erneuter Sprachabruf |
 | FT-THEME-001 | Systemmodus Light | Anwendung öffnen | Light-Variablen, Light-Favicon und Light-Logo werden verwendet |
 | FT-THEME-002 | Systemmodus Dark | Anwendung öffnen | Dark-Variablen, Dark-Favicon und Dark-Logo werden verwendet |
-| FT-THEME-003 | Export-Schaltflächen bereits sichtbar | Systemmodus wechseln | Logo/Favicon ändern sich; bestehendes Verhalten der Export-Icons verifizieren |
+| FT-THEME-003 | Export-Schaltflächen bereits sichtbar | Systemmodus wechseln | Logo/Favicon und die variablenbasierten Farben der Export-Schaltflächen wechseln passend zum Systemmodus |
 | FT-RESP-001 | Viewport breiter als 768 px | Anwendung öffnen | Horizontale Header- und Modusstruktur |
 | FT-RESP-002 | Viewport höchstens 768 px | Anwendung öffnen | Header und Modusnavigation werden vertikal, Container-Padding wird reduziert |
 | FT-RESP-003 | Lange Mining-Ergebnisliste bei breitem Viewport | Nach unten scrollen | Bewertungslegende und Exportauswahl bleiben unterhalb des festen Seitenheaders sichtbar; der Tabellenkopf scrollt normal mit |
 | FT-EXPORT-001 | Mining-Tabelle sichtbar | „Excel“ anklicken | Ausschließlich `mined_terms.xlsx` wird aus der sichtbaren Tabelle erzeugt |
 | FT-EXPORT-002 | Paste-basierter Mining-Ablauf mit Treffern | „JSON“ anklicken | Ausschließlich `termlist_<source>-<target>.json` wird aus dem bereits berechneten Prüfergebnis erzeugt |
-| FT-EXPORT-003 | Mining-Tabelle sichtbar | Beide Formate nacheinander exportieren | Excel und JSON werden jeweils nur durch ihre eigene Schaltfläche ausgelöst |
+| FT-EXPORT-003 | Mining-Tabelle sichtbar | Excel und JSON nacheinander exportieren | Excel und JSON werden jeweils nur durch ihre eigene Schaltfläche ausgelöst |
+| FT-EXPORT-004 | Mining-Tabelle mit Treffern sichtbar | „CSV“ anklicken | Eine UTF-8-CSV mit Bewertung, Anzahl, Vorzugsbenennung und Sprachcodes wird erzeugt; die anderen Exportformate werden nicht ausgelöst |
 | FT-ERROR-001 | Lokal abgelaufene Tokenzeit | API-Aktion auslösen | Neuer FileMaker-Login erfolgt vor dem Request |
 | FT-ERROR-002 | Server lehnt lokal als gültig betrachteten Token ab | API-Aktion auslösen | Kein zentraler Retry; konkretes UI-/Konsolenverhalten dokumentieren |
 | FT-ERROR-003 | Concept enthält fehlerhaftes JSON in `definition`, `context`, `info` oder `hyperLink` | Concept öffnen | Das betroffene Feld verwendet seinen leeren Fallback und übrige Bereiche werden soweit möglich gerendert; der heutige Browserpfad protokolliert den Feldfehler, während `mapConcept()` dieselben Fallbackdaten ohne feldbezogenes Log erzeugt |
@@ -460,7 +468,7 @@ Folgende Punkte lassen sich ohne laufendes FileMaker-System oder echten Browsera
 6. Sofortige oder verzögerte Translator-Aktualisierung nach Zielsprachwechsel.
 7. Sprachumschaltung bei zwei Locale-Codes mit identischem zweistelligem Basiscode.
 8. Verfügbarkeit der Link-Sprachbuttons bei FileMaker-Daten im Feld `hyperLink`.
-9. Praktischer Download und Inhalt der getrennten Excel- und JSON-Exporte.
+9. Praktischer Download und Inhalt der getrennten Excel-, CSV- und JSON-Exporte.
 10. Verhalten bei serverseitig abgelaufener FileMaker-Session trotz lokal verlängerter Ablaufzeit.
 11. Visuelle Darstellung bei 768 px, kleineren Viewports, Browser-Zoom und langen Sprachbezeichnungen.
-12. Verhalten bereits sichtbarer Export-Icons bei einem Theme-Wechsel.
+12. Lesbarkeit der Export-Schaltflächen nach einem Theme-Wechsel.
