@@ -226,6 +226,77 @@ footer {
     line-height: 1;
 }
 
+.termbase-control {
+    display: flex;
+    flex: 0 1 250px;
+    min-width: 150px;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.termbase-control.hidden {
+    display: none;
+}
+
+.termbase-control label {
+    color: var(--text-muted-color);
+    font-size: 0.68rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+#termbase-selector {
+    width: 100%;
+    min-height: 36px;
+    padding: 6px 30px 6px 10px;
+    border: 1px solid var(--search-field-border-color);
+    border-radius: var(--control-radius);
+    background-color: var(--bg-color-search-field);
+    color: var(--text-color);
+    font: inherit;
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+
+#termbase-selector:focus-visible {
+    border-color: var(--focus-color);
+    outline: none;
+    box-shadow: 0 0 0 3px var(--focus-shadow);
+}
+
+.session-control {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-muted-color);
+    font-size: 0.78rem;
+}
+
+.session-control.hidden {
+    display: none;
+}
+
+.session-control form {
+    margin: 0;
+}
+
+#logout-button {
+    padding: 6px 9px;
+    border: 1px solid var(--search-field-border-color);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-color);
+    font: inherit;
+    cursor: pointer;
+}
+
+#logout-button:hover,
+#logout-button:focus-visible {
+    border-color: var(--focus-color);
+    outline: none;
+}
+
 .search-wrapper {
     position: relative;
     flex: 1;
@@ -1658,6 +1729,18 @@ a:active {
 
     .logo-wordmark {
         width: 92px;
+    }
+
+    .termbase-control {
+        flex: none;
+        width: 100%;
+        max-width: none;
+        text-align: left;
+    }
+
+    .session-control {
+        width: 100%;
+        justify-content: center;
     }
 
     .search-wrapper,

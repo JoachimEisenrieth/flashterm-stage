@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "publication": {
+    "id": "TEST-PUBLICATION-001",
+    "tenantId": "TEST-TENANT",
+    "termbaseId": "TEST-TERMBASE",
+    "revision": "1",
+    "publishedAt": "2026-08-21T10:00:00.000Z"
+  },
+  "termbase": {
+    "name": "Synthetic terminology",
+    "sourceLanguage": "xx-XX",
+    "assetBasePath": "/api/termbases/TEST-TERMBASE/assets/",
+    "languages": [
+      {
+        "code": "xx-XX",
+        "isSource": true,
+        "names": {
+          "de-DE": "Alphasprache",
+          "en-GB": "Alpha language"
+        }
+      },
+      {
+        "code": "yy-YY",
+        "isSource": false,
+        "names": {
+          "de-DE": "Betasprache",
+          "en-GB": "Beta language"
+        }
+      }
+    ]
+  },
+  "termsByLanguage": {
+    "xx-XX": [
+      {
+        "conceptID": "TEST-001",
+        "term": "alpha term",
+        "weighting": 2
+      }
+    ],
+    "yy-YY": [
+      {
+        "conceptID": "TEST-001",
+        "term": "beta term",
+        "weighting": 2
+      }
+    ]
+  },
+  "concepts": [
+    {
+      "id": "TEST-001",
+      "languages": [
+        {
+          "code": "xx-XX",
+          "terms": [
+            {
+              "term": "alpha term",
+              "weighting": 2
+            }
+          ],
+          "definition": {
+            "text": "Synthetic definition.",
+            "footnote": ""
+          },
+          "contexts": [],
+          "information": [],
+          "infobox": "",
+          "links": [],
+          "imageFileName": "TEST-001.png"
+        },
+        {
+          "code": "yy-YY",
+          "terms": [
+            {
+              "term": "beta term",
+              "weighting": 2
+            }
+          ],
+          "definition": {
+            "text": "Synthetic target definition.",
+            "footnote": ""
+          },
+          "contexts": [],
+          "information": [],
+          "infobox": "",
+          "links": [],
+          "imageFileName": ""
+        }
+      ]
+    }
+  ]
+}

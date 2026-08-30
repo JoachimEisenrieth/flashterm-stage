@@ -130,7 +130,7 @@ Vor und nach Änderungen:
 npm test
 ```
 
-Der erwartete aktuelle Stand ist `77/77` erfolgreiche Tests. Einige Dev-Server-Tests öffnen temporäre Loopback-Ports. In eingeschränkten Ausführungsumgebungen kann dafür eine lokale Freigabe erforderlich sein.
+Der erwartete aktuelle Stand ist `127/127` erfolgreiche Tests. Einige Dev-Server- und Stage-API-Tests öffnen temporäre Loopback-Ports. In eingeschränkten Ausführungsumgebungen kann dafür eine lokale Freigabe erforderlich sein.
 
 Zusätzliche Prüfungen nach JavaScript-Änderungen:
 
@@ -141,6 +141,8 @@ git diff
 ```
 
 Der vollständige Diff muss geprüft werden. Commit und Push erfolgen ausschließlich auf ausdrücklichen Auftrag.
+
+Der neue, noch parallel betriebene Veröffentlichungsserver besitzt eine eigene Start- und Testanleitung in [`stage-server-development.md`](stage-server-development.md). Er ersetzt den hier beschriebenen FileMaker-Entwicklungsserver noch nicht.
 
 ## 8. Entwicklungsserver beenden
 

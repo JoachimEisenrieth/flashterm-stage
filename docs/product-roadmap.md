@@ -1,6 +1,6 @@
 # Produkt-Roadmap: flashterm stage
 
-Stand: 16. August 2026
+Stand: 30. August 2026
 
 ## Zweck
 
@@ -8,7 +8,7 @@ Diese Roadmap übersetzt die Produktstrategie von flashterm stage in überprüfb
 
 ## Kurzbewertung des aktuellen Stands
 
-flashterm stage besitzt bereits einen belastbaren fachlichen Kern und drei unterscheidbare Nutzungssituationen. Die Anwendung ist jedoch noch nicht vollständig als quellenunabhängiges Produkt betreibbar: Der Browser meldet sich weiterhin direkt an FileMaker an, kennt lokale Konfiguration und verwaltet das FileMaker-Session-Token. Die vorhandene Repository-Grenze normalisiert bereits wesentliche Daten, endet aber noch nicht an einer sicheren, austauschbaren Systemgrenze.
+flashterm stage besitzt einen belastbaren fachlichen Kern und drei unterscheidbare Nutzungssituationen. Der erste Windows-Pilot arbeitet vollständig über den getrennten Stage-Server: Backstage veröffentlicht versionierte Daten und Bilder, während der Browser nur die same-origin Stage-API kennt. Der direkte FileMaker-Browserpfad bleibt ausschließlich als lokaler Entwicklungs- und Referenzmodus erhalten.
 
 ### Bereits stark
 
@@ -19,19 +19,17 @@ flashterm stage besitzt bereits einen belastbaren fachlichen Kern und drei unter
 - Die Concept-Darstellung ist vom FileMaker-Rohformat entkoppelt.
 - Excel unterstützt die menschliche Auswertung; CSV und JSON unterstützen technische Weiterverarbeitung.
 - Die Oberfläche besitzt eine konsistente, warme und zurückhaltende Gestaltung sowie Light und Dark Mode.
-- Characterization Baseline, anonymisierte Fixtures und 77 Unit-Tests sichern wichtige bestehende Verträge.
+- Characterization Baseline, anonymisierte Fixtures und 127 automatisierte Tests sichern wichtige bestehende Verträge.
 - Der lokale Development-Proxy ermöglicht realistische Browserprüfungen ohne Änderungen am FileMaker-Server.
 
 ### Noch nicht produktreif gelöst
 
-- FileMaker-Zugangsdaten werden über die lokale Browserkonfiguration bereitgestellt.
-- FileMaker-Login und Tokenverwaltung laufen im Browser.
-- `flashterm.js` importiert weiterhin FileMaker-Login und Konfiguration direkt.
-- Die produktive Composition ist fest mit FileMaker-Funktionen verbunden.
-- Teile der als Domain-Code bezeichneten Mapper kennen weiterhin `fieldData` und FileMaker-Feldnamen.
-- Ein dokumentierter, quellenneutraler HTTP-API-Vertrag existiert noch nicht.
-- Es gibt noch keinen zweiten Adapter, der die tatsächliche Quellenunabhängigkeit beweist.
-- Browserabläufe werden praktisch, aber noch nicht automatisiert geprüft.
+- Der lokale FileMaker-Entwicklungsmodus benötigt weiterhin eine lokale, ignorierte Browserkonfiguration und verwaltet dort sein FileMaker-Token.
+- FileMaker-Feldnamen und `fieldData` existieren noch in der klar abgegrenzten Adapter- und Normalisierungsschicht.
+- Ein weiterer unabhängiger Importadapter neben FileMaker-Veröffentlichung und Published-Data-Repository fehlt noch.
+- Browserabläufe werden praktisch, aber noch nicht vollständig automatisiert geprüft.
+- Sitzungen, Speicher und Publisher sind bewusst noch nicht hochverfügbar oder mandantenfähig ausgelegt.
+- Backup und Restore des Windows-Datenverzeichnisses müssen praktisch in einer getrennten Umgebung bestätigt werden.
 - Einige historisch bekannte Randfälle sind bewusst noch offen.
 
 ## Gap-Analyse nach strategischem Ziel
@@ -41,8 +39,8 @@ flashterm stage besitzt bereits einen belastbaren fachlichen Kern und drei unter
 | Terminologie zugänglich machen | Verständlicher Einstieg, Suche, Suggestions und Wiki vorhanden | Zielgruppen und wichtigste Nutzungskontexte sind noch nicht ausdrücklich priorisiert | Hoch |
 | Sichere Anwendung ermöglichen | Bewertungen, Sprachbezug und fehlende Übersetzungen sind überwiegend eindeutig | Links-Verfügbarkeit und gleichlautende Zweizeichen-Sprachcodes besitzen bekannte Altsemantik | Hoch |
 | Reale Arbeitsabläufe unterstützen | Inspector, Translator sowie Excel-, CSV- und JSON-Export vorhanden | Vollständiger praktischer End-to-End-Test und Rückmeldung realer Anwenderinnen fehlen | Hoch |
-| Datenquellen austauschbar machen | Repository und normalisierte Modelle sind produktiv im Einsatz | Composition, Login und einige Mapper bleiben FileMaker-spezifisch; kein externer API-Vertrag | Sehr hoch |
-| Vertrauen und Datenschutz sichern | Sensitive Browser-Logs wurden reduziert; lokale Config wird ignoriert | Credentials und Session-Token befinden sich weiterhin im Browserkontext | Kritisch vor Produktion |
+| Datenquellen austauschbar machen | FileMaker- und Published-Data-Composition verwenden denselben UI-Vertrag | Automatischer Publisher und ein weiterer unabhängiger Importadapter fehlen | Hoch |
+| Vertrauen und Datenschutz sichern | Der Windows-Pilot hält FileMaker-Credentials und Tokens vollständig aus dem Browser heraus | Restore-Test, breitere Rollenabnahme und Betriebsfreigabe stehen noch aus | Hoch |
 | Einfach weiterentwickelbar bleiben | Kleine ES-Module, native Tests, kein Build-Zwang | Hauptdatei bleibt groß; Browserorchestrierung ist nur teilweise isoliert testbar | Mittel |
 | Wertiges Produkterlebnis | Einheitliche Gestaltung, responsive Grundlagen, klare Submarke | Systematische Prüfung von Dark Mode, schmalen Ansichten und langen Inhalten ist noch offen | Mittel |
 
@@ -125,11 +123,13 @@ Abnahmekriterium:
 
 - Produktname und Nutzenversprechen sind in Oberfläche und Dokumentation konsistent.
 
-## Als Nächstes: Sichere, quellenneutrale Integrationsgrenze
+## Im ersten Windows-Pilot umgesetzt: Veröffentlichungsbasierte Stage-Grenze
 
-Ziel: Der Browser arbeitet ausschließlich mit einer stabilen flashterm-API und kennt weder FileMaker-Zugangsdaten noch FileMaker-Session-Tokens.
+Ziel: flashterm backstage veröffentlicht freigegebene, versionierte Terminologie an einen getrennt betreibbaren Stage-Server. Der Browser arbeitet ausschließlich mit dessen stabiler API und kennt weder FileMaker-Zugangsdaten noch FileMaker-Session-Tokens.
 
-### NEXT-1: Fachlichen API-Vertrag spezifizieren
+Die beschlossene Systemgrenze und die schrittweise Migration sind in [`stage-publication-architecture.md`](stage-publication-architecture.md) festgehalten.
+
+### NEXT-1: Fachlichen API-Vertrag spezifizieren — umgesetzt
 
 Minimaler Lesevertrag:
 
@@ -153,12 +153,13 @@ Abnahmekriterium:
 - Der Vertrag enthält keine Begriffe wie `fieldData`, FileMaker-Layout, `_find` oder FileMaker-Token.
 - Vorhandene Domain-Fixtures lassen sich als Vertragsbeispiele verwenden.
 
-### NEXT-2: Serverseitiges Integrations-Gateway einführen
+### NEXT-2: Stage-Server und Veröffentlichungsspeicher einführen — umgesetzt
 
 Aufgabe:
 
 - Statische Anwendung und `/api/...` same-origin bereitstellen,
-- Zugangsdaten und Quellsystem-Sessions serverseitig verwalten,
+- mehrere Termbasen und unveränderliche Veröffentlichungsrevisionen verwalten,
+- eine neue Revision erst nach vollständiger Validierung atomar aktivieren,
 - ausschließlich normalisierte Daten an den Browser liefern,
 - sensible Payloads und Tokens nicht protokollieren.
 
@@ -169,21 +170,23 @@ Abnahmekriterium:
 - Der Browser importiert keine FileMaker-API-Funktionen mehr.
 - Lokale Entwicklung und spätere Produktion verwenden denselben fachlichen API-Pfad.
 
-### NEXT-3: FileMaker als Referenzadapter kapseln
+Stand: Der Windows-Pilot liefert die bestehende Oberfläche same-origin mit einer öffentlichen Published-Data-Konfiguration aus. Mehrere aktive Termbasen lassen sich sichtbar auswählen und über einen URL-Parameter eindeutig verlinken. Der separate FileMaker-Entwicklungsserver bleibt als Referenz- und Rückfallpfad erhalten.
+
+### NEXT-3: FileMaker-Veröffentlichung als Referenzadapter kapseln — umgesetzt
 
 Aufgabe:
 
-- bestehende Layouts und Queries hinter dem Gateway binden,
+- bestehende Layouts und Queries im Veröffentlichungsprozess binden,
 - vorhandene Mapper weiterverwenden beziehungsweise sauber der Adaptergrenze zuordnen,
-- Contract-Tests für Language, Term und Concept ergänzen,
-- Login, Sessionerneuerung, Logout und Fehlerabbildung testen.
+- Contract-Tests für Publication, Language, Term und Concept ergänzen,
+- Login, Sessionerneuerung, Veröffentlichung und Fehlerabbildung testen.
 
 Abnahmekriterium:
 
-- FileMaker-spezifische Begriffe existieren nur im Adapter und seiner Konfiguration.
-- flashterm stage funktioniert gegen den Adapter ohne FileMaker-Wissen im Browsercode.
+- FileMaker-spezifische Begriffe existieren nur im Backstage-Adapter und seiner Konfiguration.
+- flashterm stage bleibt mit dem letzten aktiven Stand ohne erreichbaren FileMaker-Server vollständig lesbar.
 
-### NEXT-4: Betrieb dokumentieren
+### NEXT-4: Betrieb dokumentieren — für den ersten Pilot umgesetzt
 
 Zu dokumentieren:
 
@@ -193,6 +196,8 @@ Zu dokumentieren:
 - TLS- und CORS-Anforderungen,
 - Secret-Verwaltung,
 - Healthcheck und sichere Diagnose.
+
+Zwischenstand: Der erste Windows-Pilot läuft unter IIS mit eigenem Node-Dienst, Auth0-OIDC, rollenbasierter Termbase-Freigabe, unveränderlicher Publication- und Asset-Ablage sowie automatisierter Zertifikatserneuerung. Installation, Code- und Daten-Rollback sowie der reale Backstage-Publish wurden praktisch geprüft. Offen bleiben insbesondere ein dokumentierter Restore-Test und die betriebliche Aufnahme weiterer Pilotpersonen.
 
 ## Später: Quellenunabhängigkeit beweisen und Reichweite erhöhen
 

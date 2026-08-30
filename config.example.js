@@ -1,4 +1,5 @@
 export const config = {
+    dataSource: 'filemaker',
     server: 'https://your-filemaker-server.example.com',
     database: 'YOUR_FILEMAKER_DATABASE',
     username: 'YOUR_FILEMAKER_USERNAME',

@@ -134,7 +134,7 @@ Anschließend wird `json/translations.json` geladen und die vorhandenen überset
 
 ### 5.3 Sprachoptionen und Cache
 
-`fetchAndCacheLanguageOptions()` prüft `sessionStorage.languageData`. Wiederverwendet wird ausschließlich ein syntaktisch gültiges V3-Envelope für die aktuelle GUI-Sprache. Es enthält neben Sprachcode und Name die normalisierte Source-Kennzeichnung. Der frühere V2-Cache wird bewusst verworfen. Bei einem Cachemiss lädt das Repository die Sprachoptionen aus FileMaker und speichert die normalisierte Liste wieder im Session Storage.
+`fetchAndCacheLanguageOptions()` prüft einen quellspezifischen `sessionStorage`-Eintrag. Der FileMaker-Modus verwendet `languageData:<Datenbankname>`, der Stage-Modus `languageData:termbase:<Termbase-ID>:publication:<Publication-ID>`. Wiederverwendet wird ausschließlich ein syntaktisch gültiges V3-Envelope für die aktuelle GUI-Sprache. Es enthält neben Sprachcode und Name die normalisierte Source-Kennzeichnung. Der frühere V2-Cache wird bewusst verworfen. Bei einem Cachemiss lädt das Repository die Sprachoptionen aus der aktiven Quelle und speichert die normalisierte Liste wieder im Session Storage. Dadurch können weder Sprachdaten einer anderen lokalen Datenbank noch die einer vorherigen Stage-Publication wiederverwendet werden.
 
 Nach dem Laden ermittelt `getSourceLanguage()` genau eine Sprache mit `isSource: true`. Ihr Code ersetzt einen abweichenden vorläufigen URL- oder Config-Wert und wird in die URL geschrieben. Fehlt eine eindeutige Source, läuft die Anwendung mit dem bisherigen Rückfallwert im Zustand `degraded` weiter.
 

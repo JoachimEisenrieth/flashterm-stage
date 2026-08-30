@@ -1,6 +1,5 @@
 // © 2025-04-18 Eisenrieth Digital Solutions. Alle Rechte vorbehalten.
 
-import { loginToFileMaker } from './filemaker-api.js';
 import { config } from './config.js';  // Konfiguration importieren
 import {
     BootstrapState,
@@ -10,10 +9,20 @@ import {
 import { getConceptSectionAvailability } from './src/app/concept-section-availability.js';
 import { createConceptViewModel } from './src/app/concept-view-model.js';
 import { serializeCsv } from './src/app/csv-export.js';
-import { getImageBasePath } from './src/app/image-path.js';
 import { parseLanguageCache, serializeLanguageCache } from './src/app/language-cache.js';
 import { getSourceLanguage } from './src/app/source-language.js';
-import { terminologyRepository } from './src/app/terminology-repository.js';
+import {
+    effectiveTerminologyConfig,
+    getAvailableTermbases,
+    initializeTerminologySource,
+    terminologyRepository
+} from './src/app/terminology-repository.js';
+import {
+    getTermbaseSelectionUrl,
+    getTerminologyCacheKey,
+    getTerminologyImageBasePath,
+    usesPublishedTerminology
+} from './src/app/terminology-source.js';
 
 const langParams = getLanguageParamsFromURL();
 let sourceLanguage = langParams.source;
@@ -79,11 +88,15 @@ async function initialize() {
         renderBootstrapState(BootstrapState.STARTING);
 
         try {
-            // An FileMaker anmelden
-            await loginToFileMaker();
+            // Konfigurierte Terminologiequelle initialisieren
+            await initializeTerminologySource();
 
             // GUI-Übersetzungen für die gewählte Sprache laden
             const translationsLoaded = await loadGuiTranslations(guiLanguage);
+
+            // Verfügbare veröffentlichte Terminologiebestände im Header anbieten
+            await initializeTermbaseSelector();
+            await initializeSessionDisplay();
 
             // Sprachoptionen für das GUI laden und cachen
             const languagesLoaded = await fetchAndCacheLanguageOptions(guiLanguage);
@@ -155,7 +168,8 @@ function setDataControlsEnabled(enabled) {
         clearButton,
         document.getElementById('profile-icon'),
         document.getElementById('language-selector'),
-        document.getElementById('saveLanguageBtn')
+        document.getElementById('saveLanguageBtn'),
+        document.getElementById('termbase-selector')
     ].forEach(element => {
         if (element) {
             element.disabled = !enabled;
@@ -184,6 +198,14 @@ function initializeEventListeners() {
                 switchMode(button.mode); // Schaltet zwischen den Modi um
             });
             button.element.hasListener = true; // Verhindert doppelte Listener
+        }
+    });
+
+    const termbaseSelector = document.getElementById('termbase-selector');
+    termbaseSelector?.addEventListener('change', event => {
+        const selectedTermbaseId = event.target.value;
+        if (selectedTermbaseId && selectedTermbaseId !== effectiveTerminologyConfig.termbaseId) {
+            window.location.assign(getTermbaseSelectionUrl(window.location.href, selectedTermbaseId));
         }
     });
 
@@ -384,6 +406,55 @@ function getLanguageParamsFromURL() {
         source: params.get('source') || config.initialSourceLanguage,
         target: params.get('target') || config.initialTargetLanguage || ''
     };
+}
+
+async function initializeTermbaseSelector() {
+    if (!usesPublishedTerminology(effectiveTerminologyConfig)) {
+        return;
+    }
+
+    const control = document.getElementById('termbase-control');
+    const selector = document.getElementById('termbase-selector');
+    if (!control || !selector) {
+        return;
+    }
+
+    try {
+        const termbases = await getAvailableTermbases();
+        selector.innerHTML = '';
+        [...termbases]
+            .sort((first, second) => first.name.localeCompare(second.name, guiLanguage))
+            .forEach(termbase => {
+                const option = document.createElement('option');
+                option.value = termbase.id;
+                option.textContent = termbase.name;
+                option.selected = termbase.id === effectiveTerminologyConfig.termbaseId;
+                selector.appendChild(option);
+            });
+
+        control.classList.toggle('hidden', termbases.length < 2);
+    } catch (error) {
+        logWarning(`Terminologiebestände konnten nicht geladen werden: ${error.message}`);
+    }
+}
+
+async function initializeSessionDisplay() {
+    if (!usesPublishedTerminology(effectiveTerminologyConfig)) {
+        return;
+    }
+    try {
+        const response = await fetch('/api/session', { headers: { Accept: 'application/json' } });
+        if (!response.ok) return;
+        const data = await response.json();
+        const control = document.getElementById('session-control');
+        const user = document.getElementById('session-user');
+        if (control && user && data.user?.displayName) {
+            user.textContent = data.user.displayName;
+            control.classList.remove('hidden');
+        }
+    } catch (error) {
+        logWarning(`Anmeldestatus konnte nicht geladen werden: ${error.message}`);
+    }
 }
 
 // ====================================================================================================
@@ -765,6 +836,10 @@ async function fetchTargetTermList(language) {
 // ====================================================================================================
 let cachedLanguageOptions = null;
 
+function getLanguageCacheKey() {
+    return getTerminologyCacheKey(effectiveTerminologyConfig);
+}
+
 function applySourceLanguageFromOptions() {
     const configuredSourceLanguage = getSourceLanguage(cachedLanguageOptions);
     if (!configuredSourceLanguage) {
@@ -772,8 +847,25 @@ function applySourceLanguageFromOptions() {
         return false;
     }
 
+    let languagesChanged = false;
     if (sourceLanguage !== configuredSourceLanguage.code) {
         sourceLanguage = configuredSourceLanguage.code;
+        languagesChanged = true;
+    }
+
+    if (usesPublishedTerminology(effectiveTerminologyConfig)) {
+        const targetIsAvailable = cachedLanguageOptions.some(language => (
+            language.code === targetLanguage && language.code !== sourceLanguage
+        ));
+        if (!targetIsAvailable) {
+            targetLanguage = cachedLanguageOptions.find(language => (
+                language.code !== sourceLanguage
+            ))?.code ?? '';
+            languagesChanged = true;
+        }
+    }
+
+    if (languagesChanged) {
         updateURLWithLanguages(sourceLanguage, targetLanguage);
     }
 
@@ -782,7 +874,8 @@ function applySourceLanguageFromOptions() {
 
 async function fetchAndCacheLanguageOptions(guiLanguage) {
     // Überprüfe, ob die Sprachdaten bereits im SessionStorage vorhanden sind
-    const cachedData = sessionStorage.getItem('languageData');
+    const languageCacheKey = getLanguageCacheKey();
+    const cachedData = sessionStorage.getItem(languageCacheKey);
     const cachedLanguages = parseLanguageCache(cachedData, guiLanguage);
     if (cachedLanguages !== null) {
         cachedLanguageOptions = cachedLanguages;
@@ -794,7 +887,7 @@ async function fetchAndCacheLanguageOptions(guiLanguage) {
         cachedLanguageOptions = await terminologyRepository.getLanguages(guiLanguage);
         if (cachedLanguageOptions && cachedLanguageOptions.length > 0) {
             // Speichere die Daten im SessionStorage für zukünftige Sitzungen
-            sessionStorage.setItem('languageData', serializeLanguageCache(guiLanguage, cachedLanguageOptions));
+            sessionStorage.setItem(languageCacheKey, serializeLanguageCache(guiLanguage, cachedLanguageOptions));
             return true;
         } else {
             logWarning('Keine Sprachdaten gefunden.');
@@ -1079,6 +1172,8 @@ function updateTexts(language) {
         { selector: '#translator-start-heading', key: 'translator_start_heading' },
         { selector: '#translator-start-intro', key: 'translator_start_intro' },
         { selector: '#translator-start-hint', key: 'translator_start_hint' },
+        { selector: '#termbase-selector-label', key: 'select_termbase' },
+        { selector: '#logout-button', key: 'logout' },
         { selector: '#language-modal-title', key: 'select_target_language' },
         { selector: '#saveLanguageBtn', key: 'save' }
     ];
@@ -1151,7 +1246,7 @@ async function showWiki(term, conceptID, sourceLanguage, targetLanguage) {
         updateDOMElements(
             conceptData,
             targetLanguage,
-            getImageBasePath(config.server, config.database, window.location.origin)
+            getTerminologyImageBasePath(effectiveTerminologyConfig, window.location.origin)
         );
 
         document.getElementById('mining-container').style.display = 'none';

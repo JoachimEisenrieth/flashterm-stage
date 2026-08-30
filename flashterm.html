@@ -22,6 +22,16 @@
                 </div>
                 <span class="brand-product-name">stage</span>
             </div>
+            <div id="termbase-control" class="termbase-control hidden">
+                <label id="termbase-selector-label" for="termbase-selector">Terminologiebestand</label>
+                <select id="termbase-selector" aria-labelledby="termbase-selector-label"></select>
+            </div>
+            <div id="session-control" class="session-control hidden">
+                <span id="session-user"></span>
+                <form method="post" action="/auth/logout">
+                    <button id="logout-button" type="submit">Abmelden</button>
+                </form>
+            </div>
             <div class="search-wrapper">
                 <div class="search-container">
                     <input id="search-field" type="text" placeholder="Suche..." class="search-field" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="suggestions" aria-expanded="false">

@@ -10,5 +10,18 @@
 .env.*
 !.env.example
 
+# Local flashterm stage publication data
+/.stage-data/
+
+# Generated exports and deployment bundles
+/outputs/
+
+# Accidental local command-output file
+/node
+
+# Local Windows service configuration and secrets
+/deploy/windows/service.env
+/deploy/windows/flashterm-stage-service.xml
+
 # Log files
 *.log

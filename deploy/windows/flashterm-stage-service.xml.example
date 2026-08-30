@@ -1,0 +1,20 @@
+<service>
+  <id>flashterm-stage</id>
+  <name>flashterm stage</name>
+  <description>Serves published flashterm terminology on the local IIS reverse-proxy port.</description>
+  <executable>powershell.exe</executable>
+  <arguments>-NoLogo -NoProfile -NonInteractive -File "C:\Apps\flashterm-stage\current\deploy\windows\start-stage.ps1" -ProjectRoot "C:\Apps\flashterm-stage\current" -SettingsFile "C:\ProgramData\flashterm-stage\service.env"</arguments>
+  <workingdirectory>C:\Apps\flashterm-stage\current</workingdirectory>
+  <startmode>Automatic</startmode>
+  <delayedAutoStart>true</delayedAutoStart>
+  <hidewindow>true</hidewindow>
+  <logpath>C:\ProgramData\flashterm-stage\logs</logpath>
+  <log mode="roll-by-size">
+    <sizeThreshold>10240</sizeThreshold>
+    <keepFiles>14</keepFiles>
+  </log>
+  <onfailure action="restart" delay="10 sec" />
+  <onfailure action="restart" delay="30 sec" />
+  <resetfailure>1 hour</resetfailure>
+  <stoptimeout>15 sec</stoptimeout>
+</service>

@@ -27,14 +27,15 @@ Für eine vollständige manuelle Verifikation werden eine gültige lokale `confi
 
 ### URL-Parameter
 
-Das Hauptmodul wertet ausschließlich diese Parameter aus:
+Das Hauptmodul wertet diese Parameter aus:
 
 - `source`: Ausgangssprache
 - `target`: Zielsprache
+- `termbase`: öffentliche ID eines veröffentlichten Terminologiebestands im Stage-Modus
 
-Fehlt `source`, wird zunächst `config.initialSourceLanguage` verwendet. Nach dem Laden der Sprachdaten ersetzt die in FileMaker gekennzeichnete Source diesen vorläufigen Wert. Fehlt `target`, wird `config.initialTargetLanguage` beziehungsweise eine leere Zeichenkette verwendet. Andere Query-Parameter werden zwar durch `index.html` weitergereicht, vom Hauptmodul aber nicht ausgewertet.
+Fehlt `source`, wird zunächst `config.initialSourceLanguage` verwendet. Nach dem Laden der Sprachdaten ersetzt die als Source gekennzeichnete Sprache diesen vorläufigen Wert. Fehlt `target`, wird `config.initialTargetLanguage` beziehungsweise eine leere Zeichenkette verwendet. Andere Query-Parameter werden zwar durch `index.html` weitergereicht, vom Hauptmodul aber nicht ausgewertet.
 
-Ein abweichender oder ungültiger `source`-Wert wird nach dem Laden der Sprachdaten auf die eindeutige FileMaker-Source korrigiert und in der URL ersetzt. Der `target`-Wert wird weiterhin nicht gegen die verfügbaren Sprachcodes validiert. **Bekannte Inkonsistenz:** Eine nicht verfügbare Zielsprache kann deshalb bis zur nächsten bestätigten Sprachwahl sichtbar bleiben.
+Ein abweichender oder ungültiger `source`-Wert wird nach dem Laden der Sprachdaten auf die eindeutige Source korrigiert und in der URL ersetzt. Im veröffentlichten Stage-Modus wird auch eine nicht verfügbare Zielsprache auf die erste verfügbare, von der Source abweichende Sprache korrigiert. Der FileMaker-Modus behält die historische Target-Semantik bei.
 
 ### Unmittelbarer Modulstart
 
@@ -51,15 +52,16 @@ Beim Laden von `flashterm.js` geschieht in dieser Reihenfolge:
 
 `initialize()` führt nacheinander aus:
 
-1. Anmeldung an FileMaker.
+1. Initialisieren der konfigurierten Terminologiequelle; nur im FileMaker-Modus schließt dies die Anmeldung an FileMaker ein.
 2. Laden von `json/translations.json` und Aktualisieren der vorhandenen übersetzbaren UI-Elemente.
-3. Laden beziehungsweise Wiederverwenden der normalisierten Sprachoptionen aus einem versionierten, an die GUI-Sprache gebundenen Cache.
-4. Ermitteln der eindeutig mit `isSource` markierten Mastersprache und gegebenenfalls Korrigieren der URL.
-5. Laden und Parsen der Terminliste der Source-Sprache.
-6. Laden und Parsen der Terminliste der Zielsprache.
-7. Aktualisieren des Dokumenttitels und der Modusbeschriftungen.
-8. Anzeigen der Wiki-Startfläche.
-9. Wechsel in `ready`, wenn alle Schritte erfolgreich waren, andernfalls in `degraded`.
+3. Im veröffentlichten Stage-Modus Laden der aktiven Termbasen und Einblenden der Auswahl, sobald mindestens zwei vorhanden sind.
+4. Laden beziehungsweise Wiederverwenden der normalisierten Sprachoptionen aus einem versionierten, an GUI-Sprache und Terminologiebestand gebundenen Cache.
+5. Ermitteln der eindeutig mit `isSource` markierten Mastersprache und gegebenenfalls Korrigieren der URL.
+6. Laden und Parsen der Terminliste der Source-Sprache.
+7. Laden und Parsen der Terminliste der Zielsprache.
+8. Aktualisieren des Dokumenttitels und der Modusbeschriftungen.
+9. Anzeigen der Wiki-Startfläche.
+10. Wechsel in `ready`, wenn alle Schritte erfolgreich waren, andernfalls in `degraded`.
 
 Die Abrufe laufen weiterhin seriell. Ein Fehler beim Login wechselt in `failed`; datenabhängige Bedienelemente bleiben deaktiviert und eine lokalisierte Wiederholungsaktion wird angeboten. Fehler beim Laden von Übersetzungen, Sprachoptionen oder Terminlisten werden innerhalb der jeweiligen Ladefunktion abgefangen und führen nach Abschluss in `degraded`. Bereits geladene Funktionen bleiben nutzbar; die Wiederholungsaktion startet die vollständige Initialisierung erneut.
 
@@ -236,11 +238,12 @@ Relevante Storage-Einträge:
 | `fmToken` | FileMaker-API | FileMaker-API |
 | `fmTokenExpiration` | FileMaker-API | FileMaker-API |
 | `availableLanguages` | FileMaker-API | nicht vom Hauptmodul verwendet |
-| `languageData` | Hauptmodul | Hauptmodul; V3-Envelope mit `guiLanguage` und normalisiertem `languages`-Array einschließlich `isSource` |
+| `languageData:<Datenbankname>` | Hauptmodul | Hauptmodul; datenbankspezifisches V3-Envelope mit `guiLanguage` und normalisiertem `languages`-Array einschließlich `isSource` |
+| `languageData:termbase:<Termbase-ID>:publication:<Publication-ID>` | Hauptmodul im Stage-Modus | Hauptmodul; sprach- und revisionsspezifisches V3-Envelope |
 | `sourceLanguage` | ungenutzter Quellsprachwechsel | nein |
 | `targetLanguage` | Zielsprachwechsel | nein |
 
-Der Sprachcache wird als `{ version: 3, guiLanguage, languages: [{ code, name, isSource }] }` gespeichert. Nur ein V3-Envelope für die aktuelle GUI-Sprache mit einem Array unter `languages` wird wiederverwendet. Der frühere V2-Cache wird verworfen, damit die Source-Kennzeichnung sicher neu aus FileMaker geladen wird. Alte FileMaker-Roharrays, andere GUI-Sprachen, unerwartete JSON-Typen und beschädigtes JSON gelten ebenfalls als Cachemiss. Beschädigtes Cache-JSON bricht die Initialisierung damit nicht ab. Ein formal gültiges V3-Envelope mit leerem `languages`-Array wird weiterhin als gültiger leerer Cache akzeptiert.
+Der Sprachcache wird pro Datenbank als `{ version: 3, guiLanguage, languages: [{ code, name, isSource }] }` gespeichert. Nur ein V3-Envelope für die aktuelle GUI-Sprache mit einem Array unter `languages` wird wiederverwendet. Der frühere V2-Cache wird verworfen, damit die Source-Kennzeichnung sicher neu aus FileMaker geladen wird. Alte FileMaker-Roharrays, andere GUI-Sprachen, unerwartete JSON-Typen und beschädigtes JSON gelten ebenfalls als Cachemiss. Beschädigtes Cache-JSON bricht die Initialisierung damit nicht ab. Ein formal gültiges V3-Envelope mit leerem `languages`-Array wird weiterhin als gültiger leerer Cache akzeptiert. Ein Wechsel der Datenbank verwendet einen eigenen Schlüssel und kann damit keine Sprachdaten der vorherigen Datenbank übernehmen.
 
 ## 6. Wiki-/Concept-Ansicht
 
@@ -454,12 +457,14 @@ Der integrierte Durchlauf vom 16. August 2026 ist in [`smoke-test-2026-08-16.md`
 | FT-LANG-003 | Wiki mit ausgewähltem Concept | Zielsprache wechseln | Concept wird für das neue Sprachpaar erneut geladen |
 | FT-LANG-004 | `targetLanguage` nur in Session Storage gesetzt, URL ohne Target | Seite neu laden | Session-Wert wird ignoriert; Konfigurationswert wird verwendet |
 | FT-LANG-005 | Ungültiger URL-Target-Code | Anwendung öffnen | Source wird aus FileMaker ermittelt; unbekanntes Target bleibt bis zur nächsten bestätigten Sprachwahl sichtbar |
-| FT-LANG-CACHE-001 | Altes FileMaker-Roharray in `sessionStorage.languageData` | Anwendung neu laden | Alter Cache wird ignoriert, Sprachen werden über das Repository geladen und als V3-Envelope gespeichert |
+| FT-LANG-CACHE-001 | Altes FileMaker-Roharray im datenbankspezifischen Sprachcache | Anwendung neu laden | Alter Cache wird ignoriert, Sprachen werden über das Repository geladen und als V3-Envelope gespeichert |
 | FT-LANG-CACHE-002 | Gültiges V3-Envelope mit anderer `guiLanguage` | Anwendung neu laden | Cache wird ignoriert und für die aktuelle GUI-Sprache neu geladen |
 | FT-LANG-CACHE-003 | Gültiges V3-Envelope mit `languages: []` für die aktuelle GUI-Sprache | Anwendung neu laden | Leerer Cache wird akzeptiert und löst keinen neuen Sprachabruf aus |
-| FT-LANG-CACHE-004 | Syntaktisch beschädigtes JSON in `sessionStorage.languageData` | Anwendung neu laden | Cache gilt als Cachemiss; Sprachabruf und Initialisierung laufen weiter |
+| FT-LANG-CACHE-004 | Syntaktisch beschädigtes JSON im datenbankspezifischen Sprachcache | Anwendung neu laden | Cache gilt als Cachemiss; Sprachabruf und Initialisierung laufen weiter |
 | FT-LANG-CACHE-005 | Gültiges V3-Envelope für die aktuelle GUI-Sprache | Anwendung neu laden | Sprachen einschließlich Source-Rolle werden aus dem Cache übernommen; kein erneuter Sprachabruf |
 | FT-LANG-CACHE-006 | Gültiges altes V2-Envelope | Anwendung neu laden | Cache wird verworfen und mit Source-Kennzeichnung als V3 neu aufgebaut |
+| FT-LANG-CACHE-007 | Wechsel auf eine andere Datenbank mit vorhandenem Sprachcache | Anwendung neu laden | Der datenbankspezifische Cache der neuen Datenbank wird verwendet; Sprachdaten der vorherigen Datenbank werden nicht übernommen |
+| FT-LANG-CACHE-008 | Neue Publication derselben Termbase wurde aktiviert, altes Tab enthält noch den vorherigen Sprachcache | Tab normal neu laden | Der Publication-spezifische Schlüssel erzwingt neue Sprachdaten; URL-Source und -Target werden auf verfügbare Sprachen korrigiert |
 | FT-LANG-SOURCE-001 | URL enthält einen von FileMaker abweichenden `source`-Code | Anwendung starten | FileMaker-Source wird übernommen, URL korrigiert und in den Modusbeschriftungen mit `Source` gekennzeichnet |
 | FT-LANG-SOURCE-002 | Sprachdaten enthalten keine oder mehrere Source-Markierungen | Anwendung starten | Vorläufiger URL-/Config-Wert bleibt erhalten; Initialisierung endet kontrolliert in `degraded` |
 | FT-THEME-001 | Systemmodus Light | Anwendung öffnen | Light-Variablen, Light-Favicon und Light-Logo werden verwendet |
