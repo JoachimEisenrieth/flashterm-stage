@@ -5,6 +5,9 @@ Stand: 30. August 2026
 Der praktisch abgenommene Stand des ersten Servers ist separat in
 [`windows-pilot-2026-08-30.md`](windows-pilot-2026-08-30.md) dokumentiert.
 
+Die Trennung mehrerer Internet- und Intranetinstanzen ist in
+[`internet-intranet-profiles.md`](internet-intranet-profiles.md) festgelegt. Die folgende Anleitung beschreibt weiterhin die einzelne Standardinstanz; für zusätzliche Instanzen erzeugt der dort dokumentierte Generator eindeutige Service-, Daten- und Proxykonfigurationen.
+
 ## Ziel und Pilotgrenze
 
 Diese Anleitung beschreibt einen einzelnen flashterm-stage-Prozess auf einem Windows Server. IIS nimmt ausschließlich HTTPS-Verbindungen an und leitet sie intern an den Node-Prozess auf `127.0.0.1:8100` weiter. Veröffentlichungen und Aktivierungen liegen in einem lokalen, gesicherten Datenverzeichnis.
@@ -22,6 +25,8 @@ Der erste Pilot umfasst:
 
 Mehrere gleichzeitig schreibende Prozesse, gemeinsamer Netzwerkspeicher und hochverfügbare Sitzungen gehören nicht zu diesem Pilotumfang.
 
+Mehrere getrennte Instanzen dürfen dieselbe geprüfte Release-Version lesen, verwenden aber zwingend unterschiedliche Service-IDs, Loopback-Ports, geschützte Einstellungen, Datenverzeichnisse, IIS-Sites, OIDC-Anwendungen und Veröffentlichungstoken. Ein interner DNS-Name oder ein IIS-Hostname-Binding auf einer öffentlichen IP-Adresse ist allein keine Intranetgrenze.
+
 ## Voraussetzungen
 
 - eine unterstützte 64-Bit-Node.js-LTS-Version ab Node 20,
@@ -34,6 +39,14 @@ Mehrere gleichzeitig schreibende Prozesse, gemeinsamer Netzwerkspeicher und hoch
 - ein durch den Betrieb genehmigter Windows-Service-Wrapper.
 
 Die mitgelieferte Dienstvorlage verwendet WinSW als Wrapper. Die ausführbare Wrapperdatei selbst gehört nicht zum Repository und muss aus einer betrieblich freigegebenen Quelle bezogen werden.
+
+Für eine zusätzliche Instanz werden die drei aufeinander abgestimmten Vorlagen erzeugt mit:
+
+```text
+npm run windows:instance -- --instance <id> --port <port> --origin <https-origin> --output <verzeichnis>
+```
+
+Der Generator installiert nichts, erzeugt keine Secrets und überschreibt kein vorhandenes Instanzverzeichnis.
 
 ## Empfohlene Verzeichnisse
 

@@ -9,6 +9,7 @@
     "dev": "node scripts/dev-server.js",
     "stage": "node scripts/stage-server.js",
     "publish:backstage": "node scripts/publish-backstage.js",
+    "windows:instance": "node scripts/create-windows-instance-files.js",
     "test": "node --test"
   }
 }

@@ -130,7 +130,7 @@ Vor und nach Änderungen:
 npm test
 ```
 
-Der erwartete aktuelle Stand ist `127/127` erfolgreiche Tests. Einige Dev-Server- und Stage-API-Tests öffnen temporäre Loopback-Ports. In eingeschränkten Ausführungsumgebungen kann dafür eine lokale Freigabe erforderlich sein.
+Der erwartete aktuelle Stand ist `130/130` erfolgreiche Tests. Einige Dev-Server- und Stage-API-Tests öffnen temporäre Loopback-Ports. In eingeschränkten Ausführungsumgebungen kann dafür eine lokale Freigabe erforderlich sein.
 
 Zusätzliche Prüfungen nach JavaScript-Änderungen:
 

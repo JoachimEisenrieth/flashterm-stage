@@ -19,7 +19,7 @@ flashterm stage besitzt einen belastbaren fachlichen Kern und drei unterscheidba
 - Die Concept-Darstellung ist vom FileMaker-Rohformat entkoppelt.
 - Excel unterstützt die menschliche Auswertung; CSV und JSON unterstützen technische Weiterverarbeitung.
 - Die Oberfläche besitzt eine konsistente, warme und zurückhaltende Gestaltung sowie Light und Dark Mode.
-- Characterization Baseline, anonymisierte Fixtures und 127 automatisierte Tests sichern wichtige bestehende Verträge.
+- Characterization Baseline, anonymisierte Fixtures und 130 automatisierte Tests sichern wichtige bestehende Verträge.
 - Der lokale Development-Proxy ermöglicht realistische Browserprüfungen ohne Änderungen am FileMaker-Server.
 
 ### Noch nicht produktreif gelöst
@@ -199,6 +199,12 @@ Zu dokumentieren:
 
 Zwischenstand: Der erste Windows-Pilot läuft unter IIS mit eigenem Node-Dienst, Auth0-OIDC, rollenbasierter Termbase-Freigabe, unveränderlicher Publication- und Asset-Ablage sowie automatisierter Zertifikatserneuerung. Installation, Code- und Daten-Rollback sowie der reale Backstage-Publish wurden praktisch geprüft. Offen bleiben insbesondere ein dokumentierter Restore-Test und die betriebliche Aufnahme weiterer Pilotpersonen.
 
+### NEXT-5: Einfaches Intranetprofil vorbereiten — Vorlagen umgesetzt
+
+Internet und Intranet verwenden dieselbe Release-Version, aber getrennte Dienste, Ports, Einstellungen, Daten, IIS-Sites, OIDC-Anwendungen und Veröffentlichungstoken. Das erste Intranetprofil bleibt bei OIDC und wird netzseitig über interne IP, VPN beziehungsweise Firewall abgegrenzt. Windows-Single-Sign-on ist bewusst zurückgestellt.
+
+Die Entscheidung und Abnahmegrenze stehen in [`internet-intranet-profiles.md`](internet-intranet-profiles.md). Ein getesteter Generator erzeugt die instanzspezifischen Windows-Dateien, nimmt jedoch keine IIS-, Firewall- oder Secret-Änderungen vor.
+
 ## Später: Quellenunabhängigkeit beweisen und Reichweite erhöhen
 
 ### LATER-1: Zweite Terminologiequelle anbinden
@@ -242,10 +248,10 @@ Eine Messung wird nur mit klarer Zweckbindung, sparsamen Daten und transparenter
 ## Empfohlene unmittelbare Reihenfolge
 
 1. Den begonnenen praktischen Smoke-Test mit Inspector, Translator, Export und responsiver Darstellung abschließen.
-2. Gemeinsam primäre Zielgruppe und wichtigsten Arbeitsablauf festlegen.
-3. Nur die dabei gefundenen Pilot-Blocker einzeln beheben.
-4. Anschließend den quellenneutralen API-Vertrag dokumentieren.
-5. Erst danach das serverseitige Gateway und den FileMaker-Referenzadapter implementieren.
+2. Das einfache Intranetprofil mit internem Hostnamen, Netzgrenze und eigener OIDC-Anwendung konkretisieren.
+3. Die generierten Instanzdateien zunächst in einer getrennten internen Testinstallation abnehmen.
+4. Gemeinsam primäre Zielgruppe und wichtigsten Arbeitsablauf festlegen.
+5. Nur die dabei gefundenen Pilot-Blocker einzeln beheben.
 
 ## Strategischer Prüfstein
 

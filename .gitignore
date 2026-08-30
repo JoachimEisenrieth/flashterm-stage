@@ -22,6 +22,7 @@
 # Local Windows service configuration and secrets
 /deploy/windows/service.env
 /deploy/windows/flashterm-stage-service.xml
+/deploy/windows/generated/
 
 # Log files
 *.log
