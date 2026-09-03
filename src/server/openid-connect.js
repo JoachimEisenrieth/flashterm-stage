@@ -105,6 +105,16 @@ export function createOpenIdConnectClient({
     }
 
     return {
+        createLogoutUrl(returnTo) {
+            const returnUrl = assertHttpsUrl(returnTo, 'Post-logout redirect URI');
+            const url = new URL(`${normalizedIssuer}/v2/logout`);
+            url.search = new URLSearchParams({
+                client_id: clientId,
+                returnTo: returnUrl.toString()
+            }).toString();
+            return url.toString();
+        },
+
         async createAuthorization(returnTo) {
             const metadata = await provider();
             const state = randomBytes(32).toString('base64url');

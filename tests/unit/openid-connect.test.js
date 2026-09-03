@@ -73,6 +73,11 @@ test('uses discovery, PKCE S256 and a validated ID token to derive termbase gran
     assert.equal(tokenBody.get('code_verifier'), transaction.codeVerifier);
     assert.equal(tokenBody.get('client_secret'), null);
     assert.match(calls.find(call => call.url.endsWith('/token')).options.headers.Authorization, /^Basic /);
+
+    const logoutUrl = new URL(client.createLogoutUrl('https://stage.example.test/'));
+    assert.equal(logoutUrl.href.startsWith(`${issuer}v2/logout?`), true);
+    assert.equal(logoutUrl.searchParams.get('client_id'), 'TEST-CLIENT');
+    assert.equal(logoutUrl.searchParams.get('returnTo'), 'https://stage.example.test/');
 });
 
 test('rejects non-HTTPS OpenID Connect configuration', () => {
@@ -81,4 +86,13 @@ test('rejects non-HTTPS OpenID Connect configuration', () => {
         clientId: 'TEST',
         redirectUri: 'https://stage.example.test/auth/callback'
     }), /HTTPS/);
+});
+
+test('rejects a non-HTTPS post-logout redirect', () => {
+    const client = createOpenIdConnectClient({
+        issuer: 'https://identity.example.test',
+        clientId: 'TEST',
+        redirectUri: 'https://stage.example.test/auth/callback'
+    });
+    assert.throws(() => client.createLogoutUrl('http://stage.example.test/'), /HTTPS/);
 });

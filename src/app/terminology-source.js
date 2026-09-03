@@ -10,9 +10,16 @@ export function resolvePublishedTermbaseConfig(config, search = '') {
     }
 
     const requestedTermbaseId = new URLSearchParams(search).get('termbase')?.trim();
-    return requestedTermbaseId
-        ? { ...config, termbaseId: requestedTermbaseId }
-        : config;
+    const termbaseId = requestedTermbaseId || config.termbaseId;
+    const initialTargetLanguage = config.initialTargetLanguages?.[termbaseId]
+        ?? config.initialTargetLanguage;
+    const resolvedConfig = {
+        ...config,
+        termbaseId
+    };
+    return initialTargetLanguage === undefined
+        ? resolvedConfig
+        : { ...resolvedConfig, initialTargetLanguage };
 }
 
 export function getTermbaseSelectionUrl(currentUrl, termbaseId) {
@@ -21,6 +28,14 @@ export function getTermbaseSelectionUrl(currentUrl, termbaseId) {
     url.searchParams.delete('source');
     url.searchParams.delete('target');
     return url.toString();
+}
+
+export function getInitialLanguageSelection(config, search = '') {
+    const params = new URLSearchParams(search);
+    return {
+        source: params.get('source') || config?.initialSourceLanguage || '',
+        target: params.get('target') || config?.initialTargetLanguage || ''
+    };
 }
 
 export function getTerminologyCacheKey(config) {

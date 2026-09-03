@@ -18,6 +18,7 @@ const PUBLIC_ROOT_PATHS = new Set([
     '/',
     '/index.html',
     '/flashterm.html',
+    '/manual-de.html',
     '/flashterm.css',
     '/flashterm.js',
     '/filemaker-api.js',
@@ -61,7 +62,15 @@ function serializeBrowserConfig(config) {
         .replaceAll('\u2029', '\\u2029');
 }
 
-async function serveBrowserConfig(request, response, store, tenantId, configuredTermbaseId, auth) {
+async function serveBrowserConfig(
+    request,
+    response,
+    store,
+    tenantId,
+    configuredTermbaseId,
+    defaultTargetLanguages,
+    auth
+) {
     if (request.method !== 'GET' && request.method !== 'HEAD') {
         sendText(response, 405, 'Method Not Allowed');
         return;
@@ -90,7 +99,10 @@ async function serveBrowserConfig(request, response, store, tenantId, configured
         termbaseId: selectedTermbase?.id ?? '',
         publicationId: publication?.publication.id ?? '',
         initialSourceLanguage: sourceLanguage,
-        initialTargetLanguage: targetLanguage
+        initialTargetLanguage: targetLanguage,
+        initialTargetLanguages: Object.fromEntries(termbases
+            .filter(termbase => Object.hasOwn(defaultTargetLanguages, termbase.id))
+            .map(termbase => [termbase.id, defaultTargetLanguages[termbase.id]]))
     };
     const body = `export const config = ${serializeBrowserConfig(browserConfig)};\n`;
     response.writeHead(200, {
@@ -108,6 +120,7 @@ export function createStageServer({
     bodyLimit,
     rootDirectory = '',
     configuredTermbaseId = '',
+    defaultTargetLanguages = {},
     auth = createStageAuth(),
     publishTermbaseIds = ['*']
 }) {
@@ -142,6 +155,7 @@ export function createStageServer({
                 store,
                 tenantId,
                 configuredTermbaseId,
+                defaultTargetLanguages,
                 auth
             ).catch(() => sendText(response, 500, 'Internal Server Error'));
             return;
@@ -180,6 +194,26 @@ function parseGroupAccess(value) {
     }));
 }
 
+export function parseDefaultTargetLanguages(value) {
+    if (!value) return {};
+    const parsed = JSON.parse(value);
+    if (!parsed || Array.isArray(parsed) || typeof parsed !== 'object') {
+        throw new Error('FLASHTERM_STAGE_DEFAULT_TARGET_LANGUAGES must be a JSON object.');
+    }
+    return Object.fromEntries(Object.entries(parsed).map(([termbaseId, languageCode]) => {
+        const normalizedTermbaseId = termbaseId.trim();
+        const normalizedLanguageCode = typeof languageCode === 'string'
+            ? languageCode.trim()
+            : '';
+        if (!normalizedTermbaseId || !normalizedLanguageCode) {
+            throw new Error(
+                'Every default target language entry must contain a termbase ID and language code.'
+            );
+        }
+        return [normalizedTermbaseId, normalizedLanguageCode];
+    }));
+}
+
 async function startStageServer() {
     const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
     const configuredPort = Number.parseInt(process.env.FLASHTERM_STAGE_PORT ?? '', 10);
@@ -190,6 +224,9 @@ async function startStageServer() {
     const tenantId = process.env.FLASHTERM_STAGE_TENANT ?? DEFAULT_TENANT_ID;
     const publishToken = process.env.FLASHTERM_PUBLISH_TOKEN ?? '';
     const configuredTermbaseId = process.env.FLASHTERM_STAGE_TERMBASE ?? '';
+    const defaultTargetLanguages = parseDefaultTargetLanguages(
+        process.env.FLASHTERM_STAGE_DEFAULT_TARGET_LANGUAGES ?? ''
+    );
     const publishTermbaseIds = (process.env.FLASHTERM_PUBLISH_TERMBASES ?? '*')
         .split(',').map(value => value.trim()).filter(Boolean);
     const authMode = process.env.FLASHTERM_STAGE_AUTH ?? 'development';
@@ -226,6 +263,7 @@ async function startStageServer() {
         publishToken,
         rootDirectory: projectRoot,
         configuredTermbaseId,
+        defaultTargetLanguages,
         auth,
         publishTermbaseIds
     });

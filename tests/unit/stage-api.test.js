@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import {
     createStageServer,
     isPublicAppPath,
+    parseDefaultTargetLanguages,
     pathsResolveToSameFile
 } from '../../scripts/stage-server.js';
 import { createSessionManager } from '../../src/server/auth-session.js';
@@ -21,10 +22,22 @@ const publicationFixtureUrl = new URL(
 const publicationFixture = JSON.parse(await readFile(publicationFixtureUrl, 'utf8'));
 const TEST_TOKEN = 'TEST-PUBLISH-TOKEN';
 
+test('parses configured default target languages by termbase', () => {
+    assert.deepEqual(
+        parseDefaultTargetLanguages('{" PARIPHARMA ":" en-GB "}'),
+        { PARIPHARMA: 'en-GB' }
+    );
+    assert.throws(
+        () => parseDefaultTargetLanguages('{"PARIPHARMA":""}'),
+        /termbase ID and language code/
+    );
+});
+
 test('exposes only browser assets from the application directory', () => {
     for (const pathname of [
         '/',
         '/index.html',
+        '/manual-de.html',
         '/flashterm.js',
         '/json/translations.json',
         '/svg/logo-grau.svg',
@@ -293,7 +306,11 @@ test('serves the browser app with a public config for the active termbase', asyn
         store,
         tenantId: 'TEST-TENANT',
         publishToken: TEST_TOKEN,
-        rootDirectory
+        rootDirectory,
+        defaultTargetLanguages: {
+            'TEST-TERMBASE': 'yy-YY',
+            'HIDDEN-TERMBASE': 'zz-ZZ'
+        }
     });
     t.after(async () => {
         await close(server);
@@ -316,11 +333,102 @@ test('serves the browser app with a public config for the active termbase', asyn
         termbaseId: 'TEST-TERMBASE',
         publicationId: 'TEST-PUBLICATION-001',
         initialSourceLanguage: 'xx-XX',
-        initialTargetLanguage: 'yy-YY'
+        initialTargetLanguage: 'yy-YY',
+        initialTargetLanguages: {
+            'TEST-TERMBASE': 'yy-YY'
+        }
     });
     assert.equal(configSource.includes(TEST_TOKEN), false);
     assert.equal(configSource.includes('username'), false);
     assert.equal(configSource.includes('password'), false);
+});
+
+test('trusted-intranet grants every reachable client read access without a login', async t => {
+    const dataDirectory = await mkdtemp(path.join(os.tmpdir(), 'flashterm-stage-trusted-'));
+    const store = createFilePublicationStore({ dataDirectory });
+    await store.savePublication(structuredClone(publicationFixture));
+    await store.activatePublication('TEST-TENANT', 'TEST-TERMBASE', 'TEST-PUBLICATION-001');
+    const auth = createStageAuth({ mode: 'trusted-intranet' });
+    const server = createStageServer({
+        store,
+        tenantId: 'TEST-TENANT',
+        auth,
+        publishToken: 'test-publish-token'
+    });
+    t.after(async () => {
+        await close(server);
+        await rm(dataDirectory, { recursive: true, force: true });
+    });
+    const origin = await listen(server);
+
+    assert.equal(auth.required, false);
+    const listResponse = await fetch(`${origin}/api/termbases`);
+    assert.equal(listResponse.status, 200);
+    assert.deepEqual((await listResponse.json()).termbases.map(item => item.id), [
+        'TEST-TERMBASE'
+    ]);
+    assert.deepEqual(await (await fetch(`${origin}/api/session`)).json(), {
+        user: { displayName: 'Intranet' }
+    });
+    const loginResponse = await fetch(`${origin}/auth/login?returnTo=%2Fflashterm.html`, {
+        redirect: 'manual'
+    });
+    assert.equal(loginResponse.status, 303);
+    assert.equal(loginResponse.headers.get('location'), '/flashterm.html');
+
+    const publicationResponse = await fetch(`${origin}/api/admin/publications`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(publicationFixture)
+    });
+    assert.equal(publicationResponse.status, 401);
+});
+
+test('rejects an unknown Stage access mode', () => {
+    assert.throws(() => createStageAuth({ mode: 'intranet' }), /Unknown Stage authentication mode/);
+});
+
+test('clears the local session and redirects OIDC logout through the provider', async () => {
+    let responseStatus;
+    let responseHeaders;
+    let ended = false;
+    const auth = createStageAuth({
+        mode: 'oidc',
+        publicOrigin: 'https://stage.example.test',
+        sessionManager: {
+            getSession() { return null; },
+            clearSession() { return 'flashterm_session=; Max-Age=0'; }
+        },
+        oidcClient: {
+            createLogoutUrl(returnTo) {
+                assert.equal(returnTo, 'https://stage.example.test/');
+                return 'https://identity.example.test/v2/logout?client_id=TEST';
+            }
+        }
+    });
+    const handled = await auth.handle(
+        {
+            method: 'POST',
+            headers: {
+                host: 'stage.example.test',
+                origin: 'https://stage.example.test'
+            }
+        },
+        {
+            writeHead(status, headers) {
+                responseStatus = status;
+                responseHeaders = headers;
+            },
+            end() { ended = true; }
+        },
+        new URL('https://stage.example.test/auth/logout')
+    );
+
+    assert.equal(handled, true);
+    assert.equal(responseStatus, 303);
+    assert.equal(responseHeaders.Location, 'https://identity.example.test/v2/logout?client_id=TEST');
+    assert.deepEqual(responseHeaders['Set-Cookie'], ['flashterm_session=; Max-Age=0']);
+    assert.equal(ended, true);
 });
 
 test('requires a person session and enforces termbase grants on every read route', async t => {

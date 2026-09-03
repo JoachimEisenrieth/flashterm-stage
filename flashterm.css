@@ -163,7 +163,7 @@
 
 header {
     background-color: var(--bg-color-header);
-    padding: 16px 24px;
+    padding: 14px 24px;
     border-bottom: 1px solid var(--border-color);
     box-shadow: 0 2px 12px var(--container-shadow-color);
     box-sizing: border-box;
@@ -192,6 +192,14 @@ footer {
     margin: 0 auto;
     padding: 24px 16px;
     font-size: 0.875rem;
+}
+
+.header-context {
+    display: flex;
+    flex: 0 1 auto;
+    align-items: flex-end;
+    gap: 20px;
+    min-width: 0;
 }
 
 .brand-lockup {
@@ -228,7 +236,8 @@ footer {
 
 .termbase-control {
     display: flex;
-    flex: 0 1 250px;
+    flex: 0 1 240px;
+    width: 240px;
     min-width: 150px;
     flex-direction: column;
     gap: 3px;
@@ -246,16 +255,27 @@ footer {
 }
 
 #termbase-selector {
+    appearance: none;
     width: 100%;
-    min-height: 36px;
-    padding: 6px 30px 6px 10px;
+    min-height: 44px;
+    padding: 6px 40px 6px 10px;
     border: 1px solid var(--search-field-border-color);
     border-radius: var(--control-radius);
     background-color: var(--bg-color-search-field);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='8' viewBox='0 0 14 8' fill='none'%3E%3Cpath d='M1 1l6 6 6-6' stroke='%23667085' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-position: right 14px center;
+    background-repeat: no-repeat;
+    background-size: 14px 8px;
     color: var(--text-color);
     font: inherit;
     font-size: 0.875rem;
     cursor: pointer;
+}
+
+@media (prefers-color-scheme: dark) {
+    #termbase-selector {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='8' viewBox='0 0 14 8' fill='none'%3E%3Cpath d='M1 1l6 6 6-6' stroke='%23B8C0CC' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    }
 }
 
 #termbase-selector:focus-visible {
@@ -268,7 +288,8 @@ footer {
     display: flex;
     flex: 0 0 auto;
     align-items: center;
-    gap: 8px;
+    justify-content: flex-end;
+    min-height: 44px;
     color: var(--text-muted-color);
     font-size: 0.78rem;
 }
@@ -282,7 +303,8 @@ footer {
 }
 
 #logout-button {
-    padding: 6px 9px;
+    min-height: 44px;
+    padding: 8px 14px;
     border: 1px solid var(--search-field-border-color);
     border-radius: 8px;
     background: transparent;
@@ -299,10 +321,10 @@ footer {
 
 .search-wrapper {
     position: relative;
-    flex: 1;
+    flex: 1 1 300px;
     min-width: 0;
     width: 100%;
-    max-width: none;
+    max-width: 420px;
 }
 
 .container {
@@ -548,11 +570,11 @@ h3 {
 
 .header-content {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 24px;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 18px;
     width: 100%;
-    max-width: var(--max-width);
+    max-width: 1120px;
 }
 
 /* ================================================== */
@@ -568,6 +590,7 @@ h3 {
 
 .search-field {
     width: 100%;
+    min-height: 44px;
     padding: 13px 90px 13px 20px;
     background-color: var(--bg-color-search-field);
     border: 1px solid var(--search-field-border-color);
@@ -1624,8 +1647,49 @@ a:active {
 #context-section,
 #info-section,
 #infobox-section,
-#links-section {
+#links-section,
+#international-section {
     margin-top: 40px;
+}
+
+.international-description {
+    margin: -8px 0 18px;
+    color: var(--text-muted-color);
+}
+
+.international-table {
+    table-layout: fixed;
+}
+
+.international-table thead th {
+    color: var(--text-muted-color);
+    background-color: var(--table-header-bg);
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.international-table th,
+.international-table td {
+    width: 50%;
+}
+
+.international-table tbody th {
+    font-weight: 400;
+}
+
+.international-language-code {
+    display: inline-block;
+    width: 5.25em;
+    margin-right: 10px;
+    padding: 2px 7px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    box-sizing: border-box;
+    color: var(--text-muted-color);
+    font-size: 0.78rem;
+    line-height: 1.2;
+    text-align: center;
+    white-space: nowrap;
 }
 
 .content-source,
@@ -1715,6 +1779,34 @@ a:active {
 /* ================================================== */
 /* Responsive Design */
 /* ================================================== */
+@media (max-width: 900px) and (min-width: 769px) {
+    .header-content {
+        flex-wrap: wrap;
+    }
+
+    .header-context {
+        flex: 1 1 420px;
+    }
+
+    .session-control {
+        margin-left: auto;
+    }
+
+    .search-wrapper {
+        order: 3;
+        flex-basis: 100%;
+        max-width: none;
+    }
+
+    .container {
+        margin-top: 150px;
+    }
+
+    h1 {
+        top: 142px;
+    }
+}
+
 @media (max-width: 768px) {
     header {
         position: sticky;
@@ -1723,8 +1815,15 @@ a:active {
 
     .header-content {
         flex-direction: column;
+        align-items: stretch;
         gap: 10px;
         text-align: center;
+    }
+
+    .header-context {
+        width: 100%;
+        align-items: flex-end;
+        gap: 14px;
     }
 
     .logo-wordmark {
@@ -1732,15 +1831,17 @@ a:active {
     }
 
     .termbase-control {
-        flex: none;
-        width: 100%;
+        flex: 1;
+        width: auto;
         max-width: none;
         text-align: left;
     }
 
     .session-control {
+        order: 2;
+        max-width: none;
         width: 100%;
-        justify-content: center;
+        justify-content: space-between;
     }
 
     .search-wrapper,
@@ -1748,9 +1849,36 @@ a:active {
         max-width: none;
     }
 
+    .search-wrapper {
+        flex: 0 0 auto;
+        order: 3;
+    }
+
+    .international-table th:first-child,
+    .international-table td:first-child {
+        width: 36%;
+    }
+
+    .international-table th:last-child,
+    .international-table td:last-child {
+        width: 64%;
+    }
+
+    .international-language-name {
+        display: none;
+    }
+
+    .international-language-code {
+        margin-right: 0;
+    }
+
     .search-field {
         max-width: none;
         margin-top: 0;
+    }
+
+    .container {
+        margin-top: 16px;
     }
 
     .modal {

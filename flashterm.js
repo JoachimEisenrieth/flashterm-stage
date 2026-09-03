@@ -9,6 +9,7 @@ import {
 import { getConceptSectionAvailability } from './src/app/concept-section-availability.js';
 import { createConceptViewModel } from './src/app/concept-view-model.js';
 import { serializeCsv } from './src/app/csv-export.js';
+import { createInternationalPreferredTerms } from './src/app/international-preferred-terms.js';
 import { parseLanguageCache, serializeLanguageCache } from './src/app/language-cache.js';
 import { getSourceLanguage } from './src/app/source-language.js';
 import {
@@ -18,13 +19,17 @@ import {
     terminologyRepository
 } from './src/app/terminology-repository.js';
 import {
+    getInitialLanguageSelection,
     getTermbaseSelectionUrl,
     getTerminologyCacheKey,
     getTerminologyImageBasePath,
     usesPublishedTerminology
 } from './src/app/terminology-source.js';
 
-const langParams = getLanguageParamsFromURL();
+const langParams = getInitialLanguageSelection(
+    effectiveTerminologyConfig,
+    window.location.search
+);
 let sourceLanguage = langParams.source;
 let targetLanguage = langParams.target;
 
@@ -398,14 +403,6 @@ function initializeEventListeners() {
 function getGuiLanguage() {
     const browserLanguage = navigator.language || navigator.userLanguage || 'en-GB';
     return browserLanguage.startsWith('de') ? 'de-DE' : 'en-GB';
-}
-
-function getLanguageParamsFromURL() {
-    const params = new URLSearchParams(window.location.search);
-    return {
-        source: params.get('source') || config.initialSourceLanguage,
-        target: params.get('target') || config.initialTargetLanguage || ''
-    };
 }
 
 async function initializeTermbaseSelector() {
@@ -1166,6 +1163,10 @@ function updateTexts(language) {
         { selector: '#loading', key: 'loading' },
         { selector: '#start-heading', key: 'start_heading' },
         { selector: '#start-intro', key: 'start_intro' },
+        { selector: '#international-title', key: 'international_title' },
+        { selector: '#international-description', key: 'international_description' },
+        { selector: '#international-language-heading', key: 'international_language' },
+        { selector: '#international-preferred-heading', key: 'preferred_designation' },
         { selector: '#inspector-start-heading', key: 'inspector_start_heading' },
         { selector: '#inspector-start-intro', key: 'inspector_start_intro' },
         { selector: '#inspector-start-hint', key: 'inspector_start_hint' },
@@ -1248,6 +1249,7 @@ async function showWiki(term, conceptID, sourceLanguage, targetLanguage) {
             targetLanguage,
             getTerminologyImageBasePath(effectiveTerminologyConfig, window.location.origin)
         );
+        renderInternationalTerms(concept);
 
         document.getElementById('mining-container').style.display = 'none';
         document.getElementById('wiki-container').style.display = 'block';
@@ -1536,6 +1538,40 @@ function updateDOMElements(conceptData, targetLanguage, imageBasePath) {
     }
 
     hideEmptySections();
+}
+
+function renderInternationalTerms(concept) {
+    const section = document.getElementById('international-section');
+    const tableBody = document.getElementById('international-table-body');
+    if (!section || !tableBody) {
+        return;
+    }
+
+    const rows = createInternationalPreferredTerms(concept, cachedLanguageOptions ?? []);
+    tableBody.replaceChildren();
+
+    rows.forEach(row => {
+        const tableRow = document.createElement('tr');
+        const languageCell = document.createElement('th');
+        const languageName = document.createElement('span');
+        const languageCode = document.createElement('span');
+        const preferredTermCell = document.createElement('td');
+
+        languageCell.scope = 'row';
+        languageName.className = 'international-language-name';
+        languageName.textContent = row.name;
+        languageCode.className = 'international-language-code';
+        languageCode.textContent = row.code;
+        languageCell.append(languageCode, languageName);
+
+        preferredTermCell.lang = row.code;
+        preferredTermCell.textContent = row.preferredTerm;
+
+        tableRow.append(languageCell, preferredTermCell);
+        tableBody.appendChild(tableRow);
+    });
+
+    section.classList.toggle('hidden', rows.length === 0);
 }
 
 // ====================================================================================================

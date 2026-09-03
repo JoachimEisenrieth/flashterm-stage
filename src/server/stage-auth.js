@@ -74,7 +74,7 @@ export function createStageAuth({
     oidcClient = null,
     publicOrigin = ''
 } = {}) {
-    if (!['disabled', 'development', 'oidc'].includes(mode)) {
+    if (!['disabled', 'trusted-intranet', 'development', 'oidc'].includes(mode)) {
         throw new Error('Unknown Stage authentication mode.');
     }
     if (mode === 'development' && !developmentIdentity) {
@@ -84,11 +84,26 @@ export function createStageAuth({
         throw new Error('OpenID Connect client is required.');
     }
 
+    const openAccessIdentity = mode === 'trusted-intranet'
+        ? {
+            subject: 'trusted-intranet',
+            displayName: 'Intranet',
+            groups: ['trusted-intranet'],
+            termbaseIds: ['*']
+        }
+        : {
+            subject: 'anonymous',
+            displayName: 'Anonymous',
+            groups: [],
+            termbaseIds: ['*']
+        };
+    const openAccess = mode === 'disabled' || mode === 'trusted-intranet';
+
     return {
-        required: mode !== 'disabled',
+        required: !openAccess,
         getIdentity(request) {
-            return mode === 'disabled'
-                ? { subject: 'anonymous', displayName: 'Anonymous', groups: [], termbaseIds: ['*'] }
+            return openAccess
+                ? openAccessIdentity
                 : sessionManager.getSession(request);
         },
 
@@ -99,7 +114,7 @@ export function createStageAuth({
                     redirect(response, returnTo);
                     return true;
                 }
-                if (mode === 'disabled') {
+                if (openAccess) {
                     redirect(response, returnTo);
                     return true;
                 }
@@ -152,7 +167,10 @@ export function createStageAuth({
                     sendHtml(response, 403, '<h1>Abmeldung wurde abgewiesen</h1>');
                     return true;
                 }
-                redirect(response, '/auth/login', [sessionManager.clearSession(request)]);
+                const logoutLocation = mode === 'oidc'
+                    ? oidcClient.createLogoutUrl(new URL('/', expectedOrigin).toString())
+                    : '/auth/login';
+                redirect(response, logoutLocation, [sessionManager.clearSession(request)]);
                 return true;
             }
 

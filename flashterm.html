@@ -16,21 +16,17 @@
 <body>
     <header>
         <div class="header-content">
-            <div class="brand-lockup">
-                <div class="logo-wordmark">
-                    <img id="logo" src="svg/logo-grau.svg" alt="flashterm" class="logo">
+            <div class="header-context">
+                <div class="brand-lockup">
+                    <div class="logo-wordmark">
+                        <img id="logo" src="svg/logo-grau.svg" alt="flashterm" class="logo">
+                    </div>
+                    <span class="brand-product-name">stage</span>
                 </div>
-                <span class="brand-product-name">stage</span>
-            </div>
-            <div id="termbase-control" class="termbase-control hidden">
-                <label id="termbase-selector-label" for="termbase-selector">Terminologiebestand</label>
-                <select id="termbase-selector" aria-labelledby="termbase-selector-label"></select>
-            </div>
-            <div id="session-control" class="session-control hidden">
-                <span id="session-user"></span>
-                <form method="post" action="/auth/logout">
-                    <button id="logout-button" type="submit">Abmelden</button>
-                </form>
+                <div id="termbase-control" class="termbase-control hidden">
+                    <label id="termbase-selector-label" for="termbase-selector">Terminologiebestand</label>
+                    <select id="termbase-selector" aria-labelledby="termbase-selector-label"></select>
+                </div>
             </div>
             <div class="search-wrapper">
                 <div class="search-container">
@@ -56,6 +52,12 @@
                     <div id="suggestion-legend" class="suggestion-legend"></div>
                     <div id="suggestions" class="suggestions" role="listbox" aria-label="Suchvorschläge"></div>
                 </div>
+            </div>
+            <div id="session-control" class="session-control hidden">
+                <span id="session-user" class="visually-hidden"></span>
+                <form method="post" action="/auth/logout">
+                    <button id="logout-button" type="submit">Abmelden</button>
+                </form>
             </div>
         </div>
     </header>
@@ -154,6 +156,20 @@
                         <div id="links-container-target" class="content-target hidden">[Inhalt der Zielsprache]</div>
                     </div>
 
+                    <section id="international-section" class="international-section hidden" aria-labelledby="international-title">
+                        <h2 id="international-title" class="section-header line-secondary">International</h2>
+                        <p id="international-description" class="international-description">Vorzugsbenennungen in allen Sprachen</p>
+                        <table class="international-table">
+                            <thead>
+                                <tr>
+                                    <th id="international-language-heading" scope="col">Sprache</th>
+                                    <th id="international-preferred-heading" scope="col">Vorzugsbenennung</th>
+                                </tr>
+                            </thead>
+                            <tbody id="international-table-body"></tbody>
+                        </table>
+                    </section>
+
                 </div>
                 <div id="inspector-start-screen" class="start-screen hidden">
                     <h1 id="inspector-start-heading">Terminologie im Text erkennen</h1>
@@ -181,7 +197,7 @@
         </div>
 
         <footer>
-            <p>&copy; 2025 flashterm – Terminologie- und Wissensmanagement | 
+            <p>&copy; 2026 flashterm – Terminologie- und Wissensmanagement |
                 &nbsp;<a href="./manual-de.html">Manual</a>
             </p>
         </footer>

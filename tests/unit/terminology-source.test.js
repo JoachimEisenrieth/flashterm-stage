@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import {
+    getInitialLanguageSelection,
     getTermbaseSelectionUrl,
     getTerminologyCacheKey,
     getTerminologyImageBasePath,
@@ -15,6 +16,22 @@ test('recognizes only the explicit published terminology source', () => {
     assert.equal(usesPublishedTerminology({}), false);
 });
 
+test('uses the effective termbase languages unless the URL overrides them', () => {
+    const config = {
+        initialSourceLanguage: 'de-DE',
+        initialTargetLanguage: 'en-GB'
+    };
+
+    assert.deepEqual(getInitialLanguageSelection(config), {
+        source: 'de-DE',
+        target: 'en-GB'
+    });
+    assert.deepEqual(
+        getInitialLanguageSelection(config, '?source=fr-FR&target=it-IT'),
+        { source: 'fr-FR', target: 'it-IT' }
+    );
+});
+
 test('resolves a published termbase from a shareable URL without changing FileMaker config', () => {
     const publishedConfig = { dataSource: 'published', termbaseId: 'DEFAULT' };
     assert.deepEqual(
@@ -24,6 +41,28 @@ test('resolves a published termbase from a shareable URL without changing FileMa
     assert.equal(
         resolvePublishedTermbaseConfig({ dataSource: 'filemaker' }, '?termbase=SECOND').dataSource,
         'filemaker'
+    );
+});
+
+test('resolves a termbase-specific initial target language', () => {
+    const publishedConfig = {
+        dataSource: 'published',
+        termbaseId: 'FUNGI',
+        initialTargetLanguage: 'fr-FR',
+        initialTargetLanguages: {
+            PARIPHARMA: 'en-GB'
+        }
+    };
+
+    assert.equal(
+        resolvePublishedTermbaseConfig(publishedConfig, '?termbase=PARIPHARMA')
+            .initialTargetLanguage,
+        'en-GB'
+    );
+    assert.equal(
+        resolvePublishedTermbaseConfig(publishedConfig, '?termbase=FUNGI')
+            .initialTargetLanguage,
+        'fr-FR'
     );
 });
 
