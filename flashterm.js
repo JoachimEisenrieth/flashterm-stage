@@ -10,6 +10,7 @@ import { getConceptSectionAvailability } from './src/app/concept-section-availab
 import { createConceptViewModel } from './src/app/concept-view-model.js';
 import { serializeCsv } from './src/app/csv-export.js';
 import { createInternationalPreferredTerms } from './src/app/international-preferred-terms.js';
+import { createTermContexts, extractTermsFromText } from './src/app/term-mining.js';
 import { parseLanguageCache, serializeLanguageCache } from './src/app/language-cache.js';
 import { getSourceLanguage } from './src/app/source-language.js';
 import {
@@ -70,6 +71,10 @@ const searchField = document.getElementById('search-field');
 const startScreen = document.getElementById('start-screen');
 const inspectorStartScreen = document.getElementById('inspector-start-screen');
 const translatorStartScreen = document.getElementById('translator-start-screen');
+const miningInputPanel = document.getElementById('mining-input-panel');
+const miningTextInput = document.getElementById('mining-text-input');
+const miningAnalyzeButton = document.getElementById('mining-analyze-button');
+const miningClearButton = document.getElementById('mining-clear-button');
 
 const wiki = document.getElementById("wiki");
 const inspector = document.getElementById("inspector");
@@ -222,13 +227,23 @@ function initializeEventListeners() {
     }
 
     if (searchField && !searchField.hasListeners) {
-        searchField.addEventListener('input', (event) => handleInputEvent(event, 'input'));  // Event bei Benutzereingabe
-        searchField.addEventListener('paste', (event) => handleInputEvent(event, 'paste'));  // Event bei Einfügen von Text
+        searchField.addEventListener('input', handleSearchInput);
         searchField.addEventListener('keydown', (event) => handleKeyPressEvent(event));     // Event bei Tastatureingaben
         searchField.hasListeners = true;
     } else if (!searchField) {
         handleError('Text input element not found');
     }
+
+    miningTextInput?.addEventListener('input', updateMiningInputState);
+    miningTextInput?.addEventListener('keydown', event => {
+        if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+            event.preventDefault();
+            analyzeMiningInput();
+        }
+    });
+    miningAnalyzeButton?.addEventListener('click', analyzeMiningInput);
+    miningClearButton?.addEventListener('click', clearMiningInput);
+    updateMiningInputState();
 
     // -------------------------------------------------------------------------------------------------
     // Vorschlagsliste und Drag-and-Drop-Funktionalität
@@ -558,6 +573,7 @@ async function switchMode(mode) {
     document.getElementById("wiki-container").style.display = "none";
     inspectorStartScreen?.classList.add('hidden');
     translatorStartScreen?.classList.add('hidden');
+    miningInputPanel?.classList.toggle('hidden', mode === 'wiki');
 
     if (mode === "wiki") {
         wiki.classList.add("active");
@@ -573,7 +589,7 @@ async function switchMode(mode) {
     if (mode === "wiki") {
         document.getElementById("wiki-container").style.display = "block";
         if (searchField && searchField.value.trim()) {
-            termMining();  // Aktualisiere Begriffe basierend auf dem Text
+            showSuggestions(sourceTermList, searchField.value.trim());
         } else {
             document.getElementById('search-field').placeholder = 'Suche...';
         }
@@ -586,8 +602,6 @@ async function switchMode(mode) {
             }
             const modeStartScreen = mode === 'inspector' ? inspectorStartScreen : translatorStartScreen;
             modeStartScreen?.classList.remove('hidden');
-            document.getElementById('search-field').placeholder = 'Fügen Sie Text per Zwischenablage ein.';
-            return;
         } else {
             displayMinedTerms(foundTerms);
         }
@@ -706,41 +720,18 @@ async function switchTargetLanguage(newTargetLanguage) {
 // ====================================================================================================
 // Suchfeld
 // ====================================================================================================
-function handleInputEvent(event, eventType) {
+function handleSearchInput(event) {
     try {
         const currentMode = getCurrentMode();
         const query = event.target.value.trim();
 
-        // console.log(`Event Type: ${eventType}`);
-        // console.log(`Current Mode: ${currentMode}`);
-        // console.log(`Query: "${query}"`);
-
-        if (eventType === 'input') {
-            if (query !== "" && (currentMode === 'wiki' || currentMode === 'inspector')) {
-                switchMode('wiki');
-            }
-            showSuggestions(sourceTermList, query);
-            toggleClearButton();
-        } else if (eventType === 'paste') {
-            setTimeout(() => {
-                const query = event.target.value.trim(); // Abrufen des Wertes nach dem Einfügen
-
-                // Speichern des eingefügten Textes
-                savedText = query;
-                // console.log('Text saved after paste:', savedText);
-
-                // Leeren des Suchfeldes
-                searchField.value = '';
-                searchField.dispatchEvent(new Event('input')); // Löst das Input-Event aus
-
-                if (query !== "") {
-                    switchMode(currentMode === 'translator' ? 'translator' : 'inspector');
-                }
-                termMining();
-            }, 10); // Eine kurze Verzögerung, um sicherzustellen, dass der eingefügte Wert verfügbar ist
+        if (query !== '' && currentMode !== 'wiki') {
+            switchMode('wiki');
         }
+        showSuggestions(sourceTermList, query);
+        toggleClearButton();
     } catch (error) {
-        handleError(`Error in ${eventType} event listener`, error);
+        handleError('Error in search input listener', error);
     }
 }
 
@@ -767,8 +758,7 @@ function handleKeyPressEvent(event) {
             if (selectedSuggestionIndex >= 0 && suggestions[selectedSuggestionIndex]) {
                 suggestions[selectedSuggestionIndex].click();
             } else {
-                termMining();
-                toggleClearButton();
+                hideSuggestions();
             }
         } else if (event.key === 'Escape') {
             event.preventDefault();
@@ -1013,7 +1003,7 @@ async function exportTerms() {
             }
 
             exportData.push({
-                term,
+                term: foundTerms[category][term].originalTerm || term,
                 category,
                 preferredTranslation: isTwoLanguageMode ? preferredTranslation : undefined
             });
@@ -1082,12 +1072,45 @@ function exportTermsToCsv() {
 }
 
 function clearTextInput() {
-    if (searchField && miningDiv) {
+    if (searchField) {
         searchField.value = ''; // Leert das Suchfeld
         searchField.dispatchEvent(new Event('input')); // Löst das 'input'-Event aus
-        miningDiv.innerHTML = ''; // Leert die Ergebnisliste
         toggleClearButton();
     }
+}
+
+function updateMiningInputState() {
+    const hasText = Boolean(miningTextInput?.value.trim());
+    if (miningAnalyzeButton) miningAnalyzeButton.disabled = !hasText;
+    if (miningClearButton) miningClearButton.disabled = !hasText && !savedText;
+}
+
+function showCurrentMiningStartScreen() {
+    const currentMode = getCurrentMode();
+    inspectorStartScreen?.classList.toggle('hidden', currentMode !== 'inspector');
+    translatorStartScreen?.classList.toggle('hidden', currentMode !== 'translator');
+}
+
+function analyzeMiningInput() {
+    const inputText = miningTextInput?.value.trim() ?? '';
+    if (!inputText) return;
+
+    savedText = inputText;
+    inspectorStartScreen?.classList.add('hidden');
+    translatorStartScreen?.classList.add('hidden');
+    termMining();
+    updateMiningInputState();
+}
+
+function clearMiningInput() {
+    savedText = '';
+    foundTerms = { preferred: {}, alternative: {}, rejected: {} };
+    if (miningTextInput) miningTextInput.value = '';
+    if (miningDiv) miningDiv.innerHTML = '';
+    if (miningStatus) miningStatus.textContent = '';
+    updateMiningInputState();
+    showCurrentMiningStartScreen();
+    miningTextInput?.focus();
 }
 
 // ====================================================================================================
@@ -1173,6 +1196,9 @@ function updateTexts(language) {
         { selector: '#translator-start-heading', key: 'translator_start_heading' },
         { selector: '#translator-start-intro', key: 'translator_start_intro' },
         { selector: '#translator-start-hint', key: 'translator_start_hint' },
+        { selector: '#mining-input-label', key: 'mining_input_label' },
+        { selector: '#mining-clear-button', key: 'clear_text' },
+        { selector: '#mining-analyze-button', key: 'analyze_text' },
         { selector: '#termbase-selector-label', key: 'select_termbase' },
         { selector: '#logout-button', key: 'logout' },
         { selector: '#language-modal-title', key: 'select_target_language' },
@@ -1184,6 +1210,7 @@ function updateTexts(language) {
         { selector: '#clear-icon', attribute: 'aria-label', key: 'clear_search' },
         { selector: '#close-icon', attribute: 'aria-label', key: 'close_suggestions' },
         { selector: '#suggestions', attribute: 'aria-label', key: 'search_suggestions' },
+        { selector: '#mining-text-input', attribute: 'placeholder', key: 'mining_input_placeholder' },
         { selector: '.close', attribute: 'aria-label', key: 'close_language_selection' }
     ];
 
@@ -1803,7 +1830,7 @@ async function checkAndDisplayImage(fileName, imageBasePath) {
 // TermMining
 // ====================================================================================================
 let savedText = ''; // Nimmte den Text auf, der in die Zwischenablage kopiert wurde.
-let foundTerms = ''; // Nimmte die Termini auf, die gefunden wurden.
+let foundTerms = { preferred: {}, alternative: {}, rejected: {} }; // Nimmt die gefundenen Termini auf.
 function termMining() {
     if (!searchField || !miningDiv) {
         handleError('Required elements for Term Mining function are missing');
@@ -1814,7 +1841,11 @@ function termMining() {
 
     // Wähle die Termliste
     const termList = sourceTermList;
-    foundTerms = extractTermsFromText(savedText.trim(), termList);
+    foundTerms = extractTermsFromText(savedText.trim(), termList, {
+        onInvalidWeighting() {
+            handleError('Unknown weighting', new Error('Unknown weighting value'));
+        }
+    });
 
     // Zeige die gefundenen Begriffe und deren Klassifikation (abgelehnt, alternativ, bevorzugt)
     displayMinedTerms(foundTerms);
@@ -1822,93 +1853,6 @@ function termMining() {
     // Setze den Fokus auf die Ergebnisse
     miningDiv.focus();
 
-}
-
-function extractTermsFromText(text, termList) {
-    const foundTerms = { preferred: {}, alternative: {}, rejected: {} };
-    const termOccurrences = {};
-
-    const normalizedText = text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-
-    const sortedTermList = [...termList].sort((a, b) => b.term.length - a.term.length);
-
-    sortedTermList.forEach(term => {
-        const normalizedTerm = term.term.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-
-        try {
-            const regex = new RegExp(`\\b${sanitizeRegexString(normalizedTerm)}\\b`, 'gi');
-            let match;
-
-            while ((match = regex.exec(normalizedText)) !== null) {
-                const foundTerm = match[0];
-                let category;
-                switch (term.weighting) {
-                    case 2:
-                        category = 'preferred';
-                        break;
-                    case 1:
-                        category = 'alternative';
-                        break;
-                    case 0:
-                        category = 'rejected';
-                        break;
-                    default:
-                        handleError('Unknown weighting', new Error('Unknown weighting value'));
-                        continue;
-                }
-
-                if (!termOccurrences[foundTerm]) {
-                    termOccurrences[foundTerm] = [];
-                }
-                termOccurrences[foundTerm].push({
-                    position: match.index,
-                    category,
-                    conceptID: term.conceptID,
-                    originalTerm: term.term,
-                    preferredTerm: category !== 'preferred' ? retrievePreferredTerm(term.conceptID, termList) : ''
-                });
-            }
-        } catch (e) {
-            handleError('Regex Error', e);
-        }
-    });
-
-    for (const term in termOccurrences) {
-        const occurrences = termOccurrences[term];
-        occurrences.forEach(occurrence => {
-            if (!isPartOfLongerTerm(occurrence.position, term, termOccurrences)) {
-                if (!foundTerms[occurrence.category][term]) {
-                    foundTerms[occurrence.category][term] = {
-                        count: 0,
-                        conceptID: occurrence.conceptID,
-                        originalTerm: occurrence.originalTerm,
-                        preferredTerm: occurrence.preferredTerm
-                    };
-                }
-                foundTerms[occurrence.category][term].count += 1;
-            }
-        });
-    }
-
-    return foundTerms;
-}
-
-function sanitizeRegexString(string) {
-    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-function isPartOfLongerTerm(position, term, termOccurrences) {
-    for (const longerTerm in termOccurrences) {
-        if (longerTerm.length > term.length) {
-            const occurrences = termOccurrences[longerTerm];
-            for (const occurrence of occurrences) {
-                if (occurrence.position <= position && occurrence.position + longerTerm.length >= position + term.length) {
-                    return true;
-                }
-            }
-        }
-    }
-    return false;
 }
 
 function retrievePreferredTerm(conceptID, termList) {
@@ -1952,8 +1896,9 @@ function displayMinedTerms(foundTerms) {
     const targetLanguageName = languageNames[targetLanguage.substring(0, 2)] || targetLanguage;
     const foundTermLabel = translations?.[guiLanguage]?.found_term || 'Found term';
     const preferredDesignationLabel = translations?.[guiLanguage]?.preferred_designation || 'Preferred designation';
+    const contextRows = [];
 
-    const createTableRow = (term, count, category, preferredTerm) => {
+    const createTableRow = (term, count, category, preferredTerm, occurrences) => {
         let ratingClass = '';
         let ratingIcon = '';
         switch (category) {
@@ -1972,15 +1917,31 @@ function displayMinedTerms(foundTerms) {
         }
 
         const categoryLabel = translations?.[guiLanguage]?.[`${category}_heading`] || category;
+        const occurrenceLabel = (translations?.[guiLanguage]?.[
+            count === 1 ? 'occurrence_count_one' : 'occurrence_count_other'
+        ] || (count === 1 ? '{count} occurrence' : '{count} occurrences')).replace('{count}', count);
+        const contextRowId = `term-context-${contextRows.length + 1}`;
+        const contexts = createTermContexts(savedText, occurrences);
+        contextRows.push({ id: contextRowId, contexts });
+        const occurrenceToggle = `<button type="button" class="term-context-toggle" aria-expanded="false" aria-controls="${contextRowId}">
+                                      <span>${occurrenceLabel}</span>
+                                      <span class="term-context-toggle-icon" aria-hidden="true">⌄</span>
+                                  </button>`;
         const termResult = `<div class="term-result">
-                                <span class="term-result-label"><button type="button" class="term-clickable" data-concept-id="${term.conceptID}" data-source-language="${sourceLanguage}" data-target-language="${targetLanguage}">${term.originalTerm}</button> (${count})</span>
+                                <span class="term-result-copy">
+                                    <span class="term-result-label"><button type="button" class="term-clickable" data-concept-id="${term.conceptID}" data-source-language="${sourceLanguage}" data-target-language="${targetLanguage}">${term.originalTerm}</button></span>
+                                    ${occurrenceToggle}
+                                </span>
                                 <span class="term-rating ${ratingClass}" role="img" aria-label="${categoryLabel}" title="${categoryLabel}">${ratingIcon}</span>
                             </div>`;
+        const contextRow = `<tr id="${contextRowId}" class="term-context-row hidden">
+                                <td colspan="2"><div class="term-context-list"></div></td>
+                            </tr>`;
 
         if (!isTranslatorMode && term.originalTerm === preferredTerm) {
             return `<tr>
                         <td colspan="2" style="width: 100%;" data-label="${foundTermLabel}">${termResult}</td>
-                    </tr>`;
+                    </tr>${contextRow}`;
         }
 
         const normalizedPreferredTerm = typeof preferredTerm === 'string' ? preferredTerm.trim() : '';
@@ -1995,20 +1956,26 @@ function displayMinedTerms(foundTerms) {
                     <td style="width: 50%;" class="preferred-term-cell" data-label="${preferredDesignationLabel}">
                         <button type="button" class="preferred-term-content term-clickable" data-concept-id="${term.conceptID}" data-source-language="${sourceLanguage}" data-target-language="${targetLanguage}"><span class="preferred-term-label">${translation}</span>${preferredRating}</button>
                     </td>
-                </tr>`;
+                </tr>${contextRow}`;
     };
 
     const createCategorySection = (terms, category) => {
         if (Object.keys(terms).length > 0) {
             let sectionContent = '';
-            Object.entries(terms).forEach(([termKey, { conceptID, originalTerm, count }]) => {
+            Object.values(terms).forEach(({ conceptID, originalTerm, count, occurrences }) => {
                 let preferredTerm;
                 if (isTranslatorMode) {
                     preferredTerm = retrievePreferredTerm(conceptID, targetTermList);
                 } else {
                     preferredTerm = retrievePreferredTerm(conceptID, sourceTermList);
                 }
-                sectionContent += createTableRow({ conceptID, originalTerm }, count, category, preferredTerm);
+                sectionContent += createTableRow(
+                    { conceptID, originalTerm },
+                    count,
+                    category,
+                    preferredTerm,
+                    occurrences
+                );
             });
             return sectionContent;
         }
@@ -2043,6 +2010,27 @@ function displayMinedTerms(foundTerms) {
     if (typeof miningDiv !== 'undefined' && miningDiv) {
         miningDiv.innerHTML = tableContent;
 
+        contextRows.forEach(({ id, contexts }) => {
+            const contextList = miningDiv.querySelector(`#${id} .term-context-list`);
+            contexts.forEach((context, index) => {
+                const contextParagraph = document.createElement('p');
+                contextParagraph.classList.add('term-context');
+
+                const positionLabel = document.createElement('span');
+                positionLabel.classList.add('visually-hidden');
+                positionLabel.textContent = `${(
+                    translations?.[guiLanguage]?.occurrence_position || 'Occurrence {number}'
+                ).replace('{number}', index + 1)}: `;
+
+                const before = document.createTextNode(context.before);
+                const match = document.createElement('mark');
+                match.textContent = context.match;
+                const after = document.createTextNode(context.after);
+                contextParagraph.append(positionLabel, before, match, after);
+                contextList?.appendChild(contextParagraph);
+            });
+        });
+
         const exportContainer = document.createElement('div');
         exportContainer.classList.add('export-actions');
         exportContainer.setAttribute('role', 'group');
@@ -2072,7 +2060,16 @@ function displayMinedTerms(foundTerms) {
         );
         miningDiv.querySelector('.term-toolbar').appendChild(exportContainer);
 
-        document.querySelectorAll('.term-clickable').forEach(element => {
+        miningDiv.querySelectorAll('.term-context-toggle').forEach(button => {
+            button.addEventListener('click', () => {
+                const contextRow = miningDiv.querySelector(`#${button.getAttribute('aria-controls')}`);
+                const willExpand = button.getAttribute('aria-expanded') !== 'true';
+                button.setAttribute('aria-expanded', String(willExpand));
+                contextRow?.classList.toggle('hidden', !willExpand);
+            });
+        });
+
+        miningDiv.querySelectorAll('.term-clickable').forEach(element => {
             element.addEventListener('click', function () {
                 const conceptID = this.getAttribute('data-concept-id');
                 const sourceLanguage = this.getAttribute('data-source-language');

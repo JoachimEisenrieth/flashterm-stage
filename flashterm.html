@@ -173,14 +173,22 @@
                 </div>
                 <div id="inspector-start-screen" class="start-screen hidden">
                     <h1 id="inspector-start-heading">Terminologie im Text erkennen</h1>
-                    <p id="inspector-start-intro">Füge einen Text ein, um enthaltene Fachbegriffe zu finden und zu bewerten.</p>
-                    <p id="inspector-start-hint" class="start-screen-hint">Die Analyse startet automatisch nach dem Einfügen.</p>
+                    <p id="inspector-start-intro">Gib einen Text ein oder füge ihn ein, um enthaltene Fachbegriffe zu finden und zu bewerten.</p>
+                    <p id="inspector-start-hint" class="start-screen-hint">Gib Text ein oder füge ihn ein und wähle anschließend „Analysieren“.</p>
                 </div>
                 <div id="translator-start-screen" class="start-screen hidden">
                     <h1 id="translator-start-heading">Terminologiegestützt übersetzen</h1>
-                    <p id="translator-start-intro">Füge einen Text ein, um erkannte Fachbegriffe mit ihren bevorzugten Benennungen in der Zielsprache gegenüberzustellen.</p>
-                    <p id="translator-start-hint" class="start-screen-hint">Der Terminologievergleich startet automatisch nach dem Einfügen.</p>
+                    <p id="translator-start-intro">Gib einen Text ein oder füge ihn ein, um erkannte Fachbegriffe mit ihren bevorzugten Benennungen in der Zielsprache gegenüberzustellen.</p>
+                    <p id="translator-start-hint" class="start-screen-hint">Gib Text ein oder füge ihn ein und wähle anschließend „Analysieren“.</p>
                 </div>
+                <section id="mining-input-panel" class="mining-input-panel hidden" aria-labelledby="mining-input-label">
+                    <label id="mining-input-label" for="mining-text-input">Zu analysierender Text</label>
+                    <textarea id="mining-text-input" rows="8" placeholder="Text hier eingeben oder einfügen"></textarea>
+                    <div class="mining-input-actions">
+                        <button id="mining-clear-button" class="mining-action-button mining-action-secondary" type="button" disabled>Text löschen</button>
+                        <button id="mining-analyze-button" class="mining-action-button mining-action-primary" type="button" disabled>Analysieren</button>
+                    </div>
+                </section>
                 <div id="mining-status" class="visually-hidden" role="status" aria-live="polite"></div>
                 <div id="mining-container" class="hidden"></div>
             </div>
