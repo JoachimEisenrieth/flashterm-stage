@@ -19,7 +19,7 @@ flashterm stage besitzt einen belastbaren fachlichen Kern und drei unterscheidba
 - Die Concept-Darstellung ist vom FileMaker-Rohformat entkoppelt.
 - Excel unterstützt die menschliche Auswertung; CSV und JSON unterstützen technische Weiterverarbeitung.
 - Die Oberfläche besitzt eine konsistente, warme und zurückhaltende Gestaltung sowie Light und Dark Mode.
-- Characterization Baseline, anonymisierte Fixtures und 130 automatisierte Tests sichern wichtige bestehende Verträge.
+- Characterization Baseline, anonymisierte Fixtures und 135 automatisierte Tests sichern wichtige bestehende Verträge.
 - Der lokale Development-Proxy ermöglicht realistische Browserprüfungen ohne Änderungen am FileMaker-Server.
 
 ### Noch nicht produktreif gelöst
@@ -199,11 +199,11 @@ Zu dokumentieren:
 
 Zwischenstand: Der erste Windows-Pilot läuft unter IIS mit eigenem Node-Dienst, Auth0-OIDC, rollenbasierter Termbase-Freigabe, unveränderlicher Publication- und Asset-Ablage sowie automatisierter Zertifikatserneuerung. Installation, Code- und Daten-Rollback sowie der reale Backstage-Publish wurden praktisch geprüft. Offen bleiben insbesondere ein dokumentierter Restore-Test und die betriebliche Aufnahme weiterer Pilotpersonen.
 
-### NEXT-5: Einfaches Intranetprofil vorbereiten — Vorlagen umgesetzt
+### NEXT-5: Einfaches Intranetprofil vorbereiten — Installer-Kandidat umgesetzt
 
-Internet und Intranet verwenden dieselbe Release-Version, aber getrennte Dienste, Ports, Einstellungen, Daten, IIS-Sites, OIDC-Anwendungen und Veröffentlichungstoken. Das erste Intranetprofil bleibt bei OIDC und wird netzseitig über interne IP, VPN beziehungsweise Firewall abgegrenzt. Windows-Single-Sign-on ist bewusst zurückgestellt.
+Internet und Intranet verwenden dieselbe Release-Version, aber getrennte Dienste, Ports, Einstellungen, Daten, IIS-Sites und Veröffentlichungstoken. Das erste Intranetprofil verwendet `trusted-intranet`: Innerhalb der bestätigten privaten Netzgrenze ist keine Personenanmeldung erforderlich und jeder erreichbare Client kann alle veröffentlichten Bestände lesen. OIDC bleibt als Alternative für personenbezogene oder gruppenabhängige Zugriffe erhalten; Windows-Single-Sign-on ist bewusst zurückgestellt.
 
-Die Entscheidung und Abnahmegrenze stehen in [`internet-intranet-profiles.md`](internet-intranet-profiles.md). Ein getesteter Generator erzeugt die instanzspezifischen Windows-Dateien, nimmt jedoch keine IIS-, Firewall- oder Secret-Änderungen vor.
+Die Entscheidung und Abnahmegrenze stehen in [`internet-intranet-profiles.md`](internet-intranet-profiles.md). Der Kundeninstaller erzeugt ein manifestiertes Paket mit privater Node.js-Laufzeit, führt standardmäßig nur einen Preflight aus und installiert erst mit ausdrücklichem Apply. Da beim Kunden immer FileMaker Server auf demselben Rechner vorhanden ist, bleiben dessen interne Node.js-Laufzeit, `FMWebSite` und Bindings nachweislich unberührt. Eine unabhängige praktische Windows-Abnahme steht noch aus.
 
 ## Später: Quellenunabhängigkeit beweisen und Reichweite erhöhen
 
@@ -245,10 +245,79 @@ Mögliche, datenschutzfreundliche Produktkennzahlen:
 
 Eine Messung wird nur mit klarer Zweckbindung, sparsamen Daten und transparenter Dokumentation eingeführt.
 
+## Neue Anregungen aus der Anwendungspraxis
+
+Die folgenden Wünsche aus Dresden werden zunächst als fachlicher Backlog aufgenommen. Reihenfolge und Umsetzung werden nach einer kurzen Analyse des vorhandenen Datenmodells, der Zielgruppenrelevanz und des Aufwands entschieden.
+
+### BACKLOG-1: Sprachumschaltung in der Oberfläche
+
+Wunsch:
+
+- Sprachen, insbesondere im Inspector, über sichtbare Bedienelemente wie DE-/EN-Schaltflächen wechseln,
+- für den normalen Sprachwechsel keine manuelle Änderung der Browseradresse voraussetzen,
+- einen per URL geteilten Sprachzustand weiterhin eindeutig und reproduzierbar halten.
+
+Vor einer Umsetzung zu klären:
+
+- ob Ausgangs- und Zielsprache je Modus getrennt oder gemeinsam gesteuert werden,
+- wie viele Sprachen bei wachsendem Sprachbestand gleichzeitig sinnvoll sichtbar sind,
+- wie Sprachname, Sprachcode und aktiver Zustand barrierearm dargestellt werden.
+
+### BACKLOG-2: Geltungsbereich und Perspektive sichtbar machen
+
+Wunsch:
+
+- die vorhandenen Kategorisierungen **Geltungsbereich** und **Perspektive** in stage anzeigen,
+- ihre Zuordnung zu Concept beziehungsweise Benennung fachlich eindeutig darstellen,
+- fehlende Werte nicht mit einem tatsächlich gesetzten Wert verwechseln.
+
+Vor einer Umsetzung zu klären:
+
+- ob beide Merkmale bereits vollständig in den veröffentlichten Daten und im quellenneutralen Modell vorhanden sind,
+- in welchen Ansichten die Angaben unmittelbar benötigt werden,
+- ob Mehrfachwerte, Hierarchien oder sprachabhängige Bezeichnungen vorkommen.
+
+### BACKLOG-3: Filterbare Liste der Vorzugsbenennungen
+
+Anwendungsfall:
+
+> Eine Softwareentwicklerin oder ein Softwareentwickler möchte Oberflächentexte erstellen, kennt die gesuchte Vorzugsbenennung aber noch nicht und möchte deshalb relevante Benennungen durchsehen.
+
+Wunsch:
+
+- Vorzugsbenennungen einer ausgewählten Sprache als durchsuch- oder durchblätterbare Liste anzeigen,
+- die Liste mindestens nach **Geltungsbereich** und **Perspektive** filtern,
+- beispielsweise die Kombination **PVD-System** und **GUI** auswählen und fachlich nicht relevante Bereiche wie **Glovebox** ausblenden,
+- von einem Listeneintrag direkt zum zugehörigen Concept gelangen.
+
+Abhängigkeiten:
+
+- setzt eine verlässliche Veröffentlichung und fachliche Modellierung von Geltungsbereich und Perspektive voraus,
+- benötigt eine Entscheidung zu Mehrfachzuordnungen, Sortierung, leeren Filtern und großen Ergebnismengen,
+- soll vorhandene Suche und Exporte ergänzen und nicht mit abweichender Filtersemantik duplizieren.
+
+### BACKLOG-4: Übersetzungen gesammelt importieren
+
+Ausgangslage:
+
+- tschechische Übersetzungen der Vorzugsbenennungen sind in Arbeit,
+- weitere Sprachen sollen gegebenenfalls vor einem gemeinsamen Import ergänzt werden,
+- die Fachanwenderinnen und Fachanwender können den Import derzeit nicht selbst ausführen.
+
+Zu prüfen und anzubieten:
+
+- ein dokumentiertes Austauschformat mit stabiler Concept- oder Datensatz-ID, Sprachcode, Benennung und den erforderlichen Statusangaben,
+- ein kontrollierter Sammelimport in flashterm backstage beziehungsweise die führende Terminologiequelle,
+- Vorabprüfung auf unbekannte IDs, Dubletten, fehlende Pflichtwerte, ungültige Sprachcodes und unbeabsichtigtes Überschreiben vorhandener Benennungen,
+- Prüfbericht beziehungsweise Vorschau vor der Übernahme sowie Stichproben und Rückrollmöglichkeit danach,
+- perspektivisch ein wiederverwendbarer Importablauf, falls solche Lieferungen regelmäßig vorkommen.
+
+Für eine belastbare Aufwand- und Kostenschätzung werden zunächst eine anonymisierte Beispieldatei, das gewünschte Zielformat, die Anzahl der Sprachen und Datensätze sowie die Regeln für Status, Dubletten und bestehende Übersetzungen benötigt. Danach lassen sich einmalige Datenbereinigung, Importentwicklung beziehungsweise -konfiguration und fachliche Nachkontrolle getrennt schätzen. Ein gemeinsamer Import mehrerer vorbereiteter Sprachen kann sinnvoll sein, sofern alle Lieferungen dasselbe geprüfte Format und dieselben stabilen IDs verwenden.
+
 ## Empfohlene unmittelbare Reihenfolge
 
 1. Den begonnenen praktischen Smoke-Test mit Inspector, Translator, Export und responsiver Darstellung abschließen.
-2. Das einfache Intranetprofil mit internem Hostnamen, Netzgrenze und eigener OIDC-Anwendung konkretisieren.
+2. Das einfache Intranetprofil mit internem Hostnamen, bestätigter Netzgrenze und `trusted-intranet` praktisch abnehmen.
 3. Die generierten Instanzdateien zunächst in einer getrennten internen Testinstallation abnehmen.
 4. Gemeinsam primäre Zielgruppe und wichtigsten Arbeitsablauf festlegen.
 5. Nur die dabei gefundenen Pilot-Blocker einzeln beheben.

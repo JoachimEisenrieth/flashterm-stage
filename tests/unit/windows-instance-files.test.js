@@ -19,7 +19,8 @@ test('renders isolated Windows files for internet and intranet instances', () =>
     const intranet = buildWindowsInstanceFiles({
         instanceId: 'intranet',
         port: 8200,
-        publicOrigin: 'https://stage.intern.example.org'
+        publicOrigin: 'https://stage.intern.example.org',
+        accessMode: 'trusted-intranet'
     });
 
     assert.equal(internet.serviceId, 'flashterm-stage-internet');
@@ -27,7 +28,10 @@ test('renders isolated Windows files for internet and intranet instances', () =>
     assert.notEqual(internet.settingsPath, intranet.settingsPath);
     assert.notEqual(internet.dataDirectory, intranet.dataDirectory);
     assert.match(intranet.files['service.env.example'], /FLASHTERM_STAGE_PORT=8200/);
+    assert.match(intranet.files['service.env.example'], /FLASHTERM_STAGE_AUTH=trusted-intranet/);
     assert.match(intranet.files['service.env.example'], /FLASHTERM_STAGE_PUBLIC_ORIGIN=https:\/\/stage\.intern\.example\.org/);
+    assert.doesNotMatch(intranet.files['service.env.example'], /FLASHTERM_OIDC_/);
+    assert.match(internet.files['service.env.example'], /FLASHTERM_STAGE_AUTH=oidc/);
     assert.match(intranet.files['iis/web.config'], /127\.0\.0\.1:8200/);
     assert.match(
         intranet.files['flashterm-stage-intranet-service.xml'],
@@ -63,6 +67,12 @@ test('rejects ambiguous or unsafe Windows instance parameters', () => {
         publicOrigin: 'https://stage.intern.example.org',
         dataDirectory: 'relative\\data'
     }), /absolute Windows path/);
+    assert.throws(() => buildWindowsInstanceFiles({
+        instanceId: 'intranet',
+        port: 8200,
+        publicOrigin: 'https://stage.intern.example.org',
+        accessMode: 'anonymous'
+    }), /accessMode/);
 });
 
 test('writes a complete bundle once and parses the documented CLI options', async () => {
@@ -74,7 +84,8 @@ test('writes a complete bundle once and parses the documented CLI options', asyn
             '--origin', 'https://stage.intern.example.org',
             '--output', temporaryDirectory,
             '--tenant', 'INTRANET-TENANT',
-            '--termbase', 'INTERNAL-TERMBASE'
+            '--termbase', 'INTERNAL-TERMBASE',
+            '--access-mode', 'trusted-intranet'
         ]);
         const result = await writeWindowsInstanceFiles(options);
         const settings = await readFile(
@@ -87,6 +98,8 @@ test('writes a complete bundle once and parses the documented CLI options', asyn
         );
 
         assert.match(settings, /FLASHTERM_STAGE_TENANT=INTRANET-TENANT/);
+        assert.match(settings, /FLASHTERM_STAGE_DEFAULT_TARGET_LANGUAGES=\{\}/);
+        assert.match(settings, /FLASHTERM_STAGE_AUTH=trusted-intranet/);
         assert.match(settings, /FLASHTERM_PUBLISH_TERMBASES=INTERNAL-TERMBASE/);
         assert.match(proxy, /127\.0\.0\.1:8200/);
         await assert.rejects(() => writeWindowsInstanceFiles(options), /already exists/);

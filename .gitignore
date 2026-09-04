@@ -23,6 +23,7 @@
 /deploy/windows/service.env
 /deploy/windows/flashterm-stage-service.xml
 /deploy/windows/generated/
+/deploy/windows/installer/customer-settings.json
 
 # Log files
 *.log

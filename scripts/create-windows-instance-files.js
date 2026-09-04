@@ -16,7 +16,8 @@ const OPTION_NAMES = new Map([
     ['--node', 'nodeExecutable'],
     ['--tenant', 'tenantId'],
     ['--termbase', 'termbaseId'],
-    ['--group', 'groupName']
+    ['--group', 'groupName'],
+    ['--access-mode', 'accessMode']
 ]);
 
 function usage() {
@@ -30,7 +31,8 @@ Optional paths and identifiers:
   --node <windows-path>
   --tenant <tenant-id>
   --termbase <termbase-id>
-  --group <oidc-group-name>`;
+  --group <oidc-group-name>
+  --access-mode <oidc|trusted-intranet>`;
 }
 
 export function parseWindowsInstanceArguments(argumentsList) {

@@ -10,6 +10,7 @@
     "stage": "node scripts/stage-server.js",
     "publish:backstage": "node scripts/publish-backstage.js",
     "windows:instance": "node scripts/create-windows-instance-files.js",
+    "windows:customer-bundle": "node scripts/create-windows-customer-bundle.js",
     "test": "node --test"
   }
 }

@@ -2,7 +2,7 @@
 <html lang="de">
   <head>
     <meta charset="utf-8" />
-    <title>Gebrauchsanleitung für flashterm</title>
+    <title>Gebrauchsanleitung für flashterm stage</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <link href="flashterm.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
@@ -21,10 +21,14 @@
       }
 
       code {
+        display: inline-block;
+        max-width: 100%;
         font-family: monospace;
         font-size: 0.95em;
         padding: 0.3em 0.6em;
         border-radius: 6px;
+        box-sizing: border-box;
+        overflow-wrap: anywhere;
       }
 
       h1,
@@ -77,7 +81,7 @@
   </head>
   <body>
     <section class="container">
-      <h1>📘 Gebrauchsanleitung für flashterm</h1>
+      <h1>📘 Gebrauchsanleitung für flashterm stage</h1>
       <p><em>Terminologie- und Wissensmanagement leicht gemacht</em></p>
 
       <h2>Einführung</h2>
@@ -89,94 +93,137 @@
 
       <h2>Funktionsübersicht</h2>
       <ul>
+        <li><strong>Terminologiebestand:</strong> Auswahl der für Sie freigeschalteten Terminologie</li>
         <li><strong>Suchfeld:</strong> Eingabe eines Begriffs mit sofortiger Vorschlagsliste</li>
         <li><strong>Tastatursteuerung:</strong> Navigation durch Vorschläge per Pfeiltasten und Auswahl per Enter</li>
         <li><strong>Modusauswahl:</strong> Drei Modi: Wiki, Inspector, Translator</li>
-        <li><strong>Sprachumschaltung:</strong> Zielsprachen dynamisch auswählbar</li>
-        <li><strong>Term-Mining:</strong> Analyse von Texten zur Begriffsidentifikation</li>
-        <li><strong>Export:</strong> Gefundene Begriffe als Excel oder JSON exportieren</li>
-        <li>
-          <strong>Zwischenablage:</strong> Texte aus der Zwischenablage einfügen und automatisch prüfen oder übersetzen
-          lassen
-        </li>
-        <li><strong>URL-Parameter:</strong> Sprachkombination direkt über die URL anwählbar</li>
+        <li><strong>Sprachumschaltung:</strong> Auswahl der gewünschten Zielsprache</li>
+        <li><strong>Textanalyse:</strong> Erkennung und Bewertung hinterlegter Termini im Kontext</li>
+        <li><strong>International:</strong> Übersicht der Vorzugsbenennungen in allen verfügbaren Sprachen</li>
+        <li><strong>Export:</strong> Analyseergebnisse als Excel-, CSV- oder JSON-Datei speichern</li>
+        <li><strong>Direktlink:</strong> Terminologiebestand und Sprachkombination über die URL aufrufen</li>
       </ul>
 
       <h2>Bedienung Schritt für Schritt</h2>
 
-      <h3>1. Start und Suche</h3>
+      <h3>1. Anmelden und Terminologiebestand wählen</h3>
       <p>
-        Öffnen Sie die Anwendung im Browser und geben Sie im Suchfeld einen Begriff ein. Die Vorschlagsliste öffnet sich
-        automatisch.
+        Bei der geschützten Internetversion melden Sie sich zunächst an. Wenn Ihnen mehrere Terminologiebestände
+        zugewiesen sind, erscheint neben dem flashterm-Logo eine Auswahl. Wählen Sie dort den gewünschten Bestand.
+        Ist nur ein Bestand verfügbar, wird die Auswahl nicht angezeigt. Mit <strong>Abmelden</strong> beenden Sie Ihre
+        Sitzung.
       </p>
 
-      <h3>2. Vorschläge nutzen</h3>
+      <h3>2. Begriff suchen</h3>
+      <p>
+        Öffnen Sie die Anwendung im Browser und geben Sie im Suchfeld einen Begriff ein. Die Vorschlagsliste öffnet sich
+        automatisch. Die Symbole kennzeichnen bevorzugte, alternative und abgelehnte Benennungen. Die Bedeutung der
+        Symbole wird in der Legende über den Vorschlägen erläutert.
+      </p>
+
+      <h3>3. Vorschläge nutzen</h3>
       <p>
         – Navigieren Sie mit ↓ / ↑ durch die Vorschläge.<br />
         – Drücken Sie <strong>Enter</strong>, um den markierten Vorschlag auszuwählen.<br />
+        – Drücken Sie <strong>Esc</strong>, um die Vorschlagsliste zu schließen.<br />
         – Alternativ: Klicken Sie mit der Maus auf einen Vorschlag.<br />
         <strong>Tipp:</strong> Wenn Sie die Vorschlagsliste mit der Maus verschieben (z. B. zur Seite), bleibt sie
         dauerhaft geöffnet. Das erleichtert das systematische Abarbeiten mehrerer Begriffe, ohne die Liste bei jedem
         neuen Suchwort erneut öffnen zu müssen.
       </p>
 
-      <h3>3. Wissensanzeige (Wiki)</h3>
+      <h3>4. Wissensanzeige (Wiki)</h3>
       <p>
-        Sie sehen: Vorzugsbenennungen, Definitionen, Kontexte, Synonyme, Infobox. Schalten Sie die Sprache um: Klick auf
-        [de] / [en] usw.
+        Nach der Auswahl eines Begriffs zeigt Wiki die Vorzugsbenennungen sowie – sofern vorhanden – Synonyme,
+        Definition, Kontext, weitere Informationen, Infobox und Links. Mit den Sprachschaltern in den einzelnen
+        Abschnitten wechseln Sie zwischen Ausgangs- und Zielsprache. Ein deaktivierter Schalter mit einem Gedankenstrich
+        bedeutet, dass in dieser Sprache kein Inhalt vorliegt.
+      </p>
+      <p>
+        Am Ende der Begriffsansicht listet <strong>International</strong> die Vorzugsbenennungen aller im Bestand
+        vorhandenen Sprachen nach Sprachcode auf. Fehlt für eine Sprache eine Vorzugsbenennung, bleibt die zugehörige
+        Tabellenzelle leer.
       </p>
 
-      <h3>4. Modus wechseln</h3>
+      <h3>5. Modus wechseln</h3>
       <ul>
         <li><strong>Wiki:</strong> Begriffseinzelanzeige</li>
-        <li><strong>Inspector:</strong> Textanalyse (mit Begriffserkennung)</li>
-        <li><strong>Translator:</strong> Begriffe mit Zielsprachübersetzung</li>
+        <li><strong>Inspector:</strong> Terminologie in einem Text erkennen und bewerten</li>
+        <li><strong>Translator:</strong> erkannte Termini den Vorzugsbenennungen der Zielsprache gegenüberstellen</li>
       </ul>
-
-      <h3>5. Textanalyse (Term-Mining)</h3>
       <p>
-        – Kopieren Sie einen Text (Strg+C) und fügen Sie ihn in das Suchfeld ein (Strg+V).<br />
-        – Analyse in der Ausgangssprache startet automatisch<br />
-        – Gefundene Begriffe werden markiert: Haken im Kreis = bevorzugt, leerer Kreis = alternativ,
-        durchgestrichener Kreis = nicht verwenden.<br />
-        – Wechseln Sie in den Modus <em>Translator</em>.<br />
-        – Gefundene Begriffe werden mit der Vorzugsbenennung der Zielsprache übersetzt.
+        Eine Eingabe in das Suchfeld führt zurück in den Wiki-Modus. Für längere Texte verwenden Sie das Textfeld in
+        Inspector oder Translator.
       </p>
 
-      <h3>6. Sprachkombination per URL steuern</h3>
+      <h3>6. Text im Inspector prüfen</h3>
+      <ol>
+        <li>Wählen Sie <strong>Inspector</strong>.</li>
+        <li>Geben Sie den zu prüfenden Text in das große Textfeld ein oder fügen Sie ihn aus der Zwischenablage ein.</li>
+        <li>Wählen Sie <strong>Analysieren</strong>. Alternativ starten Sie mit Strg+Enter beziehungsweise ⌘+Enter.</li>
+        <li>Prüfen Sie die gefundenen bevorzugten, alternativen und abgelehnten Termini.</li>
+      </ol>
+      <p>
+        Die Anzahl neben einem Terminus gibt seine Fundstellen im Text an. Klicken Sie auf diese Angabe, um die
+        Textausschnitte mit hervorgehobener Fundstelle ein- oder auszublenden. Ein Klick auf einen gefundenen Terminus
+        oder seine Vorzugsbenennung öffnet den zugehörigen Wiki-Eintrag. Mit <strong>Text löschen</strong> setzen Sie die
+        Analyse zurück.
+      </p>
+
+      <h3>7. Terminologiegestützt übersetzen</h3>
+      <p>
+        Wählen Sie zunächst über das Sprachsymbol die Zielsprache und anschließend <strong>Translator</strong>. Geben Sie
+        den Ausgangstext in das Textfeld ein und starten Sie die Analyse. Die Ergebnistabelle stellt jedem erkannten
+        Terminus die hinterlegte Vorzugsbenennung der Zielsprache gegenüber. Ein Gedankenstrich zeigt an, dass kein
+        entsprechender Zielterminus vorhanden ist. Auch hier lassen sich die Fundstellen aufklappen und die Begriffe in
+        Wiki öffnen.
+      </p>
+
+      <h3>8. Zielsprache wählen und Direktlink verwenden</h3>
+      <p>
+        Öffnen Sie die Sprachwahl über das Symbol rechts im Suchfeld. Wählen Sie die gewünschte Zielsprache und speichern
+        Sie die Auswahl. Die angezeigten Sprachbezeichnungen in Wiki und Translator werden anschließend aktualisiert.
+      </p>
       <p>
         Rufen Sie die Seite beispielsweise so auf:<br />
-        <code>https://ihre-domain.de/index.html?source=de-DE&amp;target=en-US</code>
+        <code>https://ihre-domain.de/flashterm.html?termbase=PARIPHARMA&amp;source=de-DE&amp;target=en-GB</code>
       </p>
       <p>
-        Die gültigen Sprachcodes finden Sie in der Sprachauswahl von flashterm.
-        <strong>Tipp:</strong> Nach dem Wechseln einer Zielsprache sehen Sie die für Ihre Domain gültige URL.
+        Die gültigen Sprachcodes finden Sie in der Sprachauswahl von flashterm. Beim Wechsel des Terminologiebestands
+        wird die URL automatisch angepasst. So lässt sich ein bestimmter Bestand oder ein Sprachpaar als Lesezeichen
+        speichern und weitergeben.
       </p>
       <p>Ungültige Sprachcodes werden ignoriert – in diesem Fall verwendet das System die Voreinstellung.</p>
 
-      <h3>7. Exportieren</h3>
-      <p>Klicken Sie auf das Export-Icon 📤 unter der Tabelle, um die Daten zu speichern.</p>
+      <h3>9. Analyseergebnisse exportieren</h3>
+      <p>
+        Nach einer Analyse erscheinen oberhalb der Ergebnistabelle die Schaltflächen <strong>Excel</strong>,
+        <strong>CSV</strong> und <strong>JSON</strong>. Wählen Sie das gewünschte Format, um die gefundenen Termini,
+        ihre Bewertung, Anzahl und Vorzugsbenennung zu speichern.
+      </p>
 
       <h2>Tastenkombinationen</h2>
       <ul>
-        <li>↓ = nächsten Vorschlag markieren</li>
-        <li>↑ = vorherigen Vorschlag markieren</li>
-        <li><strong>Enter</strong> = Auswahl öffnen</li>
+        <li><strong>↓ / ↑</strong> = nächsten beziehungsweise vorherigen Vorschlag markieren</li>
+        <li><strong>Enter</strong> = markierten Vorschlag öffnen</li>
+        <li><strong>Esc</strong> = Vorschlagsliste schließen</li>
+        <li><strong>Strg+Enter / ⌘+Enter</strong> = Text in Inspector oder Translator analysieren</li>
       </ul>
 
       <h2>Tipps &amp; Hinweise</h2>
       <ul>
-        <li>Der Dunkelmodus wird automatisch erkannt</li>
-        <li>Suchfeld-Reset per Klick auf das „x“-Icon</li>
-        <li>Profil-Icon öffnet Spracheinstellungen</li>
-        <li>Markdown erlaubt Formatierungen in der Infobox</li>
+        <li>Der Dunkelmodus wird automatisch anhand der Systemeinstellung erkannt.</li>
+        <li>Das Symbol zum Löschen leert das Suchfeld.</li>
+        <li>Das Sprachsymbol öffnet die Auswahl der Zielsprache.</li>
+        <li>Inhalte in der Infobox können formatiert sowie mit Links versehen sein.</li>
+        <li>Welche Terminologiebestände sichtbar sind, hängt von den persönlichen Zugriffsrechten ab.</li>
       </ul>
 
       <h2>Technik</h2>
       <ul>
         <li>Empfohlene Browser: Chrome, Firefox, Safari, Edge</li>
         <li>JavaScript muss aktiviert sein</li>
-        <li>Internetverbindung erforderlich für Datenabruf</li>
+        <li>Für die Internetversion ist eine Internetverbindung erforderlich</li>
       </ul>
 
       <footer>
@@ -188,7 +235,7 @@
             >
             |
           </span>
-          &nbsp;<a href="./manual-de.html">Manual</a>
+          &nbsp;<a href="./flashterm.html">Zur Anwendung</a>
         </p>
       </footer>
     </section>

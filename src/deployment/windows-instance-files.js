@@ -70,7 +70,8 @@ export function buildWindowsInstanceFiles({
     nodeExecutable = 'C:\\Program Files\\nodejs\\node.exe',
     tenantId = 'YOUR-TENANT-ID',
     termbaseId = 'YOUR-TERMBASE-ID',
-    groupName
+    groupName,
+    accessMode = 'oidc'
 } = {}) {
     const normalizedInstanceId = requireSingleLine(instanceId, 'instanceId');
     if (!INSTANCE_ID_PATTERN.test(normalizedInstanceId)) {
@@ -93,12 +94,15 @@ export function buildWindowsInstanceFiles({
     const normalizedNodeExecutable = requireWindowsPath(nodeExecutable, 'nodeExecutable');
     const normalizedTenantId = requireStableId(tenantId, 'tenantId');
     const normalizedTermbaseId = requireStableId(termbaseId, 'termbaseId');
+    const normalizedAccessMode = requireSingleLine(accessMode, 'accessMode');
+    if (!['oidc', 'trusted-intranet'].includes(normalizedAccessMode)) {
+        throw new Error('accessMode must be oidc or trusted-intranet.');
+    }
     const serviceId = `flashterm-stage-${normalizedInstanceId}`;
     const wrapperBaseName = `${serviceId}-service`;
-    const normalizedGroupName = requireStableId(
-        groupName ?? `${serviceId}-readers`,
-        'groupName'
-    );
+    const normalizedGroupName = normalizedAccessMode === 'oidc'
+        ? requireStableId(groupName ?? `${serviceId}-readers`, 'groupName')
+        : '';
     const settingsPath = path.win32.join(normalizedProgramData, 'service.env');
     const logDirectory = path.win32.join(normalizedProgramData, 'logs');
     const startScript = path.win32.join(
@@ -109,6 +113,22 @@ export function buildWindowsInstanceFiles({
     );
     const proxyDirectory = `C:\\inetpub\\${serviceId}-proxy`;
 
+    const authenticationSettings = normalizedAccessMode === 'oidc'
+        ? [
+            'FLASHTERM_STAGE_AUTH=oidc',
+            `FLASHTERM_STAGE_PUBLIC_ORIGIN=${normalizedOrigin}`,
+            'FLASHTERM_OIDC_ISSUER=https://identity.example.org/YOUR-TENANT',
+            'FLASHTERM_OIDC_CLIENT_ID=YOUR-CLIENT-ID',
+            'FLASHTERM_OIDC_CLIENT_SECRET=REPLACE_IN_PROTECTED_COPY',
+            'FLASHTERM_OIDC_GROUP_CLAIM=groups',
+            `FLASHTERM_STAGE_GROUP_ACCESS=${JSON.stringify({
+                [normalizedGroupName]: [normalizedTermbaseId]
+            })}`
+        ]
+        : [
+            'FLASHTERM_STAGE_AUTH=trusted-intranet',
+            `FLASHTERM_STAGE_PUBLIC_ORIGIN=${normalizedOrigin}`
+        ];
     const settings = windowsText([
         '# Copy this file to the protected settings target shown by the generator.',
         '# Replace all placeholders only in that protected copy and never commit it.',
@@ -117,16 +137,9 @@ export function buildWindowsInstanceFiles({
         `FLASHTERM_STAGE_DATA=${normalizedDataDirectory}`,
         `FLASHTERM_STAGE_TENANT=${normalizedTenantId}`,
         'FLASHTERM_STAGE_TERMBASE=',
+        'FLASHTERM_STAGE_DEFAULT_TARGET_LANGUAGES={}',
         '',
-        'FLASHTERM_STAGE_AUTH=oidc',
-        `FLASHTERM_STAGE_PUBLIC_ORIGIN=${normalizedOrigin}`,
-        'FLASHTERM_OIDC_ISSUER=https://identity.example.org/YOUR-TENANT',
-        'FLASHTERM_OIDC_CLIENT_ID=YOUR-CLIENT-ID',
-        'FLASHTERM_OIDC_CLIENT_SECRET=REPLACE_IN_PROTECTED_COPY',
-        'FLASHTERM_OIDC_GROUP_CLAIM=groups',
-        `FLASHTERM_STAGE_GROUP_ACCESS=${JSON.stringify({
-            [normalizedGroupName]: [normalizedTermbaseId]
-        })}`,
+        ...authenticationSettings,
         '',
         'FLASHTERM_PUBLISH_TOKEN=REPLACE_IN_PROTECTED_COPY',
         `FLASHTERM_PUBLISH_TERMBASES=${normalizedTermbaseId}`
@@ -188,6 +201,7 @@ export function buildWindowsInstanceFiles({
 
     return {
         instanceId: normalizedInstanceId,
+        accessMode: normalizedAccessMode,
         port,
         publicOrigin: normalizedOrigin,
         serviceId,

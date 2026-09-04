@@ -1,12 +1,12 @@
 # Entwicklungsumgebung für flashterm STAGE starten
 
-Stand: 16. August 2026
+Stand: 4. September 2026
 
 ## Voraussetzungen
 
 Für die lokale Entwicklung werden benötigt:
 
-- Node.js 18 oder neuer einschließlich npm,
+- Node.js 20 oder neuer einschließlich npm,
 - Zugriff auf das Repository `flashterm STAGE`,
 - eine lokale, gültige `config.js`,
 - Netzwerkzugriff auf den konfigurierten FileMaker-Server,
@@ -20,6 +20,15 @@ Versionen prüfen:
 node --version
 npm --version
 ```
+
+Auf macOS kann die im Repository geprüfte Node-Hauptversion mit `nvm` eingerichtet werden:
+
+```text
+nvm install
+nvm use
+```
+
+`nvm` ist nur eine mögliche Node-Verwaltung und keine Projektabhängigkeit. Ohne `nvm` genügt eine andere lokale Node.js-Installation, sofern sie die in `package.json` angegebene Mindestversion erfüllt.
 
 ## 1. In das Projektverzeichnis wechseln
 
@@ -130,7 +139,7 @@ Vor und nach Änderungen:
 npm test
 ```
 
-Der erwartete aktuelle Stand ist `130/130` erfolgreiche Tests. Einige Dev-Server- und Stage-API-Tests öffnen temporäre Loopback-Ports. In eingeschränkten Ausführungsumgebungen kann dafür eine lokale Freigabe erforderlich sein.
+Der erwartete aktuelle Stand ist `151/151` erfolgreiche Tests. Einige Dev-Server- und Stage-API-Tests öffnen temporäre Loopback-Ports. In eingeschränkten Ausführungsumgebungen kann dafür eine lokale Freigabe erforderlich sein.
 
 Zusätzliche Prüfungen nach JavaScript-Änderungen:
 

@@ -12,7 +12,7 @@ Die Trennung mehrerer Internet- und Intranetinstanzen ist in
 
 Diese Anleitung beschreibt einen einzelnen flashterm-stage-Prozess auf einem Windows Server. IIS nimmt ausschließlich HTTPS-Verbindungen an und leitet sie intern an den Node-Prozess auf `127.0.0.1:8100` weiter. Veröffentlichungen und Aktivierungen liegen in einem lokalen, gesicherten Datenverzeichnis.
 
-Der erste Pilot umfasst:
+Der erste Internetpilot umfasst:
 
 - einen Windows Server,
 - einen Node-Prozess,
@@ -25,7 +25,7 @@ Der erste Pilot umfasst:
 
 Mehrere gleichzeitig schreibende Prozesse, gemeinsamer Netzwerkspeicher und hochverfügbare Sitzungen gehören nicht zu diesem Pilotumfang.
 
-Mehrere getrennte Instanzen dürfen dieselbe geprüfte Release-Version lesen, verwenden aber zwingend unterschiedliche Service-IDs, Loopback-Ports, geschützte Einstellungen, Datenverzeichnisse, IIS-Sites, OIDC-Anwendungen und Veröffentlichungstoken. Ein interner DNS-Name oder ein IIS-Hostname-Binding auf einer öffentlichen IP-Adresse ist allein keine Intranetgrenze.
+Mehrere getrennte Instanzen dürfen dieselbe geprüfte Release-Version lesen, verwenden aber zwingend unterschiedliche Service-IDs, Loopback-Ports, geschützte Einstellungen, Datenverzeichnisse, IIS-Sites und Veröffentlichungstoken. OIDC-Instanzen verwenden außerdem getrennte OIDC-Anwendungen. Ein interner DNS-Name oder ein IIS-Hostname-Binding auf einer öffentlichen IP-Adresse ist allein keine Intranetgrenze.
 
 ## Voraussetzungen
 
@@ -34,11 +34,13 @@ Mehrere getrennte Instanzen dürfen dieselbe geprüfte Release-Version lesen, ve
 - IIS URL Rewrite und Application Request Routing (ARR),
 - aktivierte ARR-Proxyfunktion auf Serverebene,
 - ein eigener, nicht interaktiv verwendeter Windows-Dienstaccount,
-- ein für den Server freigegebener OpenID-Connect-Client,
+- bei Personenanmeldung ein für den Server freigegebener OpenID-Connect-Client,
 - ein freigegebenes lokales Daten- und Backupziel,
 - ein durch den Betrieb genehmigter Windows-Service-Wrapper.
 
 Die mitgelieferte Dienstvorlage verwendet WinSW als Wrapper. Die ausführbare Wrapperdatei selbst gehört nicht zum Repository und muss aus einer betrieblich freigegebenen Quelle bezogen werden.
+
+Für Kundeninstallationen auf einem Server mit bereits vorhandenem FileMaker Server gilt zusätzlich [`windows-customer-installer.md`](windows-customer-installer.md). Dieses Paket liefert eine private Node.js-Laufzeit mit und verwendet ausdrücklich weder FileMakers interne `node.exe` noch einen globalen Node-Pfad.
 
 Für eine zusätzliche Instanz werden die drei aufeinander abgestimmten Vorlagen erzeugt mit:
 
@@ -106,28 +108,29 @@ Die konkrete Rechtevergabe muss mit den lokalen Accountnamen der Installation er
 
 [`deploy/windows/service.env.example`](../deploy/windows/service.env.example) nach `C:\ProgramData\flashterm-stage\service.env` kopieren und ausschließlich in der geschützten Kopie ausfüllen. Die Datei enthält später Secrets und darf weder in das Repository noch in Tickets, Logs oder Sicherungen mit breitem Leserkreis gelangen.
 
-Für den produktiven Pilot sind mindestens festzulegen:
+Für jede produktive Instanz sind mindestens festzulegen:
 
 | Variable | Bedeutung |
 |---|---|
 | `FLASHTERM_STAGE_DATA` | Absolutes lokales Datenverzeichnis |
 | `FLASHTERM_STAGE_TENANT` | Stabile Organisations-ID |
-| `FLASHTERM_STAGE_AUTH=oidc` | Produktive Personenanmeldung |
-| `FLASHTERM_STAGE_PUBLIC_ORIGIN` | Exakte öffentliche HTTPS-Adresse ohne Pfad |
-| `FLASHTERM_OIDC_ISSUER` | Exakter HTTPS-Issuer des Identitätsdiensts |
-| `FLASHTERM_OIDC_CLIENT_ID` | Registrierte Client-ID |
-| `FLASHTERM_OIDC_CLIENT_SECRET` | Optionales, geschütztes Client-Secret |
-| `FLASHTERM_STAGE_GROUP_ACCESS` | JSON-Zuordnung von Identitätsgruppen zu Termbase-IDs |
+| `FLASHTERM_STAGE_AUTH` | `oidc` für Personenanmeldung oder `trusted-intranet` hinter einer kontrollierten privaten Netzgrenze |
+| `FLASHTERM_STAGE_PUBLIC_ORIGIN` | Exakte für Benutzer sichtbare HTTPS-Adresse ohne Pfad |
+| `FLASHTERM_STAGE_DEFAULT_TARGET_LANGUAGES` | Optionale JSON-Zuordnung von Termbase-IDs zu Standard-Zielsprachen |
+| `FLASHTERM_OIDC_ISSUER` | Nur bei `oidc`: exakter HTTPS-Issuer des Identitätsdiensts |
+| `FLASHTERM_OIDC_CLIENT_ID` | Nur bei `oidc`: registrierte Client-ID |
+| `FLASHTERM_OIDC_CLIENT_SECRET` | Nur bei `oidc`: optionales, geschütztes Client-Secret |
+| `FLASHTERM_STAGE_GROUP_ACCESS` | Nur bei `oidc`: JSON-Zuordnung von Identitätsgruppen zu Termbase-IDs |
 | `FLASHTERM_PUBLISH_TOKEN` | Eigenständiges technisches Veröffentlichungstoken |
 | `FLASHTERM_PUBLISH_TERMBASES` | Erlaubte Termbase-IDs dieses Tokens |
 
-Beim Identitätsdienst wird exakt folgende Callback-Adresse registriert:
+Bei `trusted-intranet` dürfen nur Clients innerhalb der nachweislich kontrollierten privaten Netzgrenze die Site erreichen; eine Anmeldung findet nicht statt. Beim Modus `oidc` wird beim Identitätsdienst exakt folgende Callback-Adresse registriert:
 
 ```text
 https://<stage-host>/auth/callback
 ```
 
-Der Node-Prozess benötigt ausgehend HTTPS-Zugriff auf Discovery-, Token- und Schlüsseldokument-Endpunkte des Identitätsdiensts. Adressen und Antworten werden nicht über IIS geleitet.
+Im Modus `oidc` benötigt der Node-Prozess ausgehend HTTPS-Zugriff auf Discovery-, Token- und Schlüsseldokument-Endpunkte des Identitätsdiensts. Adressen und Antworten werden nicht über IIS geleitet.
 
 Die Vorlage wird zeilenweise als `NAME=WERT` gelesen. Werte werden nicht durch PowerShell ausgewertet. Anführungszeichen wären Bestandteil des Werts und sollen deshalb nicht um einfache Werte gesetzt werden.
 
@@ -246,13 +249,13 @@ Bei einem Codefehler wird der Dienst gestoppt und `previous` wieder als `current
 - Port 8100 ist nur über Loopback erreichbar.
 - Die öffentliche Adresse verwendet ausschließlich HTTPS.
 - `config.js` und Browser-Storage enthalten keine FileMaker-Zugangsdaten oder FileMaker-Tokens.
-- Unangemeldete Personen werden zur OIDC-Anmeldung geleitet.
-- Gruppenberechtigungen werden für mindestens eine erlaubte und eine nicht erlaubte Termbase geprüft.
+- Das gewählte Zugriffsprofil wird geprüft: OIDC leitet unangemeldete Personen zur Anmeldung; `trusted-intranet` liefert intern ohne Anmeldung und ist extern nicht erreichbar.
+- Bei OIDC werden Gruppenberechtigungen für mindestens eine erlaubte und eine nicht erlaubte Termbase geprüft; bei `trusted-intranet` sind alle veröffentlichten Termbases innerhalb der Netzgrenze lesbar.
 - Veröffentlichung, Aktivierung und erneute Aktivierung einer älteren Revision funktionieren.
 - Dienstneustart, Serverneustart und Healthcheck funktionieren.
 - Backup und testweiser Restore wurden praktisch verifiziert.
 - Secrets sind nur für Dienstaccount und zuständige Administratoren lesbar.
-- Alle referenzierten Bilder sind vollständig übertragen und nur mit einer berechtigten Personensitzung abrufbar.
+- Alle referenzierten Bilder sind vollständig übertragen und nur innerhalb der gewählten Zugriffsgrenze abrufbar.
 - Die Abhängigkeit von externen Browser-CDNs ist betrieblich akzeptiert oder vor Pilotbeginn beseitigt.
 
 ## Herstellerreferenzen für die Betriebskomponenten

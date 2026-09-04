@@ -1,0 +1,20 @@
+{
+  "instanceId": "intranet",
+  "hostName": "flashterm.intern.example.org",
+  "bindingIpAddress": "10.0.0.10",
+  "port": 8200,
+  "tenantId": "YOUR-TENANT-ID",
+  "termbaseId": "YOUR-TERMBASE-ID",
+  "accessMode": "trusted-intranet",
+  "trustedIntranetConfirmed": false,
+  "readerGroup": null,
+  "oidcIssuer": null,
+  "oidcClientId": null,
+  "oidcGroupClaim": null,
+  "certificateThumbprint": "REPLACE-WITH-CERTIFICATE-THUMBPRINT",
+  "fileMakerSiteName": "FMWebSite",
+  "applicationRoot": "C:\\Apps\\flashterm-stage-intranet",
+  "programDataDirectory": "C:\\ProgramData\\flashterm-stage-intranet",
+  "dataDirectory": "C:\\Data\\flashterm-stage-intranet",
+  "proxyDirectory": "C:\\inetpub\\flashterm-stage-intranet-proxy"
+}

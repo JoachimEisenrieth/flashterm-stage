@@ -6,13 +6,14 @@ Stand: 30. August 2026
 
 flashterm stage bleibt eine Anwendung mit einer gemeinsamen Codebasis. Internet und Intranet werden im ersten Schritt als zwei getrennte Betriebsinstanzen derselben Release-Version umgesetzt.
 
-Das Intranetprofil führt noch keine Windows- oder Active-Directory-Anmeldung ein. Beide Profile verwenden zunächst OpenID Connect. Für das Intranet wird eine eigene OIDC-Anwendung mit eigener Callback-Adresse registriert.
+Das erste Intranetprofil verwendet den expliziten Zugriffsmodus `trusted-intranet`. Jede Person, deren Browser den internen Host über die kontrollierte Netzgrenze erreicht, darf alle dort aktiv veröffentlichten Terminologiebestände lesen. Der Link ist dabei kein Geheimnis und keine Berechtigung; die tatsächliche Zugriffskontrolle liegt bei Firewall, Routing, VPN oder privatem Reverse Proxy.
+
+OpenID Connect bleibt als alternative Konfiguration für Installationen mit personenbezogener Anmeldung und gruppenabhängigen Beständen erhalten. Das Internetprofil verwendet weiterhin OIDC.
 
 Zurückgestellt sind:
 
 - Integrated Windows Authentication,
 - automatische Übernahme von AD-Gruppen,
-- Betrieb ohne erreichbaren OIDC-Anbieter,
 - eine gemeinsame Laufzeitinstanz mit gemischten internen und externen Beständen.
 
 Diese Abgrenzung hält den ersten Intranetbetrieb überschaubar und verhindert Sonderlogik in der Oberfläche.
@@ -39,12 +40,12 @@ Ein Hostname-Binding auf `*:443` desselben öffentlich erreichbaren Servers reic
 | IIS | eigene Site und HTTPS-Binding | eigene Site auf interner Netzgrenze |
 | Konfiguration | eigene geschützte `service.env` | eigene geschützte `service.env` |
 | Daten | eigenes Datenverzeichnis | eigenes Datenverzeichnis |
-| Anmeldung | eigene OIDC-Anwendung | eigene OIDC-Anwendung |
-| Berechtigungen | externe Pilotrollen | interne Rollen, zunächst weiterhin als OIDC-Claims |
+| Anmeldung | eigene OIDC-Anwendung | keine Personenanmeldung in `trusted-intranet`; OIDC bleibt optional |
+| Berechtigungen | externe Pilotrollen | alle über die bestätigte Netzgrenze erreichbaren Personen lesen alle veröffentlichten Bestände |
 | Publisher | eigenes Ziel und Token | eigenes Ziel und Token |
 | Backup/Rollback | eigener Sicherungs- und Aktivierungsstand | eigener Sicherungs- und Aktivierungsstand |
 
-Die beiden Instanzen dürfen weder `service.env`, Datenverzeichnis, Veröffentlichungstoken noch OIDC-Client miteinander teilen. Ein Release-Verzeichnis darf gemeinsam gelesen werden, solange Updates beide Dienste kontrolliert stoppen, prüfen und bei Bedarf zurückrollen.
+Die beiden Instanzen dürfen weder `service.env`, Datenverzeichnis noch Veröffentlichungstoken miteinander teilen. Wenn beide Profile OIDC verwenden, erhalten sie außerdem getrennte OIDC-Clients. Ein Release-Verzeichnis darf gemeinsam gelesen werden, solange Updates beide Dienste kontrolliert stoppen, prüfen und bei Bedarf zurückrollen.
 
 ## Empfohlene erste Belegung
 
@@ -79,7 +80,8 @@ npm run windows:instance -- `
   --origin https://flashterm.intern.example.org `
   --output C:\Temp\flashterm-stage-instance-files `
   --tenant INTRANET-TENANT `
-  --termbase INTERNAL-TERMBASE
+  --termbase INTERNAL-TERMBASE `
+  --access-mode trusted-intranet
 ```
 
 Der Beispielhostname wird durch einen freigegebenen Namen unter einer eigenen Domain ersetzt. `.local` soll nicht als willkürliche interne Endung verwendet werden.
@@ -88,15 +90,21 @@ Der Generator überschreibt kein vorhandenes Instanzverzeichnis. Seine Ausgabe b
 
 Die IIS-Site und ihre Bindings werden bewusst nicht automatisch angelegt. Vor dieser Änderung müssen interne IP-Adresse, Zertifikat, DNS, Firewall und Überschneidungen mit vorhandenen Sites betrieblich geprüft werden.
 
-## Authentifizierung im ersten Intranetprofil
+Für die spätere Installation durch Kunden auf einem eigenen Windows Server wird aus diesen Vorlagen ein geprüftes, manifestiertes Kundenpaket mit Preflight und ausdrücklichem Apply erzeugt. Der Ablauf und die besondere Koexistenz mit dem auf demselben Server vorhandenen FileMaker Server sind in [`windows-customer-installer.md`](windows-customer-installer.md) beschrieben.
 
-Für das Intranet wird im vorhandenen OIDC-Anbieter eine zweite Anwendung registriert:
+## Zugriff im ersten Intranetprofil
+
+`FLASHTERM_STAGE_AUTH=trusted-intranet` erzeugt keine Personen-Sitzung und leitet nicht zu einem Identitätsanbieter um. Lesende Stage-API-Routen und veröffentlichte Assets sind für jeden erreichbaren Client verfügbar. Administrative Veröffentlichungsrouten bleiben unabhängig davon durch ein zufälliges technisches Veröffentlichungstoken geschützt.
+
+Dieser Modus ist nur zulässig, wenn eine kontrollierte Netzgrenze vor der Installation ausdrücklich bestätigt wurde. Interner DNS und ein nicht erratener Hostname genügen nicht. Der Modus darf nicht an einer öffentlich erreichbaren Site betrieben werden.
+
+Wenn ein Kunde später personenbezogene oder gruppenabhängige Berechtigungen benötigt, wird dieselbe Instanz stattdessen mit `FLASHTERM_STAGE_AUTH=oidc` und einer eigenen OIDC-Anwendung betrieben:
 
 ```text
 https://<interner-host>/auth/callback
 ```
 
-Die Benutzerbrowser und der Windows-Server benötigen ausgehend Zugriff auf den OIDC-Anbieter. Falls das interne Netz diesen Zugriff nicht erlaubt, ist dieses einfache Profil nicht ausreichend; dann wird ein interner OIDC-Anbieter oder Windows-SSO zu einem eigenen Folgeprojekt.
+In diesem Fall benötigen Benutzerbrowser und Windows-Server ausgehenden Zugriff auf den OIDC-Anbieter.
 
 Eine eigene Anwendung verhindert insbesondere:
 
@@ -121,12 +129,12 @@ Vor der ersten internen Freigabe werden mindestens geprüft:
 2. Derselbe Host ist aus einem externen Testnetz auch mit manuell gesetztem DNS beziehungsweise Hostnamen nicht erreichbar.
 3. Der Internetpilot funktioniert unverändert weiter.
 4. Beide Dienste besitzen unterschiedliche Service-IDs, Ports, Konfigurations- und Datenverzeichnisse.
-5. Die interne Callback-Adresse gehört ausschließlich zur internen OIDC-Anwendung.
-6. Eine Internetrolle erhält keinen Zugriff auf interne Termbases und umgekehrt.
+5. Im Modus `trusted-intranet` entsteht keine OIDC-Weiterleitung; jeder intern erreichbare Testclient erhält denselben Lesezugriff.
+6. Ein externer Testclient kann die interne Site auch mit manuell gesetztem Hostnamen nicht erreichen.
 7. Ein interner Testbestand wird nur im Intranetprofil veröffentlicht und aktiviert.
 8. Backup, Code-Rollback und Publication-Rollback werden für die Instanz getrennt nachgewiesen.
-9. Direkte Asset-Aufrufe sind ohne passende Intranetsitzung nicht möglich.
-10. Server- und Browserzugriff auf den OIDC-Anbieter sowie benötigte Browser-CDNs sind betrieblich geklärt.
+9. Direkte Asset-Aufrufe funktionieren innerhalb der Netzgrenze und sind außerhalb nicht erreichbar.
+10. Administrative Veröffentlichungsaufrufe ohne korrektes technisches Token werden abgewiesen.
 
 ## Spätere Ausbaustufe
 

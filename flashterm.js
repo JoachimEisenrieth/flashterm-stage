@@ -988,6 +988,10 @@ function highlightMatch(term, query) {
     }
 }
 
+function sanitizeRegexString(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 async function exportTerms() {
     const exportData = [];
 

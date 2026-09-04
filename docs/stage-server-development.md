@@ -112,9 +112,10 @@ Eine identische Veröffentlichung kann gefahrlos wiederholt werden. Derselbe Ver
 | `FLASHTERM_STAGE_DATA` | `.stage-data` | Absoluter oder relativer Speicherpfad |
 | `FLASHTERM_STAGE_TENANT` | `local` | Organisation der Stage-Instanz |
 | `FLASHTERM_STAGE_TERMBASE` | erste aktive Termbase | Optional fest ausgewählte Termbase |
+| `FLASHTERM_STAGE_DEFAULT_TARGET_LANGUAGES` | `{}` | Optionale JSON-Zuordnung von Termbase-IDs zu Standard-Zielsprachen |
 | `FLASHTERM_PUBLISH_TOKEN` | leer | Aktiviert authentifizierte administrative Endpunkte |
 | `FLASHTERM_PUBLISH_TERMBASES` | `*` | Kommagetrennte Termbase-IDs, die das Veröffentlichungstoken aktualisieren darf |
-| `FLASHTERM_STAGE_AUTH` | `development` | `development`, `oidc` oder nur für Tests `disabled` |
+| `FLASHTERM_STAGE_AUTH` | `development` | `development`, `trusted-intranet`, `oidc` oder nur für Tests `disabled` |
 | `FLASHTERM_STAGE_DEV_USER` | `Lokale Entwicklung` | Anzeigename des lokalen Testzugangs |
 | `FLASHTERM_STAGE_DEV_TERMBASES` | `*` | Kommagetrennte Termbase-IDs für den lokalen Testzugang |
 
@@ -122,9 +123,11 @@ Das Veröffentlichungstoken ist ein lokales Entwicklungsgeheimnis. Reale Tokens 
 
 Der vollständige Backstage-Ablauf und seine getrennte Konfiguration stehen in [`backstage-publication.md`](backstage-publication.md).
 
-## Personenanmeldung und Berechtigungen
+## Zugriff und Berechtigungen
 
-Im normalen Stage-Start ist eine Anmeldung erforderlich. Der Server speichert nach erfolgreicher Anmeldung nur eine zufällige Sitzungs-ID in einem `HttpOnly`-Cookie. Identitäts- und FileMaker-Tokens gelangen nicht in Browser-Storage. Sitzungen laufen standardmäßig nach acht Stunden ab und gehen bei einem Serverneustart verloren.
+In den Modi `development` und `oidc` ist eine Anmeldung erforderlich. Der Server speichert nach erfolgreicher Anmeldung nur eine zufällige Sitzungs-ID in einem `HttpOnly`-Cookie. Identitäts- und FileMaker-Tokens gelangen nicht in Browser-Storage. Sitzungen laufen standardmäßig nach acht Stunden ab und gehen bei einem Serverneustart verloren.
+
+`trusted-intranet` ist der ausdrückliche Modus für eine intern abgeschottete Stage-Instanz ohne Personenanmeldung. Jeder Client, der diese Instanz erreicht, kann alle dort aktiv veröffentlichten Bestände lesen. Er darf deshalb nur hinter einer tatsächlich kontrollierten Netzgrenze verwendet werden; DNS-Name und Link sind keine Berechtigung. Administrative Veröffentlichungen bleiben auch in diesem Modus durch das getrennte Veröffentlichungstoken geschützt.
 
 Jede Leseanfrage wird serverseitig geprüft:
 
@@ -143,9 +146,9 @@ npm run stage
 
 Der Entwicklungszugang ist kein produktives Benutzerverzeichnis und darf nicht für einen extern erreichbaren Server verwendet werden.
 
-## OpenID Connect für den Windows-Server
+## OpenID Connect für Instanzen mit Personenanmeldung
 
-Der produktive Modus verwendet den serverseitigen OpenID-Connect Authorization Code Flow mit PKCE-S256, `state` und `nonce`. ID-Tokens werden mit dem veröffentlichten RSA-Schlüssel des Anbieters geprüft. Die Anwendung erwartet eine HTTPS-Adresse und ordnet Gruppen ausschließlich serverseitig Termbase-IDs zu.
+Der Modus `oidc` verwendet den serverseitigen OpenID-Connect Authorization Code Flow mit PKCE-S256, `state` und `nonce`. ID-Tokens werden mit dem veröffentlichten RSA-Schlüssel des Anbieters geprüft. Die Anwendung erwartet eine HTTPS-Adresse und ordnet Gruppen ausschließlich serverseitig Termbase-IDs zu.
 
 Benötigte Umgebungsvariablen:
 
