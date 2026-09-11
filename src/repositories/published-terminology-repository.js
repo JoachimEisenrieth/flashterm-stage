@@ -26,7 +26,11 @@ export function createPublishedTerminologyRepository({ loadPublication }) {
             return publication.termbase.languages.map(language => ({
                 code: language.code,
                 name: selectLocalizedName(language.names, guiLanguage, language.code),
-                isSource: language.isSource
+                isSource: language.isSource,
+                ...(publication.termbase.languages.filter(item => item.isSource).length > 1
+                    || language.isDefaultSource !== undefined ? {
+                    isDefaultSource: language.code === publication.termbase.sourceLanguage
+                } : {})
             }));
         },
 

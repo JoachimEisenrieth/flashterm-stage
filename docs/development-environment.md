@@ -197,7 +197,7 @@ Nur generische Statusinformationen dokumentieren. Keine Credentials, Token, voll
 
 ### Oberfläche lädt, einzelne Funktionen fehlen
 
-SheetJS, das URL-Polyfill und `markdown-it` werden derzeit von externen CDNs geladen. Netzwerkfilter oder CDN-Ausfälle können insbesondere Excel-Export oder Markdown-Infoboxen beeinträchtigen.
+SheetJS und das URL-Polyfill werden von externen CDNs geladen. Netzwerkfilter oder CDN-Ausfälle können insbesondere den Excel-Export beeinträchtigen. Fachinformationen werden als kontrolliertes HTML aus Backstage dargestellt; Markdown-it wird dafür nicht mehr geladen.
 
 ## 10. Kurzablauf für den täglichen Start
 

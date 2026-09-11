@@ -50,6 +50,7 @@ function validateLanguage(language, index) {
     requireObject(language, path);
     requireNonEmptyString(language.code, `${path}.code`);
     requireBoolean(language.isSource, `${path}.isSource`);
+    if (language.isDefaultSource !== undefined) requireBoolean(language.isDefaultSource, `${path}.isDefaultSource`);
 
     const names = requireObject(language.names, `${path}.names`);
     const localizedNames = Object.entries(names);
@@ -162,10 +163,13 @@ export function validateTerminologyPublication(publication) {
     requireUnique(languageCodes, 'publication.termbase.languages[].code');
 
     const sourceLanguages = languages.filter(language => language.isSource);
-    if (sourceLanguages.length !== 1 || sourceLanguages[0].code !== sourceLanguage) {
+    const defaults = languages.filter(language => language.isDefaultSource === true);
+    if (!sourceLanguages.some(language => language.code === sourceLanguage)
+        || defaults.length > 1
+        || defaults.some(language => language.code !== sourceLanguage)) {
         fail(
             'publication.termbase.sourceLanguage',
-            'must identify the single language marked as source'
+            'must identify a language marked as source and agree with the default marker'
         );
     }
 

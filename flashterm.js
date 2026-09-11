@@ -12,7 +12,7 @@ import { serializeCsv } from './src/app/csv-export.js';
 import { createInternationalPreferredTerms } from './src/app/international-preferred-terms.js';
 import { createTermContexts, extractTermsFromText } from './src/app/term-mining.js';
 import { parseLanguageCache, serializeLanguageCache } from './src/app/language-cache.js';
-import { getSourceLanguage } from './src/app/source-language.js';
+import { getSourceLanguage, loadLanguagePair } from './src/app/source-language.js';
 import {
     effectiveTerminologyConfig,
     getAvailableTermbases,
@@ -32,7 +32,10 @@ const langParams = getInitialLanguageSelection(
     window.location.search
 );
 let sourceLanguage = langParams.source;
+let hasExplicitSourceSelection = new URLSearchParams(window.location.search).has('source');
 let targetLanguage = langParams.target;
+const modeLanguages = { wiki: null, review: null };
+let languageChangePending = false;
 
 let translations;
 let sourceTermList = [];
@@ -178,6 +181,7 @@ function setDataControlsEnabled(enabled) {
         clearButton,
         document.getElementById('profile-icon'),
         document.getElementById('language-selector'),
+        document.getElementById('source-language-selector'),
         document.getElementById('saveLanguageBtn'),
         document.getElementById('termbase-selector')
     ].forEach(element => {
@@ -356,13 +360,41 @@ function initializeEventListeners() {
         languageModalTrigger = document.activeElement;
         languageModal.style.display = 'block';
         closeLanguageModalButton.focus();
+        document.getElementById('saveLanguageBtn').disabled = true;
+        document.getElementById('source-language-selector').replaceChildren();
+        document.getElementById('language-selector').replaceChildren();
 
         try {
             // Sprachoptionen laden
             const languageData = await terminologyRepository.getLanguages(guiLanguage);
-            populateLanguageOptions(languageData);  // Optionen in das Dropdown einfügen
+            const mode = getCurrentMode();
+            const review = mode !== 'wiki';
+            cachedLanguageOptions = languageData;
+            document.getElementById('language-selection-error').hidden = true;
+            const sourceSelector = document.getElementById('source-language-selector');
+            sourceSelector.replaceChildren();
+            const selectable = review
+                ? (await Promise.all(languageData.map(async language => ({language,
+                    terms: await terminologyRepository.getTerms(language.code)}))))
+                    .filter(item => item.terms.length > 0).map(item => item.language)
+                : languageData.filter(language => language.isSource);
+            document.querySelector('label[for="source-language-selector"]').textContent = review
+                ? (translations?.[guiLanguage]?.review_language || 'Prüfsprache')
+                : (translations?.[guiLanguage]?.select_source_language || 'Ausgangssprache');
+            document.getElementById('language-selector').hidden = mode === 'inspector';
+            document.getElementById('language-selector').disabled = mode === 'inspector';
+            document.querySelector('label[for="language-selector"]').hidden = mode === 'inspector';
+            selectable.forEach(language => {
+                sourceSelector.add(new Option(`${language.name} (${language.code})`, language.code,
+                    false, language.code === sourceLanguage));
+            });
+            sourceSelector.disabled = sourceSelector.options.length < 2;
+            populateLanguageOptions(languageData, sourceSelector.value);
+            document.getElementById('saveLanguageBtn').disabled = selectable.length === 0;
         } catch (error) {
-            console.error('Fehler beim Laden der Sprachoptionen:', error);
+            const message = document.getElementById('language-selection-error');
+            message.textContent = 'Die verfügbaren Sprachen konnten nicht geladen werden. Bitte erneut öffnen.';
+            message.hidden = false;
         }
     });
 
@@ -390,10 +422,23 @@ function initializeEventListeners() {
         }
     });
 
-    document.getElementById('saveLanguageBtn').addEventListener('click', function () {
-        const selectedLanguage = document.getElementById('language-selector').value;
-        switchTargetLanguage(selectedLanguage);  // Funktion zur Zielsprache wechseln
-        closeLanguageModal();
+    document.getElementById('source-language-selector').addEventListener('change', event => {
+        populateLanguageOptions(cachedLanguageOptions, event.target.value);
+    });
+    document.getElementById('saveLanguageBtn').addEventListener('click', async function () {
+        this.disabled = true;
+        const errorMessage = document.getElementById('language-selection-error');
+        errorMessage.hidden = true;
+        try {
+            await switchLanguages(document.getElementById('source-language-selector').value,
+                getCurrentMode() === 'inspector' ? targetLanguage : document.getElementById('language-selector').value);
+            closeLanguageModal();
+        } catch {
+            errorMessage.textContent = 'Die Sprachen konnten nicht geladen werden. Bitte erneut versuchen.';
+            errorMessage.hidden = false;
+        } finally {
+            this.disabled = false;
+        }
     });
 
     setupLanguageToggle('language-toggle-links', 'links-container', 'links-container-target');
@@ -560,6 +605,23 @@ async function loadGuiTranslations(language) {
 // Modus schalten
 // ====================================================================================================
 async function switchMode(mode) {
+    if (languageChangePending) return false;
+    if (cachedLanguageOptions?.length && getCurrentMode() !== mode) {
+        const selection = modeLanguages[mode === 'wiki' ? 'wiki' : 'review'];
+        if (selection) {
+            try {
+                await switchLanguages(selection.source, mode !== 'inspector' && selection.target === selection.source
+                    ? cachedLanguageOptions.find(language => language.code !== selection.source)?.code || ''
+                    : selection.target, mode, false);
+                document.getElementById('language-mode-error').hidden = true;
+            } catch {
+                const error = document.getElementById('language-mode-error');
+                error.textContent = 'Die Sprache für diesen Modus konnte nicht geladen werden. Bitte erneut versuchen.';
+                error.hidden = false;
+                return false;
+            }
+        }
+    }
     if (!wiki || !inspector || !translator) {
         return;
     }
@@ -586,8 +648,13 @@ async function switchMode(mode) {
         translator.setAttribute('aria-pressed', 'true');
     }
 
+    updateModeText();
     if (mode === "wiki") {
         document.getElementById("wiki-container").style.display = "block";
+        if (!selectedConceptID) {
+            document.querySelectorAll('#wiki-container > div:not(#start-screen)').forEach(element => element.classList.add('hidden'));
+            startScreen?.classList.remove('hidden');
+        }
         if (searchField && searchField.value.trim()) {
             showSuggestions(sourceTermList, searchField.value.trim());
         } else {
@@ -603,9 +670,10 @@ async function switchMode(mode) {
             const modeStartScreen = mode === 'inspector' ? inspectorStartScreen : translatorStartScreen;
             modeStartScreen?.classList.remove('hidden');
         } else {
-            displayMinedTerms(foundTerms);
+            termMining();
         }
     }
+    return true;
 }
 
 
@@ -624,32 +692,70 @@ function getCurrentMode() {
 // ====================================================================================================
 // Ausgangssprche umschalten
 // ====================================================================================================
-// Diese Funktion wird verwendet, um die Ausgangssprache zu wechseln. 
-// Sie wird in einem zukünftigen Feature aufgerufen werden.
-// eslint-disable-next-line no-unused-vars
-function switchSourceLanguage(newSourceLanguage) {
-    sourceLanguage = newSourceLanguage;
-    sessionStorage.setItem('sourceLanguage', newSourceLanguage);
-
-    // Setze den Titel des Tabs mit der neuen Ausgangssprache
-    setTitle(sourceLanguage, targetLanguage);
+async function switchLanguages(newSourceLanguage, newTargetLanguage, mode = getCurrentMode(), render = true) {
+    if (languageChangePending) throw new Error('Language change already in progress.');
+    languageChangePending = true;
+    showLoadingIndicator();
+    try {
+        const lists = await loadLanguagePair(terminologyRepository, cachedLanguageOptions,
+            newSourceLanguage, newTargetLanguage, mode);
+        const sourceChanged = sourceLanguage !== newSourceLanguage;
+        sourceLanguage = newSourceLanguage;
+        targetLanguage = newTargetLanguage;
+        sourceTermList = lists.sourceTerms;
+        targetTermList = lists.targetTerms;
+        modeLanguages[mode === 'wiki' ? 'wiki' : 'review'] = {source: sourceLanguage, target: targetLanguage};
+        if (mode === 'wiki') hasExplicitSourceSelection = true;
+        sessionStorage.setItem('sourceLanguage', sourceLanguage);
+        sessionStorage.setItem('targetLanguage', targetLanguage);
+        setTitle(sourceLanguage, targetLanguage);
+        updateModeText();
+        updateURLWithLanguages(sourceLanguage, targetLanguage);
+        if (!render) {
+            selectedTerm = '';
+            selectedConceptID = null;
+            return;
+        }
+        showSuggestions(sourceTermList, searchField.value.trim());
+        if (sourceChanged && savedText && getCurrentMode() === 'wiki') {
+            foundTerms = extractTermsFromText(savedText.trim(), sourceTermList);
+        }
+        if (getCurrentMode() === 'wiki' && selectedConceptID) {
+            const preferred = sourceTermList.find(term => String(term.conceptID) === String(selectedConceptID)
+                && term.weighting === 2);
+            if (preferred) {
+                selectedTerm = preferred.term;
+                await showWiki(selectedTerm, selectedConceptID, sourceLanguage, targetLanguage);
+            } else if (sourceChanged) {
+                selectedTerm = '';
+                selectedConceptID = null;
+                document.getElementById('wiki-container').style.display = 'none';
+                startScreen?.classList.remove('hidden');
+            }
+        } else if (savedText) {
+            termMining();
+        }
+    } finally {
+        languageChangePending = false;
+        hideLoadingIndicator();
+    }
 }
 
 // ====================================================================================================
 // Zielsprache umschalten
 // ====================================================================================================
-function populateLanguageOptions(languageData) {
+function populateLanguageOptions(languageData, selectedSource = sourceLanguage) {
     const languageSelector = document.getElementById('language-selector');
     languageSelector.innerHTML = '';  // Vorherige Optionen löschen
 
     let currentTargetLanguage = targetLanguage || '';
 
     // Sortiere die Sprachdaten alphabetisch nach dem Sprachnamen
-    languageData.sort((a, b) => a.name.localeCompare(b.name));
+    const sortedLanguages = [...languageData].sort((a, b) => a.name.localeCompare(b.name));
 
     // Durch die sortierten Sprachdaten iterieren und Optionen hinzufügen
-    languageData.forEach(language => {
-        if (language.code !== sourceLanguage) {
+    sortedLanguages.forEach(language => {
+        if (language.code !== selectedSource) {
             const option = document.createElement('option');
             option.value = language.code;
             option.text = `${language.name} (${language.code})`;
@@ -668,65 +774,16 @@ function populateLanguageOptions(languageData) {
     logNot('Alle Sprachoptionen erfolgreich hinzugefügt');
 }
 
-async function switchTargetLanguage(newTargetLanguage) {
-    console.log(`Zielsprache wird gewechselt zu: ${newTargetLanguage}`);
-
-    targetLanguage = newTargetLanguage;
-    sessionStorage.setItem('targetLanguage', newTargetLanguage);
-    console.log(`Zielsprache in sessionStorage gespeichert: ${newTargetLanguage}`);
-
-    setTitle(sourceLanguage, targetLanguage);
-    console.log(`Titel auf ${sourceLanguage} ➔ ${targetLanguage} gesetzt`);
-
-    // Begriffe und Übersetzungen für die neue Zielsprache laden
-    let targetTermsLoaded = false;
-    try {
-        console.log(`Lade Begriffe für die Zielsprache: ${targetLanguage}`);
-        targetTermsLoaded = await fetchTargetTermList(targetLanguage);
-        if (targetTermsLoaded) {
-            console.log('Zielsprach-Begriffe erfolgreich geladen');
-        }
-    } catch (error) {
-        console.error('Fehler beim Laden der Zielsprach-Begriffe:', error);
-    }
-
-    updateModeText();
-    console.log('Modus-Texte wurden aktualisiert');
-
-    updateURLWithLanguages(sourceLanguage, targetLanguage);
-
-    // Überprüfen, ob der Nutzer im Wiki-Modus ist, und den Wiki-Inhalt aktualisieren
-    const currentMode = getCurrentMode();
-    console.log(`Aktueller Modus: ${currentMode}`);
-
-    if (currentMode === 'wiki') {
-        console.log('Nutzer befindet sich im Wiki-Modus. Wiki-Inhalt wird aktualisiert.');
-
-        // Verwende die global gespeicherten Term- und conceptID-Variablen
-        if (selectedTerm && selectedConceptID) {
-            console.log(`Aktualisiere Wiki für den Term: ${selectedTerm} und conceptID: ${selectedConceptID}`);
-            await showWiki(selectedTerm, selectedConceptID, sourceLanguage, targetLanguage);
-            console.log('Wiki-Inhalt erfolgreich aktualisiert');
-        } else {
-            console.warn('Kein Term oder conceptID ausgewählt. Wiki kann nicht aktualisiert werden.');
-        }
-    } else if (currentMode === 'translator' && targetTermsLoaded && savedText) {
-        displayMinedTerms(foundTerms);
-    } else {
-        console.log('Nutzer ist nicht im Wiki-Modus. Keine Aktualisierung des Wiki-Inhalts erforderlich.');
-    }
-}
-
 // ====================================================================================================
 // Suchfeld
 // ====================================================================================================
-function handleSearchInput(event) {
+async function handleSearchInput(event) {
     try {
         const currentMode = getCurrentMode();
         const query = event.target.value.trim();
 
         if (query !== '' && currentMode !== 'wiki') {
-            switchMode('wiki');
+            if (!await switchMode('wiki')) return;
         }
         showSuggestions(sourceTermList, query);
         toggleClearButton();
@@ -828,7 +885,7 @@ function getLanguageCacheKey() {
 }
 
 function applySourceLanguageFromOptions() {
-    const configuredSourceLanguage = getSourceLanguage(cachedLanguageOptions);
+    const configuredSourceLanguage = getSourceLanguage(cachedLanguageOptions, hasExplicitSourceSelection ? sourceLanguage : null);
     if (!configuredSourceLanguage) {
         logWarning('Keine eindeutige Source-Sprache in den Sprachdaten gefunden.');
         return false;
@@ -852,6 +909,8 @@ function applySourceLanguageFromOptions() {
         }
     }
 
+    modeLanguages.wiki = {source: sourceLanguage, target: targetLanguage};
+    modeLanguages.review ??= {source: getSourceLanguage(cachedLanguageOptions).code, target: targetLanguage};
     if (languagesChanged) {
         updateURLWithLanguages(sourceLanguage, targetLanguage);
     }
@@ -1096,6 +1155,7 @@ function showCurrentMiningStartScreen() {
 }
 
 function analyzeMiningInput() {
+    if (languageChangePending) return;
     const inputText = miningTextInput?.value.trim() ?? '';
     if (!inputText) return;
 
@@ -1138,14 +1198,15 @@ function updateModeText() {
             ? targetLanguageData.name
             : targetLanguage.toUpperCase();
 
-        const sourceLanguageLabel = sourceLanguageData?.isSource
-            ? `${sourceLanguageName} · Source`
-            : sourceLanguageName;
 
         // Hier werden zwei schmale Leerzeichen (&thinsp;) verwendet
-        const wikiText = `${sourceLanguageLabel} &thinsp;&thinsp;|&thinsp;&thinsp; ${targetLanguageName}`;
-        const inspectorText = `${sourceLanguageLabel}`;
-        const translatorText = `${sourceLanguageLabel} ➔ ${targetLanguageName}`;
+        const wikiSourceName = cachedLanguageOptions.find(language => language.code === modeLanguages.wiki?.source)?.name || sourceLanguageName;
+        const wikiTargetName = cachedLanguageOptions.find(language => language.code === modeLanguages.wiki?.target)?.name || targetLanguageName;
+        const wikiText = `${wikiSourceName} · Source &thinsp;&thinsp;|&thinsp;&thinsp; ${wikiTargetName}`;
+        const reviewName = cachedLanguageOptions.find(language => language.code === modeLanguages.review?.source)?.name || sourceLanguageName;
+        const reviewTargetName = cachedLanguageOptions.find(language => language.code === modeLanguages.review?.target)?.name || targetLanguageName;
+        const inspectorText = `${reviewName}`;
+        const translatorText = `${reviewName} ➔ ${reviewTargetName}`;
 
         const wikiElement = document.getElementById('wiki');
         if (wikiElement) {
@@ -1205,12 +1266,14 @@ function updateTexts(language) {
         { selector: '#mining-analyze-button', key: 'analyze_text' },
         { selector: '#termbase-selector-label', key: 'select_termbase' },
         { selector: '#logout-button', key: 'logout' },
-        { selector: '#language-modal-title', key: 'select_target_language' },
+        { selector: '#language-modal-title', key: 'select_languages' },
+        { selector: 'label[for="source-language-selector"]', key: 'select_source_language' },
+        { selector: 'label[for="language-selector"]', key: 'select_target_language' },
         { selector: '#saveLanguageBtn', key: 'save' }
     ];
 
     const attributesToUpdate = [
-        { selector: '#profile-icon', attribute: 'aria-label', key: 'select_target_language' },
+        { selector: '#profile-icon', attribute: 'aria-label', key: 'select_languages' },
         { selector: '#clear-icon', attribute: 'aria-label', key: 'clear_search' },
         { selector: '#close-icon', attribute: 'aria-label', key: 'close_suggestions' },
         { selector: '#suggestions', attribute: 'aria-label', key: 'search_suggestions' },
@@ -1536,12 +1599,10 @@ function updateDOMElements(conceptData, targetLanguage, imageBasePath) {
         infoboxContainer.innerHTML = '';
         infoboxTargetContainer.innerHTML = '';
 
-        const md = window.markdownit({ html: true, linkify: true, typographer: true });
-        const parsedContent = md.render(infoboxContentSource);
-        const parsedTargetContent = md.render(infoboxContentTarget);
-
-        const contentBlock = createContentBlock(parsedContent);
-        const targetContentBlock = createContentBlock(parsedTargetContent);
+        // Fachinformation wird in Backstage als kontrolliertes HTML gespeichert.
+        // Keine Markdown-Konvertierung: HTML und wörtliche Markdown-Zeichen erhalten.
+        const contentBlock = createContentBlock(infoboxContentSource);
+        const targetContentBlock = createContentBlock(infoboxContentTarget);
 
         if (contentBlock) {
             infoboxContainer.innerHTML = contentBlock.outerHTML;
@@ -2224,8 +2285,8 @@ function handleError(message, error) {
 
 function updateURLWithLanguages(source, target) {
     const url = new URL(window.location);
-    url.searchParams.set('source', source);
-    url.searchParams.set('target', target);
+    url.searchParams.set('source', modeLanguages.wiki?.source || source);
+    url.searchParams.set('target', modeLanguages.wiki?.target || target);
     history.replaceState(null, '', url.toString());
 }
 

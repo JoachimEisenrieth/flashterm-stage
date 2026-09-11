@@ -494,3 +494,19 @@ test('requires a person session and enforces termbase grants on every read route
         user: { displayName: 'Test Person' }
     });
 });
+
+
+test('serves the default source marker for multiple master languages', async t => {
+    const { origin, store } = await createFixtureServer(t);
+    const publication = structuredClone(publicationFixture);
+    publication.termbase.languages[1].isSource = true;
+    await store.savePublication(publication);
+    await store.activatePublication('TEST-TENANT', 'TEST-TERMBASE', 'TEST-PUBLICATION-001');
+    const response = await fetch(`${origin}/api/termbases/TEST-TERMBASE/languages?guiLanguage=de-DE`);
+    assert.equal(response.status, 200);
+    const { languages } = await response.json();
+    assert.deepEqual(languages.map(({code, isSource, isDefaultSource}) => ({code, isSource, isDefaultSource})), [
+        {code: 'xx-XX', isSource: true, isDefaultSource: true},
+        {code: 'yy-YY', isSource: true, isDefaultSource: false}
+    ]);
+});

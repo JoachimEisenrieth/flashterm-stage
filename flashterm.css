@@ -1105,7 +1105,8 @@ label {
 }
   
 /* Select Box */
-#language-selector {
+#language-selector,
+#source-language-selector {
     width: 100%;
     min-height: 46px;
     padding: 10px 38px 10px 14px;
@@ -1121,11 +1122,13 @@ label {
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-#language-selector:hover {
+#language-selector:hover,
+#source-language-selector:hover {
     border-color: var(--active-color);
 }
 
-#language-selector:focus {
+#language-selector:focus,
+#source-language-selector:focus {
     border-color: var(--focus-color);
     box-shadow: 0 0 0 3px var(--focus-shadow);
 }

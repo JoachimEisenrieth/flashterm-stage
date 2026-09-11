@@ -1,4 +1,4 @@
-const LANGUAGE_CACHE_VERSION = 3;
+const LANGUAGE_CACHE_VERSION = 5;
 
 export function parseLanguageCache(serializedCache, guiLanguage) {
     try {

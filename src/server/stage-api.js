@@ -92,7 +92,11 @@ function localizedLanguages(publication, guiLanguage) {
             ?? language.names[guiLanguage?.split('-')[0]]
             ?? Object.values(language.names)[0]
             ?? language.code,
-        isSource: language.isSource
+        isSource: language.isSource,
+        ...(publication.termbase.languages.filter(item => item.isSource).length > 1
+            || language.isDefaultSource !== undefined ? {
+            isDefaultSource: language.code === publication.termbase.sourceLanguage
+        } : {})
     }));
 }
 

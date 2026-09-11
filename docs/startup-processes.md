@@ -29,8 +29,8 @@ Der Browser verarbeitet beim Laden der Hauptseite mehrere voneinander unabhängi
 2. Die HTML-Struktur stellt zunächst Header, Suche, Modusnavigation, Ladeanzeige, leere Inhaltscontainer, Sprachmodal und Footer bereit.
 3. Am Ende des Dokuments werden externe Laufzeitbibliotheken geladen:
    - SheetJS für Excel-Exporte,
-   - ein `URLSearchParams`-Polyfill,
-   - `markdown-it` für Infobox-Inhalte.
+   - ein `URLSearchParams`-Polyfill.
+   Fachinformationen enthalten bereits HTML und benötigen keine Markdown-Bibliothek.
 4. Ein Inline-Skript setzt Logo und Favicon entsprechend `prefers-color-scheme` und registriert einen Listener für spätere Theme-Wechsel.
 5. Das ES-Modul `flashterm.js` wird geladen. Dessen Modulabhängigkeiten werden vor seiner Ausführung aufgelöst.
 6. Ein weiteres klassisches Inline-Skript lädt unabhängig davon `json/languages.json` und füllt den Zielsprach-Selector zunächst mit lokalen Sprachdaten.
@@ -204,7 +204,7 @@ Die Anwendung benötigt keinen Build-Prozess. Ein Webserver liefert HTML, CSS, J
 
 Im statischen Produktivbetrieb gibt es keinen lokalen `/fmi/`-Proxy. Der Browser verwendet `config.server` direkt und spricht die FileMaker Data API selbst an. Damit befinden sich FileMaker-Anmeldedaten und Session-Token weiterhin im Browserkontext. Dies ist eine bekannte Sicherheitsgrenze der aktuellen Architektur.
 
-Der Start hängt außerdem von der Erreichbarkeit der extern eingebundenen CDNs ab. Ein Ausfall von SheetJS oder `markdown-it` verhindert nicht zwingend die erste Darstellung, führt aber später bei den zugehörigen Funktionen zu Laufzeitfehlern.
+Der Start hängt außerdem von der Erreichbarkeit der extern eingebundenen CDNs ab. Ein Ausfall von SheetJS verhindert nicht zwingend die erste Darstellung, führt aber später bei den zugehörigen Funktionen zu Laufzeitfehlern.
 
 ## 9. Teststart
 

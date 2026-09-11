@@ -31,7 +31,7 @@
             <div class="search-wrapper">
                 <div class="search-container">
                     <input id="search-field" type="text" placeholder="Suche..." class="search-field" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="suggestions" aria-expanded="false">
-                    <button id="profile-icon" class="icon-button profile-icon" type="button" aria-label="Zielsprache auswählen">
+                    <button id="profile-icon" class="icon-button profile-icon" type="button" aria-label="Sprachen auswählen">
                         <img src="svg/profile-icon.svg" alt="" class="icon">
                     </button>
                     <button id="clear-icon" class="icon-button clear-icon" type="button" aria-label="Suchfeld leeren" style="display: none;">
@@ -194,12 +194,17 @@
             </div>
         </div>
 
+        <p id="language-mode-error" role="alert" hidden></p>
         <!-- Modal Struktur -->
         <div id="language-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="language-modal-title">
             <div class="modal-content">
                 <button class="close" type="button" aria-label="Sprachwahl schließen">&times;</button>
-                <h2 id="language-modal-title">Zielsprache</h2>
+                <h2 id="language-modal-title">Sprachen</h2>
+                <label for="source-language-selector">Mastersprache</label>
+                <select id="source-language-selector"></select>
+                <label for="language-selector">Zielsprache</label>
                 <select id="language-selector"></select>
+                <p id="language-selection-error" role="alert" hidden></p>
                 <button id="saveLanguageBtn">Speichern</button>
             </div>
         </div>
@@ -213,8 +218,6 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
         <!-- Polyfill -->
         <script src="https://unpkg.com/url-search-params-polyfill@8.1.1/index.js"></script>
-        <!-- Markdown -->
-        <script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
         <script>
             // Dynamisches Wechseln des Favicons und Logos basierend auf dem Farbmodus
             function updateAppearance() {
@@ -237,30 +240,7 @@
         </script>
         <script type="module" src="./flashterm.js" defer></script>
 
-<script>
-    
-function populateLanguageSelector(selectorID, languages, uiLang = 'de') {
-    const selector = document.getElementById(selectorID);
-    if (!selector) return;
-    selector.innerHTML = '';
-    Object.entries(languages).forEach(([code, names]) => {
-        const option = document.createElement('option');
-        option.value = code;
-        option.textContent = names[uiLang] || code;
-        selector.appendChild(option);
-    });
 
-    // Setze den Sprachwert aus globaler Variable
-    if (typeof targetLanguage !== 'undefined') {
-        selector.value = targetLanguage;
-    }
-}
-
-fetch('./json/languages.json')
-    .then(res => res.json())
-    .then(data => populateLanguageSelector('language-selector', data, 'de'))
-    .catch(err => console.error('Fehler beim Laden der Sprachliste:', err));
-</script>
 
 </body>
 

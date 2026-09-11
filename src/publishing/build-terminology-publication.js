@@ -1,3 +1,4 @@
+import { getSourceLanguage } from '../app/source-language.js';
 import { validateTerminologyPublication } from '../domain/terminology-publication.js';
 
 function mergeLanguages(languageSets) {
@@ -5,12 +6,14 @@ function mergeLanguages(languageSets) {
     for (const { guiLanguage, values } of languageSets) {
         for (const language of values) {
             const existing = languages.get(language.code);
-            if (existing && existing.isSource !== language.isSource) {
+            if (existing && (existing.isSource !== language.isSource
+                || Boolean(existing.isDefaultSource) !== Boolean(language.isDefaultSource))) {
                 throw new Error(`Source-language marker differs for ${language.code}.`);
             }
             languages.set(language.code, {
                 code: language.code,
                 isSource: language.isSource,
+                ...(language.isDefaultSource !== undefined ? { isDefaultSource: language.isDefaultSource } : {}),
                 names: { ...existing?.names, [guiLanguage]: language.name }
             });
         }
@@ -37,9 +40,9 @@ export async function buildTerminologyPublication({
         });
     }
     const languages = mergeLanguages(languageSets);
-    const sourceLanguages = languages.filter(language => language.isSource);
-    if (sourceLanguages.length !== 1) {
-        throw new Error('Publication requires exactly one source language.');
+    const defaultSource = getSourceLanguage(languages);
+    if (!defaultSource) {
+        throw new Error('Publication requires an unambiguous default source language.');
     }
 
     const termsByLanguage = {};
@@ -94,7 +97,7 @@ export async function buildTerminologyPublication({
         },
         termbase: {
             name: termbaseName,
-            sourceLanguage: sourceLanguages[0].code,
+            sourceLanguage: defaultSource.code,
             assetBasePath: `/api/termbases/${encodeURIComponent(termbaseId)}/assets/`,
             languages
         },

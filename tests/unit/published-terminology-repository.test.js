@@ -44,7 +44,7 @@ test('rejects a publication with an inconsistent source language', () => {
     assert.throws(
         () => validateTerminologyPublication(publication),
         error => error instanceof TerminologyPublicationError
-            && error.message.includes('single language marked as source')
+            && error.message.includes('language marked as source')
     );
 });
 

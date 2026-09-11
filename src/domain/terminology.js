@@ -18,7 +18,10 @@ export function mapLanguages(records) {
         code: record.fieldData.languageCode,
         name: record.fieldData.language,
         isSource: Boolean(record.fieldData.source)
-            && record.fieldData.source === record.fieldData.languageCode
+            && record.fieldData.source === record.fieldData.languageCode,
+        ...(record.fieldData.defaultSource ? {
+            isDefaultSource: record.fieldData.defaultSource === record.fieldData.languageCode
+        } : {})
     }));
 }
 
