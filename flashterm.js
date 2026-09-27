@@ -512,6 +512,10 @@ async function switchMode(mode) {
     } else if (mode === "inspector" || mode === "translator") {
         document.getElementById("mining-container").style.display = "block";
         if (!savedText) {
+            miningDiv.innerHTML = '';
+            if (miningStatus) {
+                miningStatus.textContent = '';
+            }
             const modeStartScreen = mode === 'inspector' ? inspectorStartScreen : translatorStartScreen;
             modeStartScreen?.classList.remove('hidden');
             document.getElementById('search-field').placeholder = 'Fügen Sie Text per Zwischenablage ein.';
