@@ -1,5 +1,6 @@
 // © 2025-04-18 Eisenrieth Digital Solutions. Alle Rechte vorbehalten.
 
+import { decorateConceptResults, renderConceptIdentity } from './src/app/concept-identity.js';
 import { config } from './config.js';  // Konfiguration importieren
 import {
     BootstrapState,
@@ -651,15 +652,14 @@ async function switchMode(mode) {
     updateModeText();
     if (mode === "wiki") {
         document.getElementById("wiki-container").style.display = "block";
-        if (!selectedConceptID) {
-            document.querySelectorAll('#wiki-container > div:not(#start-screen)').forEach(element => element.classList.add('hidden'));
+        if (selectedConceptID) {
+            await showWiki(selectedTerm, selectedConceptID, sourceLanguage, targetLanguage);
+        } else {
+            document.querySelectorAll('#wiki-container > :not(#start-screen)').forEach(element => element.classList.add('hidden'));
             startScreen?.classList.remove('hidden');
         }
-        if (searchField && searchField.value.trim()) {
-            showSuggestions(sourceTermList, searchField.value.trim());
-        } else {
-            document.getElementById('search-field').placeholder = 'Suche...';
-        }
+        hideSuggestions();
+        document.getElementById('search-field').placeholder = 'Suche...';
     } else if (mode === "inspector" || mode === "translator") {
         document.getElementById("mining-container").style.display = "block";
         if (!savedText) {
@@ -711,11 +711,7 @@ async function switchLanguages(newSourceLanguage, newTargetLanguage, mode = getC
         setTitle(sourceLanguage, targetLanguage);
         updateModeText();
         updateURLWithLanguages(sourceLanguage, targetLanguage);
-        if (!render) {
-            selectedTerm = '';
-            selectedConceptID = null;
-            return;
-        }
+        if (!render) return;
         showSuggestions(sourceTermList, searchField.value.trim());
         if (sourceChanged && savedText && getCurrentMode() === 'wiki') {
             foundTerms = extractTermsFromText(savedText.trim(), sourceTermList);
@@ -1529,6 +1525,7 @@ function updateDOMElements(conceptData, targetLanguage, imageBasePath) {
                </span>`
             : '';
         termTitleElement.innerHTML = `${sourceTitle}${targetTitle}`;
+        renderConceptIdentity(termTitleElement, selectedConceptID, guiLanguage);
     }
 
     // Bild anzeigen
@@ -2074,6 +2071,7 @@ function displayMinedTerms(foundTerms) {
 
     if (typeof miningDiv !== 'undefined' && miningDiv) {
         miningDiv.innerHTML = tableContent;
+        decorateConceptResults(miningDiv, guiLanguage);
 
         contextRows.forEach(({ id, contexts }) => {
             const contextList = miningDiv.querySelector(`#${id} .term-context-list`);
@@ -2137,10 +2135,11 @@ function displayMinedTerms(foundTerms) {
         miningDiv.querySelectorAll('.term-clickable').forEach(element => {
             element.addEventListener('click', function () {
                 const conceptID = this.getAttribute('data-concept-id');
-                const sourceLanguage = this.getAttribute('data-source-language');
-                const targetLanguage = this.getAttribute('data-target-language');
-
-                showWiki(this.textContent, conceptID, sourceLanguage, targetLanguage);
+                if (!conceptID || languageChangePending) return;
+                selectedTerm = this.dataset.termLabel ?? this.textContent;
+                selectedConceptID = conceptID;
+                // Der Moduswechsel lädt die Wiki-Sprachen und erhält den Analysetext.
+                switchMode('wiki');
             });
             element.addEventListener('mouseover', function () {
                 this.style.textDecoration = 'underline';

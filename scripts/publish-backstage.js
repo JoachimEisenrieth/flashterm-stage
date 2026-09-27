@@ -9,6 +9,7 @@ import { createFileMakerTerminologyRepository } from '../src/repositories/filema
 import { buildTerminologyPublication } from '../src/publishing/build-terminology-publication.js';
 import { createFileMakerDataApiClient } from '../src/publishing/filemaker-data-api-client.js';
 import { createStagePublicationClient } from '../src/publishing/stage-publication-client.js';
+import { bindOriginalContainerAssets } from '../src/publishing/original-container-assets.js';
 import { listPublicationAssetFileNames } from '../src/domain/publication-assets.js';
 
 function requireEnvironment(environment, name) {
@@ -29,7 +30,8 @@ export async function publishBackstage({
     environment = process.env,
     args = process.argv.slice(2),
     fileMakerRequest = fetch,
-    stageRequest = fetch
+    stageRequest = fetch,
+    publicationClient = null
 } = {}) {
     const activate = args.includes('--activate');
     const dryRun = args.includes('--dry-run');
@@ -51,7 +53,9 @@ export async function publishBackstage({
             .split(',').map(value => value.trim()).filter(Boolean)
     };
 
-    const publication = await fileMakerClient.withSession(async ({ find }) => {
+    const imageSource = environment.FLASHTERM_FILEMAKER_IMAGE_SOURCE ?? 'public';
+    if (!['public', 'container'].includes(imageSource)) throw new Error('Invalid FileMaker image source.');
+    return fileMakerClient.withSession(async ({ find, downloadContainerAsset }) => {
         const repository = createFileMakerTerminologyRepository({
             fetchLanguages: guiLanguage => find('languageAPI', { guiLanguageCode: guiLanguage }),
             fetchTerms: language => find('termAPI', { languageCode: language }),
@@ -74,45 +78,49 @@ export async function publishBackstage({
                 .filter(conceptId => recordsByConcept.has(conceptId))
                 .map(conceptId => mapConcept(conceptId, recordsByConcept.get(conceptId)));
         };
-        return buildTerminologyPublication({ repository, loadConcepts, ...metadata });
-    });
+        const publication = await buildTerminologyPublication({ repository, loadConcepts, ...metadata });
+        const originals = imageSource === 'container'
+            ? await bindOriginalContainerAssets(publication, find) : null;
 
-    const assetFileNames = listPublicationAssetFileNames(publication);
-    const stageClient = !dryRun
-        ? createStagePublicationClient({
-            origin: requireEnvironment(environment, 'FLASHTERM_STAGE_ORIGIN'),
-            publishToken: requireSecret(environment, 'FLASHTERM_PUBLISH_TOKEN'),
-            request: stageRequest
-        })
-        : null;
-    if (stageClient) {
-        await stageClient.publish(publication);
-    }
-    for (const fileName of assetFileNames) {
-        const asset = await fileMakerClient.downloadAsset(fileName);
+        const assetFileNames = listPublicationAssetFileNames(publication);
+        const stageClient = !dryRun
+            ? (publicationClient ?? createStagePublicationClient({
+                origin: requireEnvironment(environment, 'FLASHTERM_STAGE_ORIGIN'),
+                publishToken: requireSecret(environment, 'FLASHTERM_PUBLISH_TOKEN'),
+                request: stageRequest
+            }))
+            : null;
         if (stageClient) {
-            await stageClient.uploadAsset(
-                metadata.termbaseId,
-                metadata.publicationId,
-                asset
-            );
+            await stageClient.publish(publication);
         }
-    }
-    if (stageClient && activate) {
-        await stageClient.activate(metadata.termbaseId, metadata.publicationId);
-    }
+        for (const fileName of assetFileNames) {
+            const asset = originals
+                ? await downloadContainerAsset(fileName, originals.get(fileName))
+                : await fileMakerClient.downloadAsset(fileName);
+            if (stageClient) {
+                await stageClient.uploadAsset(
+                    metadata.termbaseId,
+                    metadata.publicationId,
+                    asset
+                );
+            }
+        }
+        if (stageClient && activate) {
+            await stageClient.activate(metadata.termbaseId, metadata.publicationId);
+        }
 
-    return {
-        publicationId: metadata.publicationId,
-        termbaseId: metadata.termbaseId,
-        languages: publication.termbase.languages.length,
-        concepts: publication.concepts.length,
-        terms: Object.values(publication.termsByLanguage)
-            .reduce((total, values) => total + values.length, 0),
-        assets: assetFileNames.length,
-        transferred: !dryRun,
-        activated: !dryRun && activate
-    };
+        return {
+            publicationId: metadata.publicationId,
+            termbaseId: metadata.termbaseId,
+            languages: publication.termbase.languages.length,
+            concepts: publication.concepts.length,
+            terms: Object.values(publication.termsByLanguage)
+                .reduce((total, values) => total + values.length, 0),
+            assets: assetFileNames.length,
+            transferred: !dryRun,
+            activated: !dryRun && activate
+        };
+    });
 }
 
 async function isExecutedFile() {

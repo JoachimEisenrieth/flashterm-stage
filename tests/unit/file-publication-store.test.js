@@ -19,6 +19,12 @@ function clonePublication() {
     return structuredClone(publicationFixture);
 }
 
+async function saveFixtureImage(store, publicationId) {
+    await store.savePublicationAsset('TEST-TENANT', 'TEST-TERMBASE', publicationId, {
+        fileName: 'TEST-001.png', contentType: 'image/png', data: Buffer.from('test image')
+    });
+}
+
 async function createFixtureStore(t) {
     const dataDirectory = await mkdtemp(path.join(os.tmpdir(), 'flashterm-stage-store-'));
     t.after(() => rm(dataDirectory, { recursive: true, force: true }));
@@ -77,6 +83,8 @@ test('activates revisions atomically and rolls back by adding a new activation',
 
     await store.savePublication(first);
     await store.savePublication(second);
+    await saveFixtureImage(store, first.publication.id);
+    await saveFixtureImage(store, second.publication.id);
     await assert.rejects(
         store.getActivePublication('TEST-TENANT', 'TEST-TERMBASE'),
         error => error instanceof PublicationStoreError && error.code === 'NOT_FOUND'
@@ -110,6 +118,7 @@ test('lists only termbases with an active publication', async t => {
     await store.savePublication(clonePublication());
 
     assert.deepEqual(await store.listTermbases('TEST-TENANT'), []);
+    await saveFixtureImage(store, 'TEST-PUBLICATION-001');
     await store.activatePublication('TEST-TENANT', 'TEST-TERMBASE', 'TEST-PUBLICATION-001');
     assert.deepEqual(await store.listTermbases('TEST-TENANT'), [
         {
@@ -218,4 +227,23 @@ test('rejects unsafe publication asset names, types and empty data', async t => 
     await assert.rejects(save({
         fileName: 'empty.png', contentType: 'image/png', data: Buffer.alloc(0)
     }), error => error instanceof PublicationStoreError && error.code === 'INVALID_ASSET');
+});
+
+test('missing and damaged images cannot replace the active publication', async t => {
+    const { dataDirectory, store } = await createFixtureStore(t);
+    const first = clonePublication();
+    first.concepts.forEach(c => c.languages.forEach(l => { l.imageFileName = ''; }));
+    await store.savePublication(first);
+    await store.activatePublication('TEST-TENANT', 'TEST-TERMBASE', first.publication.id);
+    const second = clonePublication(); second.publication.id = 'WITH-IMAGE';
+    await store.savePublication(second);
+    await assert.rejects(store.activatePublication('TEST-TENANT', 'TEST-TERMBASE', 'WITH-IMAGE'), e => e.code === 'INVALID_ASSET');
+    assert.equal((await store.getActivePublication('TEST-TENANT', 'TEST-TERMBASE')).publication.id, first.publication.id);
+    await saveFixtureImage(store, 'WITH-IMAGE');
+    await store.activatePublication('TEST-TENANT', 'TEST-TERMBASE', 'WITH-IMAGE');
+    const asset = await store.getPublicationAsset('TEST-TENANT', 'TEST-TERMBASE', 'WITH-IMAGE', 'TEST-001.png');
+    await rm(path.join(dataDirectory, 'tenants', 'TEST-TENANT', 'termbases', 'TEST-TERMBASE', 'publications', 'WITH-IMAGE', 'assets', 'blobs', asset.sha256));
+    await store.activatePublication('TEST-TENANT', 'TEST-TERMBASE', first.publication.id);
+    await assert.rejects(store.activatePublication('TEST-TENANT', 'TEST-TERMBASE', 'WITH-IMAGE'), e => e.code === 'INVALID_ASSET');
+    assert.equal((await store.getActivePublication('TEST-TENANT', 'TEST-TERMBASE')).publication.id, first.publication.id);
 });

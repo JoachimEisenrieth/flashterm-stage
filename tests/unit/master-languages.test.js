@@ -170,3 +170,14 @@ test('dedicated review input analyzes without changing mode or language', () => 
     context.analyzeMiningInput();
     assert.deepEqual(calls, ['analyze']);
 });
+
+
+test('mode language switches preserve the selected WIKI concept', async () => {
+    const context = switchingContext({async getTerms() {return [{conceptID: 1, term: 'Kräuterseitling', weighting: 2}];}});
+    context.selectedTerm = 'Kräuterseitling';
+    await context.switchLanguages('de-DE', 'en-US', 'inspector', false);
+    assert.equal(context.selectedConceptID, '1');
+    assert.equal(context.selectedTerm, 'Kräuterseitling');
+    await context.switchLanguages('de-DE', 'en-US', 'wiki', false);
+    assert.equal(context.selectedConceptID, '1');
+});

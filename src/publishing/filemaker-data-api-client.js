@@ -131,6 +131,20 @@ export function createFileMakerDataApiClient({
         }
     }
 
+    async function describeLayout(layout) {
+        if (!token) throw new FileMakerDataApiError('FileMaker session is not active.');
+        const response = await request(`${databasePath}/layouts/${encodeURIComponent(layout)}`, {
+            method: 'GET', headers: { Accept: 'application/json', Authorization: `Bearer ${token}` }
+        });
+        const data = await responseJson(response);
+        if (!response.ok || !Array.isArray(data?.response?.fieldMetaData)) {
+            throw new FileMakerDataApiError('FileMaker layout check failed.', {
+                status: response.status, code: data?.messages?.[0]?.code ?? ''
+            });
+        }
+        return data.response.fieldMetaData;
+    }
+
     async function downloadAsset(fileName) {
         try {
             requirePublicationAssetFileName(fileName);
@@ -139,10 +153,57 @@ export function createFileMakerDataApiClient({
         }
         const assetUrl = `${origin}/public/RC_Data_FMS/${encodeURIComponent(database)}`
             + `/Files/Images/${encodeURIComponent(fileName)}`;
+        return readAsset(fileName, assetUrl);
+    }
+
+    // Container URLs contain temporary access information. Keep them inside the
+    // active FileMaker session. Follow only checked same-origin streaming links;
+    // the streaming cookie never leaves this one download.
+    async function downloadContainerAsset(fileName, containerUrl) {
+        if (!token) throw new FileMakerDataApiError('FileMaker session is not active.');
+        const validate = reference => {
+            try {
+                requirePublicationAssetFileName(fileName);
+                const url = new URL(reference);
+                if (url.origin !== new URL(origin).origin || url.username || url.password
+                    || url.hash || !/^\/Streaming(?:_SSL)?\//.test(url.pathname)) throw new Error();
+                return url;
+            } catch {
+                throw new FileMakerDataApiError('FileMaker container reference is invalid.');
+            }
+        };
+        let url = validate(containerUrl);
+        const cookies = new Map();
+        for (let redirects = 0; redirects <= 3; redirects += 1) {
+            const response = await request(url.href, {
+                method: 'GET', redirect: 'manual',
+                headers: { Accept: 'image/gif, image/jpeg, image/png, image/webp',
+                    ...(cookies.size ? { Cookie: [...cookies].map(([key, value]) => `${key}=${value}`).join('; ') } : {}) }
+            });
+            if (![301, 302, 303, 307, 308].includes(response.status)) return readAssetResponse(fileName, response);
+            const location = response.headers.get('location');
+            if (!location) throw new FileMakerDataApiError('FileMaker container redirect is missing.');
+            url = validate(new URL(location, url).href);
+            const setCookies = response.headers.getSetCookie?.() ?? [response.headers.get('set-cookie') ?? ''];
+            for (const cookie of setCookies) {
+                const pair = cookie.split(';', 1)[0];
+                const split = pair.indexOf('=');
+                if (split > 0 && !/[\r\n]/.test(pair)) cookies.set(pair.slice(0, split), pair.slice(split + 1));
+            }
+            await response.body?.cancel();
+        }
+        throw new FileMakerDataApiError('FileMaker container has too many redirects.');
+    }
+
+    async function readAsset(fileName, assetUrl) {
         const response = await request(assetUrl, {
             method: 'GET',
             headers: { Accept: 'image/gif, image/jpeg, image/png, image/webp' }
         });
+        return readAssetResponse(fileName, response);
+    }
+
+    async function readAssetResponse(fileName, response) {
         if (!response.ok) {
             throw new FileMakerDataApiError('FileMaker asset download failed.', {
                 status: response.status
@@ -176,7 +237,7 @@ export function createFileMakerDataApiClient({
             await login();
             let taskError;
             try {
-                return await task({ find });
+                return await task({ find, describeLayout, downloadContainerAsset });
             } catch (error) {
                 taskError = error;
                 throw error;

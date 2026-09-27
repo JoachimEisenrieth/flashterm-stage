@@ -1,6 +1,12 @@
 # Windows-Kundeninstaller für die Intranetversion
 
-Stand: 30. August 2026
+Stand: 25. September 2026
+
+Der [getrennte IONOS-Installationstest vom 25. September](ionos-installer-test-2026-09-25.md) dokumentiert den erfolgreich installierten lokalen Teststand sowie die noch offenen Abnahmepunkte.
+
+Die Vorbereitung für den Kundentermin Anfang Oktober und der aktuelle IONOS-Prüfstand stehen in [Kundeninstallation Oktober 2026](customer-installation-2026-10.md).
+
+Für den inzwischen bestätigten **Austausch einer vorhandenen STAGE** gelten der [Austauschplan](ionos-customer-replacement-plan-2026-09-24.md) und der [Erfassungsbogen mit lesendem PowerShell-Script](customer-installation-questionnaire.md). Der Installer bleibt auf frische, getrennte Ziele beschränkt.
 
 ## Ziel
 
@@ -39,6 +45,7 @@ flashterm-stage-intranet-<release>/
     node.exe                           private Node.js-Laufzeit
     WinSW-x64.exe                      Service-Wrapper
   install-flashterm-stage.ps1
+  select-stage-certificate.ps1          vorhandene Zertifikate pruefen/auswaehlen
   customer-settings.example.json
   README.txt
   manifest.json                        SHA-256 jedes ausgelieferten Paketinhalts
@@ -51,7 +58,7 @@ Nicht enthalten sind:
 - OIDC-Client-Secret,
 - Veröffentlichungstoken,
 - Tests und Fixtures,
-- Entwicklungs- und Publisher-Skripte,
+- Entwicklungs-Skripte (der serverseitig benötigte Publisher ist enthalten),
 - Repository-Dokumentation,
 - lokale Outputs oder Stage-Daten.
 
@@ -76,7 +83,7 @@ Der Paketgenerator:
 
 1. akzeptiert nur plausible Windows-Programme mit exakt passender Prüfsumme,
 2. kopiert Runtime-Dateien über eine feste Allowlist,
-3. nimmt weder den Backstage-Publisher noch lokale Konfigurationen auf,
+3. enthält den serverseitigen Backstage-Publisher und seine Module, aber keine lokalen Konfigurationen oder Zugangsdaten,
 4. berechnet Größe und SHA-256 aller Paketdateien,
 5. überschreibt kein vorhandenes Releaseverzeichnis.
 
@@ -98,6 +105,18 @@ Vor dem Preflight stellt der Kunde bereit:
 - alternativ bei `oidc` eine eigene vertrauliche OIDC-Webanwendung und ausgehenden HTTPS-Zugriff zum OIDC-Anbieter.
 
 Der Installer beschafft keine Zertifikate und verändert weder DNS noch Windows Firewall. Diese Grenzen bleiben beim Kundenbetrieb.
+
+### Vorhandenes Zertifikat auswählen
+
+`./select-stage-certificate.ps1 -HostName <DNS-Name> -Select` öffnet eine Windows-Auswahl für vorhandene, passende Zertifikate. Ohne `-Select` liefert das Skript einen lesenden Prüfbericht. Es importiert keine Zertifikate und exportiert keine privaten Schlüssel. Den zurückgegebenen `Thumbprint` übernimmt man in die Kundeneinstellungen.
+
+Geprüft werden Hostname, Gültigkeit, privater Schlüssel, Serververwendung, Vertrauenskette und Online-Sperrprüfung. Diese Prüfung erfolgt im ausführenden Windows-Konto. Der spätere HTTPS-Test aus FileMaker und von den Clients bleibt erforderlich.
+
+### Ausschließlich auf dem Server testen
+
+Mit `-LocalTest` kann dieselbe Neuinstallation getrennt auf dem Server erprobt werden. Voraussetzungen: neue Instanz und Verzeichnisse, freie Ports, `bindingIpAddress: "127.0.0.1"`, ein ausschließlich auf Loopback auflösender DNS-Name und `accessMode: "trusted-intranet"`. `trustedIntranetConfirmed` darf dabei ausdrücklich `false` bleiben. Der HTTPS-Port ist standardmäßig `18446` und über `-LocalTestHttpsPort` einstellbar; er muss sich vom Node-Port unterscheiden.
+
+`-LocalTest` muss sowohl beim Preflight als auch bei `-Apply` gesetzt werden. Im Ergebnis steht `LocalTest: true` und `NetworkScope: LoopbackOnly; not a customer network acceptance`. Zertifikatsprüfungen bleiben aktiv. Dieser Modus bestätigt keinen Zugriff aus einem Firmennetz und ersetzt weder VPN-/Clienttests noch die Kundenabnahme.
 
 ## Kundeneinstellungen
 
@@ -200,7 +219,7 @@ Nach `Mode : Installed` folgen praktische Prüfungen:
 - ein internes Host-Binding und eine initiale Termbase,
 - `trusted-intranet` ohne Personenanmeldung oder alternativ ein vertraulicher OIDC-Webclient,
 - keine automatische Firewall-, DNS-, Zertifikats- oder OIDC-Konfiguration,
-- keine automatische Veröffentlichung aus dem lokalen FileMaker Server,
+- automatische Veröffentlichung als optionale Serverfunktion vorhanden; die kundenspezifische FileMaker-Anbindung und Konfiguration sind noch kein Bestandteil des Installers,
 - noch kein Upgrade-, Repair- oder Uninstall-Modus,
 - noch keine praktische Freigabe auf einer unabhängigen Kundeninstallation.
 

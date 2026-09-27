@@ -2243,3 +2243,45 @@ a:active {
     }
     
 }
+
+/* Concept identity in results and the concept detail header. */
+.term-table .term-result-label { overflow: visible; }
+.concept-id-visible {
+    display: block;
+    color: var(--text-muted-color);
+    font-size: 0.72em;
+    font-weight: 400;
+    margin-top: 3px;
+}
+.has-concept-tooltip { position: relative; }
+.concept-id-tooltip {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    padding: 6px 9px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background: var(--concept-header-bg);
+    color: var(--text-color);
+    font-size: 13px;
+    font-weight: 400;
+    white-space: nowrap;
+    box-shadow: var(--surface-shadow);
+}
+.has-concept-tooltip:not(.tooltip-dismissed):is(:hover, :focus-visible) .concept-id-tooltip { display: block; }
+.concept-identity {
+    grid-column: 1;
+    grid-row: 2;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: var(--text-muted-color);
+}
+.concept-header.has-image #image-container { grid-column: 2; grid-row: 1 / 3; }
+.concept-identity input { font: inherit; color: var(--text-color); background: transparent; border: 0; max-width: 100%; }
+.concept-identity button { font: inherit; cursor: pointer; padding: 3px 8px; }
+@media (max-width: 768px) {
+    .concept-header.has-image #image-container { grid-column: 1; grid-row: 3; }
+}

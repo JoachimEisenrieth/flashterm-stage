@@ -20,6 +20,41 @@ function assetResponse(data, contentType = 'image/png', status = 200) {
     };
 }
 
+test('downloads original containers within the session without forwarding credentials', async () => {
+    const calls = [];
+    const client = createFileMakerDataApiClient({
+        server: 'https://filemaker.example.test:18443', database: 'Test',
+        username: 'user', password: 'password',
+        async request(url, options) {
+            calls.push({ url, options });
+            if (options.method === 'DELETE') return response({ response: {} });
+            if (options.method === 'POST') return response({ response: { token: 'TEST-TOKEN' } });
+            return assetResponse('original image');
+        }
+    });
+    let download;
+    const reference = 'https://filemaker.example.test:18443/Streaming_SSL/image.png?temporary=TEST';
+    await client.withSession(async ({ downloadContainerAsset }) => {
+        download = downloadContainerAsset;
+        const asset = await download('concept-1.png', reference);
+        assert.equal(asset.data.toString(), 'original image');
+        assert.equal(asset.fileName, 'concept-1.png');
+        for (const invalid of [
+            reference.replace('filemaker.example.test', 'other.example.test'),
+            reference.replace(':18443', ''),
+            reference.replace('https:', 'http:'),
+            reference.replace('/Streaming_SSL/', '/public/'),
+            reference.replace('https://', 'https://user:secret@'),
+            `${reference}#fragment`
+        ]) await assert.rejects(download('concept-1.png', invalid), /reference is invalid/);
+    });
+    assert.equal(calls.length, 3);
+    assert.equal(calls[1].options.redirect, 'manual');
+    assert.equal(calls[1].options.headers.Authorization, undefined);
+    assert.equal(calls[2].options.method, 'DELETE');
+    await assert.rejects(download('concept-1.png', reference), /session is not active/);
+});
+
 test('opens one FileMaker session, performs encoded finds and always logs out', async () => {
     const calls = [];
     const client = createFileMakerDataApiClient({
@@ -50,6 +85,34 @@ test('opens one FileMaker session, performs encoded finds and always logs out', 
         offset: '1'
     });
     assert.equal(calls[2].options.method, 'DELETE');
+});
+
+test('container redirects retain a local streaming cookie but cannot send it to another server', async () => {
+    for (const external of [false, true]) {
+        let downloads = 0;
+        let loggedOut = false;
+        const client = createFileMakerDataApiClient({
+            server: 'https://filemaker.example.test', database: 'Test', username: 'user', password: 'password',
+            async request(url, options) {
+                if (options.method === 'POST') return response({ response: { token: 'TOKEN' } });
+                if (options.method === 'DELETE') { loggedOut = true; return response({}); }
+                downloads++;
+                assert.equal(options.headers.Authorization, undefined);
+                if (downloads === 1) return {
+                    status: 302,
+                    headers: new Headers({ location: external ? 'https://other.example.test/Streaming/image' : '/Streaming/image?second=1',
+                        'set-cookie': 'STREAM=PRIVATE; Path=/; Secure; HttpOnly' })
+                };
+                assert.equal(new URL(url).origin, 'https://filemaker.example.test');
+                assert.equal(options.headers.Cookie, 'STREAM=PRIVATE');
+                return assetResponse('original');
+            }
+        });
+        const task = client.withSession(({ downloadContainerAsset }) => downloadContainerAsset('image.png', 'https://filemaker.example.test/Streaming/image'));
+        if (external) { await assert.rejects(task, /reference is invalid/); assert.equal(downloads, 1); }
+        else { assert.equal((await task).data.toString(), 'original'); assert.equal(downloads, 2); }
+        assert.equal(loggedOut, true);
+    }
 });
 
 test('reads all FileMaker find pages using stable offsets', async () => {
@@ -126,4 +189,23 @@ test('rejects unsafe, unsupported and oversized FileMaker assets', async () => {
         async request() { return assetResponse('four', 'image/png'); }
     });
     await assert.rejects(oversized.downloadAsset('large.png'), /size limit/i);
+});
+
+test('layout metadata uses the authenticated session and logs out after a denied layout', async () => {
+    const calls = [];
+    const client = createFileMakerDataApiClient({ server: 'https://filemaker.example.test', database: 'Test', username: 'reader', password: 'secret',
+        async request(url, options) {
+            calls.push({ url, method: options.method });
+            if (url.endsWith('/sessions')) return response({ response: { token: 'TEST-TOKEN' } });
+            if (options.method === 'DELETE') return response({ response: {} });
+            assert.equal(options.headers.Authorization, 'Bearer TEST-TOKEN');
+            if (url.endsWith('/layouts/Allowed%20Layout')) return response({ response: { fieldMetaData: [{ name: 'conceptID' }] } });
+            return response({ messages: [{ code: '105', message: 'DO-NOT-LOG' }] }, 403);
+        }
+    });
+    await assert.rejects(client.withSession(async ({ describeLayout }) => {
+        assert.deepEqual(await describeLayout('Allowed Layout'), [{ name: 'conceptID' }]);
+        await describeLayout('Denied');
+    }), error => error.code === '105' && !error.message.includes('DO-NOT-LOG'));
+    assert.equal(calls.at(-1).method, 'DELETE');
 });

@@ -12,6 +12,7 @@ import { isDeepStrictEqual } from 'node:util';
 
 import { validateTerminologyPublication } from '../domain/terminology-publication.js';
 import {
+    listPublicationAssetFileNames,
     requirePublicationAssetContentType,
     requirePublicationAssetFileName
 } from '../domain/publication-assets.js';
@@ -396,6 +397,16 @@ export function createFilePublicationStore({ dataDirectory, now = Date.now }) {
 
         return withTermbaseLock(tenantId, termbaseId, async () => {
             const publication = await getPublication(tenantId, termbaseId, publicationId);
+            // Activation must not expose missing or corrupted referenced images.
+            for (const fileName of listPublicationAssetFileNames(publication)) {
+                try { await getPublicationAsset(tenantId, termbaseId, publicationId, fileName); }
+                catch (error) {
+                    if (error instanceof PublicationStoreError && ['NOT_FOUND', 'INVALID_ASSET'].includes(error.code)) {
+                        throw new PublicationStoreError('INVALID_ASSET', 'A referenced publication asset is missing or invalid.');
+                    }
+                    throw error;
+                }
+            }
             const files = await getActivationFiles(tenantId, termbaseId);
             const previousSequence = files.length === 0
                 ? 0

@@ -41,6 +41,9 @@ foreach ($line in Get-Content -LiteralPath $resolvedSettingsFile -Encoding UTF8)
 }
 
 $nodeCommand = Get-Command $NodeExecutable -ErrorAction Stop
+# The approved private Node 24 runtime additionally trusts the Windows CA store.
+# Certificate verification remains enabled; no custom trust-bypass callback.
+$env:NODE_USE_SYSTEM_CA = '1'
 Set-Location -LiteralPath $resolvedProjectRoot
 & $nodeCommand.Source $serverScript
 exit $LASTEXITCODE

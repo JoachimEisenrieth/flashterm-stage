@@ -15,6 +15,7 @@ const SHA256_PATTERN = /^[A-Fa-f0-9]{64}$/;
 const RUNTIME_PATHS = [
     'index.html',
     'flashterm.html',
+    'manual-de.html',
     'flashterm.css',
     'flashterm.js',
     'filemaker-api.js',
@@ -23,18 +24,27 @@ const RUNTIME_PATHS = [
     'json',
     'svg',
     'scripts/stage-server.js',
+    'scripts/publish-backstage.js',
+    'scripts/check-filemaker-setup.js',
     'scripts/create-windows-instance-files.js',
     'src/app',
     'src/deployment/windows-instance-files.js',
+    'src/deployment/filemaker-setup.js',
     'src/domain',
     'src/infrastructure',
     'src/repositories',
+    'src/publishing',
     'src/server',
     'deploy/windows/start-stage.ps1',
-    'deploy/windows/test-stage-health.ps1'
+    'deploy/windows/test-stage-health.ps1',
+    'deploy/windows/configure-auto-publication.ps1',
+    'deploy/windows/backup-stage-data.ps1',
+    'deploy/windows/restore-stage-data.ps1'
 ];
 const INSTALLER_FILES = [
+    'setup-stage.ps1',
     'install-flashterm-stage.ps1',
+    'select-stage-certificate.ps1',
     'customer-settings.example.json',
     'README.txt'
 ];

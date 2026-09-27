@@ -27,3 +27,7 @@
 
 # Log files
 *.log
+
+# Local Python bytecode caches
+__pycache__/
+*.py[cod]

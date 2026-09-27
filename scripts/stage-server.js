@@ -8,6 +8,8 @@ import { createFilePublicationStore } from '../src/server/file-publication-store
 import { createSessionManager } from '../src/server/auth-session.js';
 import { createOpenIdConnectClient } from '../src/server/openid-connect.js';
 import { createStageAuth } from '../src/server/stage-auth.js';
+import { createBackstageJobWorker } from '../src/server/backstage-job-worker.js';
+import { createAdditionalPublicationBindings } from '../src/server/publication-bindings.js';
 import { createStageApiHandler } from '../src/server/stage-api.js';
 import { sendText, serveStaticFile } from '../src/server/static-files.js';
 
@@ -117,6 +119,9 @@ export function createStageServer({
     store,
     tenantId,
     publishToken = '',
+    exportTriggerToken = '',
+    publicationJobs = null,
+    publicationBindings = [],
     bodyLimit,
     rootDirectory = '',
     configuredTermbaseId = '',
@@ -128,6 +133,9 @@ export function createStageServer({
         store,
         tenantId,
         publishToken,
+        exportTriggerToken,
+        publicationJobs,
+        publicationBindings,
         publishTermbaseIds,
         bodyLimit,
         auth
@@ -257,10 +265,19 @@ async function startStageServer() {
         publicOrigin
     });
     const store = createFilePublicationStore({ dataDirectory });
+    const publicationJobs = await createBackstageJobWorker({
+        environment: process.env, dataDirectory, store, tenantId
+    });
+    const publicationBindings = await createAdditionalPublicationBindings({
+        environment: process.env, dataDirectory, store, tenantId
+    });
     const server = createStageServer({
         store,
         tenantId,
         publishToken,
+        exportTriggerToken: process.env.FLASHTERM_EXPORT_TRIGGER_TOKEN ?? '',
+        publicationJobs,
+        publicationBindings,
         rootDirectory: projectRoot,
         configuredTermbaseId,
         defaultTargetLanguages,

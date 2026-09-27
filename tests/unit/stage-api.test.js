@@ -301,6 +301,7 @@ test('serves the browser app with a public config for the active termbase', asyn
     await writeFile(path.join(rootDirectory, 'index.html'), '<h1>flashterm stage</h1>');
     const store = createFilePublicationStore({ dataDirectory });
     await store.savePublication(structuredClone(publicationFixture));
+    await store.savePublicationAsset('TEST-TENANT', 'TEST-TERMBASE', 'TEST-PUBLICATION-001', { fileName: 'TEST-001.png', contentType: 'image/png', data: Buffer.from('test image') });
     await store.activatePublication('TEST-TENANT', 'TEST-TERMBASE', 'TEST-PUBLICATION-001');
     const server = createStageServer({
         store,
@@ -347,6 +348,7 @@ test('trusted-intranet grants every reachable client read access without a login
     const dataDirectory = await mkdtemp(path.join(os.tmpdir(), 'flashterm-stage-trusted-'));
     const store = createFilePublicationStore({ dataDirectory });
     await store.savePublication(structuredClone(publicationFixture));
+    await store.savePublicationAsset('TEST-TENANT', 'TEST-TERMBASE', 'TEST-PUBLICATION-001', { fileName: 'TEST-001.png', contentType: 'image/png', data: Buffer.from('test image') });
     await store.activatePublication('TEST-TENANT', 'TEST-TERMBASE', 'TEST-PUBLICATION-001');
     const auth = createStageAuth({ mode: 'trusted-intranet' });
     const server = createStageServer({
@@ -501,6 +503,7 @@ test('serves the default source marker for multiple master languages', async t =
     const publication = structuredClone(publicationFixture);
     publication.termbase.languages[1].isSource = true;
     await store.savePublication(publication);
+    await store.savePublicationAsset('TEST-TENANT', 'TEST-TERMBASE', 'TEST-PUBLICATION-001', { fileName: 'TEST-001.png', contentType: 'image/png', data: Buffer.from('test image') });
     await store.activatePublication('TEST-TENANT', 'TEST-TERMBASE', 'TEST-PUBLICATION-001');
     const response = await fetch(`${origin}/api/termbases/TEST-TERMBASE/languages?guiLanguage=de-DE`);
     assert.equal(response.status, 200);

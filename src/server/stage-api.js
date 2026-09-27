@@ -136,6 +136,9 @@ export function createStageApiHandler({
     store,
     tenantId,
     publishToken = '',
+    exportTriggerToken = '',
+    publicationJobs = null,
+    publicationBindings = [],
     publishTermbaseIds = ['*'],
     bodyLimit = DEFAULT_BODY_LIMIT,
     assetBodyLimit = DEFAULT_ASSET_BODY_LIMIT,
@@ -151,6 +154,40 @@ export function createStageApiHandler({
 
             if (request.method === 'GET' && requestUrl.pathname === '/api/health') {
                 sendJson(response, 200, { status: 'ok' });
+                return;
+            }
+
+            // Dedicated credential: may trigger only the configured source/target,
+            // never upload arbitrary data or invoke the general admin endpoints.
+            if (segments[0] === 'api' && segments[1] === 'export-jobs') {
+                const bindings = [
+                    ...(publicationJobs && exportTriggerToken
+                        ? [{ token: exportTriggerToken, jobs: publicationJobs }] : []),
+                    ...publicationBindings
+                ];
+                if (!bindings.length) {
+                    sendJson(response, 503, { error: 'PUBLISHING_DISABLED' });
+                    return;
+                }
+                const binding = bindings.find(item => isAuthorized(request, item.token));
+                if (!binding) {
+                    sendJson(response, 401, { error: 'UNAUTHORIZED' });
+                    return;
+                }
+                let job;
+                if (request.method === 'POST' && segments.length === 2) {
+                    job = await binding.jobs.reserve(await readJsonBody(request, 4096));
+                } else if (request.method === 'GET' && segments.length === 3) {
+                    job = await binding.jobs.get(segments[2]);
+                } else if (request.method === 'POST' && segments.length === 4 && segments[3] === 'ready') {
+                    job = await binding.jobs.start(segments[2]);
+                } else if (request.method === 'POST' && segments.length === 4 && segments[3] === 'cancel') {
+                    job = await binding.jobs.cancel(segments[2]);
+                } else {
+                    sendJson(response, 404, { error: 'NOT_FOUND' });
+                    return;
+                }
+                sendJson(response, job.state === 'running' ? 202 : 200, { job });
                 return;
             }
 

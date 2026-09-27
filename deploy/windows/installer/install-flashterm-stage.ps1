@@ -4,7 +4,11 @@ param(
 
     [Security.SecureString] $OidcClientSecret,
 
-    [switch] $Apply
+    [switch] $Apply,
+
+    [switch] $LocalTest,
+
+    [ValidateRange(1024, 65535)] [int] $LocalTestHttpsPort = 18446
 )
 
 Set-StrictMode -Version Latest
@@ -184,7 +188,7 @@ $oidcClientId = ""
 $oidcGroupClaim = ""
 if ($accessMode -eq "trusted-intranet") {
     $trustedIntranetConfirmed = Get-RequiredSetting $settings "trustedIntranetConfirmed"
-    if ($trustedIntranetConfirmed -isnot [bool] -or -not $trustedIntranetConfirmed) {
+    if ($trustedIntranetConfirmed -isnot [bool] -or (-not $LocalTest -and -not $trustedIntranetConfirmed)) {
         throw "trusted-intranet requires trustedIntranetConfirmed to be true."
     }
 }
@@ -196,6 +200,12 @@ elseif ($accessMode -eq "oidc") {
 }
 else {
     throw "accessMode must be oidc or trusted-intranet."
+}
+if ($LocalTest -and $accessMode -ne 'trusted-intranet') {
+    throw 'LocalTest requires the loopback-only reader mode, not an OIDC deployment.'
+}
+if (-not $LocalTest -and $PSBoundParameters.ContainsKey('LocalTestHttpsPort')) {
+    throw 'LocalTestHttpsPort may only be supplied with LocalTest.'
 }
 $certificateThumbprint = ([string] (Get-RequiredSetting $settings "certificateThumbprint")).Replace(" ", "").ToUpperInvariant()
 $fileMakerSiteName = [string] (Get-RequiredSetting $settings "fileMakerSiteName")
@@ -259,10 +269,17 @@ if ($tenantId -notmatch '^[A-Za-z0-9._-]+$' -or $termbaseId -notmatch '^[A-Za-z0
 $parsedBindingIp = $null
 if (
     -not [Net.IPAddress]::TryParse($bindingIpAddress, [ref] $parsedBindingIp) -or
-    $parsedBindingIp.AddressFamily -ne [Net.Sockets.AddressFamily]::InterNetwork -or
-    [Net.IPAddress]::IsLoopback($parsedBindingIp)
+    $parsedBindingIp.AddressFamily -ne [Net.Sockets.AddressFamily]::InterNetwork
 ) {
-    throw "bindingIpAddress must be a non-loopback IPv4 address."
+    throw "bindingIpAddress must be an IPv4 address."
+}
+if ($LocalTest) {
+    if ($bindingIpAddress -ne '127.0.0.1' -or $port -eq $LocalTestHttpsPort) {
+        throw 'LocalTest requires exactly 127.0.0.1 and separate Node and HTTPS ports.'
+    }
+}
+elseif ([Net.IPAddress]::IsLoopback($parsedBindingIp)) {
+    throw 'bindingIpAddress must be a non-loopback IPv4 address for customer installations.'
 }
 $parsedIssuer = $null
 if ($accessMode -eq "oidc") {
@@ -314,6 +331,12 @@ $resolvedAddresses = @([Net.Dns]::GetHostAddresses($hostName) | ForEach-Object {
 if ($resolvedAddresses -notcontains $bindingIpAddress) {
     throw "The intranet DNS host does not resolve to bindingIpAddress."
 }
+if ($LocalTest -and @($resolvedAddresses | Where-Object { -not [Net.IPAddress]::IsLoopback([Net.IPAddress]::Parse($_)) }).Count) {
+    throw 'LocalTest requires a DNS name resolving exclusively to loopback addresses.'
+}
+if ($LocalTest -and (Get-NetTCPConnection -LocalPort $LocalTestHttpsPort -State Listen -ErrorAction SilentlyContinue)) {
+    throw 'The local test HTTPS port is already in use.'
+}
 if (Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue) {
     throw "The configured Node.js loopback port is already in use."
 }
@@ -333,6 +356,10 @@ $wrapperPath = Join-Path $programDataDirectory "$wrapperBaseName.exe"
 $wrapperXmlPath = Join-Path $programDataDirectory "$wrapperBaseName.xml"
 $publicOrigin = "https://$hostName"
 $bindingInformation = "{0}:443:{1}" -f $bindingIpAddress, $hostName
+if ($LocalTest) {
+    $publicOrigin = 'https://{0}:{1}' -f $hostName, $LocalTestHttpsPort
+    $bindingInformation = '127.0.0.1:{0}:{1}' -f $LocalTestHttpsPort, $hostName
+}
 
 foreach ($targetPath in @($applicationRoot, $programDataDirectory, $dataDirectory, $proxyDirectory)) {
     if (Test-Path -LiteralPath $targetPath) {
@@ -371,6 +398,11 @@ $certificateMatches = @($certificateDnsNames | Where-Object {
 if (-not $certificateMatches) {
     throw "The selected certificate does not cover the configured intranet host."
 }
+$certificateCheck = @(& (Join-Path $PSScriptRoot 'select-stage-certificate.ps1') -HostName $hostName |
+    Where-Object { $_.Thumbprint -eq $certificateThumbprint -and $_.Selectable })
+if ($certificateCheck.Count -ne 1) {
+    throw 'The selected server certificate failed validity, private-key, trust, usage or revocation checks.'
+}
 
 $nodeVersionText = (& $nodeSource --version 2>$null)
 if ($LASTEXITCODE -ne 0 -or $nodeVersionText -notmatch '^v([0-9]+)\.') {
@@ -395,6 +427,8 @@ if ($accessMode -eq "oidc") {
 if (-not $Apply) {
     [PSCustomObject]@{
         Mode = "Preflight"
+        LocalTest = [bool] $LocalTest
+        NetworkScope = $(if ($LocalTest) { 'LoopbackOnly; not a customer network acceptance' } else { 'CustomerNetwork' })
         Release = $releaseId
         Instance = $instanceId
         AccessMode = $accessMode
@@ -574,15 +608,29 @@ try {
         throw "WinSW could not install the flashterm stage service."
     }
     $createdService = $true
-    & sc.exe config $serviceId "obj=" "NT AUTHORITY\NetworkService" "password=" "" | Out-Null
-    if ($LASTEXITCODE -ne 0) {
+    # PowerShell 5.1 drops empty native arguments; use the typed Windows API.
+    $installedService = Get-CimInstance Win32_Service -Filter "Name='$serviceId'"
+    $accountChange = Invoke-CimMethod -InputObject $installedService -MethodName Change -Arguments @{
+        StartName = 'NT AUTHORITY\NetworkService'
+        StartPassword = ''
+    }
+    if ($accountChange.ReturnValue -ne 0) {
         throw "The service account could not be changed to NetworkService."
     }
     Start-Service -Name $serviceId
     Start-Website -Name $siteName
 
-    $nodeHealth = Invoke-RestMethod -Method Get -Uri "http://127.0.0.1:$port/api/health" -TimeoutSec 15
-    if ($nodeHealth.status -ne "ok") {
+    # A running service wrapper does not yet guarantee that Node has bound its port.
+    $nodeHealth = $null
+    for ($attempt = 0; $attempt -lt 15; $attempt++) {
+        try {
+            $nodeHealth = Invoke-RestMethod -Method Get -Uri "http://127.0.0.1:$port/api/health" -TimeoutSec 2
+            if ($nodeHealth.status -eq 'ok') { break }
+        }
+        catch { $nodeHealth = $null }
+        Start-Sleep -Seconds 1
+    }
+    if (-not $nodeHealth -or $nodeHealth.status -ne "ok") {
         throw "The local Node.js health check failed."
     }
     $httpsHealth = Invoke-RestMethod -Method Get -Uri "$publicOrigin/api/health" -TimeoutSec 20
@@ -599,6 +647,8 @@ try {
 
     [PSCustomObject]@{
         Mode = "Installed"
+        LocalTest = [bool] $LocalTest
+        NetworkScope = $(if ($LocalTest) { 'LoopbackOnly; not a customer network acceptance' } else { 'CustomerNetwork' })
         Release = $releaseId
         Instance = $instanceId
         AccessMode = $accessMode

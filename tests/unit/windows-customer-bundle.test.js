@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 import {
     mkdtemp,
     readFile,
@@ -68,11 +69,24 @@ test('creates a customer bundle with private Node, WinSW and a verified runtime 
         assert(manifestPaths.has('application/src/server/stage-api.js'));
         assert(manifestPaths.has('tools/WinSW-x64.exe'));
         assert(manifestPaths.has('tools/node.exe'));
+        assert(manifestPaths.has('select-stage-certificate.ps1'));
+        assert(manifestPaths.has('setup-stage.ps1'));
+        assert(manifestPaths.has('application/scripts/check-filemaker-setup.js'));
+        assert(manifestPaths.has('application/deploy/windows/configure-auto-publication.ps1'));
+        assert(manifestPaths.has('application/deploy/windows/backup-stage-data.ps1'));
+        assert(manifestPaths.has('application/deploy/windows/restore-stage-data.ps1'));
         assert(!manifestPaths.has('application/config.js'));
         assert(![...manifestPaths].some(file => file.split('/').some(part => part.startsWith('.'))));
         assert(![...manifestPaths].some(file => file.startsWith('application/tests/')));
         assert(![...manifestPaths].some(file => file.startsWith('application/docs/')));
-        assert(!manifestPaths.has('application/scripts/publish-backstage.js'));
+        assert(manifestPaths.has('application/scripts/publish-backstage.js'));
+        assert(manifestPaths.has('application/manual-de.html'));
+        // Resolve imports from the isolated delivered tree, not the source checkout.
+        execFileSync(process.execPath, ['--input-type=module', '-e',
+            "await import('./scripts/stage-server.js'); await import('./src/deployment/filemaker-setup.js');"], {
+            cwd: path.join(result.bundleDirectory, 'application'),
+            stdio: 'pipe'
+        });
         assert.equal(runtimePackage.type, 'module');
         assert.equal(runtimePackage.scripts, undefined);
         assert.match(installer, /FileMakerSiteUnchanged/);

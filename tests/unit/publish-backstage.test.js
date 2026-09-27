@@ -27,12 +27,13 @@ function imageResponse(data, contentType = 'image/png') {
     };
 }
 
-test('builds, transfers and explicitly activates an anonymized backstage publication', async () => {
+for (const imageSource of ['public', 'container']) test(`builds and activates a publication using ${imageSource} images`, async () => {
     const stageCalls = [];
     let definitionCalls = 0;
     const environment = {
         FLASHTERM_FILEMAKER_SERVER: 'https://filemaker.example.test',
         FLASHTERM_FILEMAKER_DATABASE: 'TEST-DATABASE',
+        FLASHTERM_FILEMAKER_IMAGE_SOURCE: imageSource,
         FLASHTERM_FILEMAKER_USERNAME: 'TEST-USER',
         FLASHTERM_FILEMAKER_PASSWORD: 'TEST-PASSWORD',
         FLASHTERM_STAGE_ORIGIN: 'http://127.0.0.1:8100',
@@ -48,7 +49,7 @@ test('builds, transfers and explicitly activates an anonymized backstage publica
         environment,
         args: ['--activate'],
         async fileMakerRequest(url, options) {
-            if (url.includes('/public/RC_Data_FMS/')) {
+            if (url.includes('/public/RC_Data_FMS/') || url.includes('/Streaming/')) {
                 return imageResponse('synthetic image');
             }
             if (url.endsWith('/sessions') && options.method === 'POST') {
@@ -69,6 +70,10 @@ test('builds, transfers and explicitly activates an anonymized backstage publica
                     fieldData: { termlist: JSON.stringify([['TEST-001', `${language} term`, 2]]) }
                 }] } });
             }
+            if (url.includes('/imageAPI/')) return response({ response: { data: [{ fieldData: {
+                ID: 'TEST-001', figureFileName: 'original.png',
+                figure: 'https://filemaker.example.test/Streaming/original.png?temporary=TEST-REFERENCE'
+            } }] } });
             definitionCalls += 1;
             assert.equal(body.query[0].conceptID, '*');
             return response({ response: { data: [
@@ -103,6 +108,12 @@ test('builds, transfers and explicitly activates an anonymized backstage publica
         activated: true
     });
     assert.equal(stageCalls.length, 3);
+    if (imageSource === 'container') {
+        const sent = JSON.parse(stageCalls[0].options.body);
+        assert.equal(sent.concepts[0].languages[0].imageFileName, 'concept-TEST-001.png');
+        assert.equal(sent.concepts[0].languages[1].imageFileName, 'concept-TEST-001.png');
+        assert.ok(!stageCalls[0].options.body.includes('TEST-REFERENCE'));
+    }
     assert.equal(definitionCalls, 1);
     assert.equal(JSON.parse(stageCalls[0].options.body).publication.id, 'TEST-PUBLICATION-CLI');
     assert.equal(stageCalls[1].options.method, 'PUT');

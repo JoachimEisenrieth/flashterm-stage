@@ -4,6 +4,8 @@ flashterm stage ist die lesende Webanwendung für veröffentlichte Terminologie.
 
 ## Einstieg
 
+- Austausch der bestehenden Kunden-STAGE: [Ablauf und Rückweg](docs/ionos-customer-replacement-plan-2026-09-24.md), [Fragebogen und Erfassungsscript](docs/customer-installation-questionnaire.md)
+- Bisheriger IONOS-Prüfstand und BACKSTAGE-Abhängigkeiten: [`docs/customer-installation-2026-10.md`](docs/customer-installation-2026-10.md)
 - Für die Weiterarbeit auf einem anderen Rechner: [`docs/arbeitsuebergabe-laptop.md`](docs/arbeitsuebergabe-laptop.md)
 - Lokale Entwicklungsumgebung: [`docs/development-environment.md`](docs/development-environment.md)
 - Stage-Server und lokale Testveröffentlichung: [`docs/stage-server-development.md`](docs/stage-server-development.md)
